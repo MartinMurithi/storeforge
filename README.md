@@ -93,7 +93,7 @@ cd storeforge
 docker-compose up
 ```
 
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:4000`
 - API: `http://localhost:8080`
 
 ### 3. Environment Variables
@@ -140,7 +140,7 @@ Each user (tenant) gets:
 
 | Plan | Features |
 |------|-----------|
-| Free | 10 products, basic templates, subdomain only |
+| Free | 20 products, basic templates, subdomain only |
 | Pro | Custom domain, advanced templates, no ads |
 | Business | Analytics, multi-user, premium support |
 
