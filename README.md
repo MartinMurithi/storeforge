@@ -31,7 +31,7 @@ It’s built for speed, scalability, and simplicity — combining a **Go backend
 
 | Layer | Tech | Why |
 |-------|------|-----|
-| Frontend | **Next.js + Tailwind CSS** | Server-side rendering, React ecosystem, fast iteration |
+| Frontend | **Next.js with TS + Tailwind CSS** | Server-side rendering, React ecosystem, fast iteration |
 | Builder Engine | **Craft.js / React DnD** | Drag-and-drop UI builder with JSON layout persistence |
 | Backend | **Go (Gin + GORM)** | Concurrency, speed, and easy multi-tenant structure |
 | Database | **PostgreSQL** | Reliability, relational data + JSONB support |
