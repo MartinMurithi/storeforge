@@ -9,26 +9,31 @@ import (
 	"github.com/MartinMurithi/storeforge.io/internal/models"
 )
 
-// postgres://postgres:martin321!@localhost:5432/storeforge
-
 type Config struct {
 	Host     string
 	User     string
 	Password string
 	Port     string
 	SSLMode  string
-	DBName   string
+	Database string
 }
 
 var DB *gorm.DB
 
-func InitDB(cfg Config) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s SSLMode=%s dbName=%s \n", cfg.Host, cfg.User, cfg.Password, cfg.Port, cfg.SSLMode, cfg.DBName)
+func InitDB(cfg Config) (*gorm.DB, error) {
+
+	// Retrieve DSN(data source name) from environment variable with fallback
+	// dsn := os.Getenv("DATABASE_URL")
+
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		cfg.Host, cfg.User, cfg.Password, cfg.Database, cfg.Port, cfg.SSLMode,
+	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
-		panic("failed to connect to database : " + err.Error())
+		return nil, fmt.Errorf("failed to connect to database : %s /n", err.Error())
 	}
 
 	if err := db.AutoMigrate(
@@ -37,13 +42,14 @@ func InitDB(cfg Config) {
 		&models.UserTenant{},
 		&models.Role{},
 		&models.Permission{},
-		&models.Claims{},
 	); err != nil {
-		panic("failed to migrate database : " + err.Error())
+		return nil, fmt.Errorf("failed to migrate database : %s /n", err.Error())
 	}
 
-	fmt.Printf("migrated database")
+	fmt.Printf("migrated database /n")
 
 	DB = db
+
+	return DB, nil
 
 }
