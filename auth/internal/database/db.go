@@ -1,4 +1,4 @@
-package db
+package database
 
 import (
 	"context"
@@ -72,3 +72,5 @@ func (d *Pool) migrate() error {
 	}
 	return nil
 }
+
+// USE GORM
