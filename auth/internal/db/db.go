@@ -72,3 +72,5 @@ func (d *Pool) migrate() error {
 	}
 	return nil
 }
+
+// USE GORM
