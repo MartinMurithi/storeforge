@@ -11,5 +11,5 @@ type User struct {
 	IsVerified   bool   `gorm:"default:false" json:"isVerified"`
 	Roles        []Role `gorm:"many2many:user_roles" json:"-"`
 
-	Tenants []Tenant `gorm:"many2many:user_tenants;joinForeignKey:UserID;JoinReferences:TenantID, omitempty"` // all tenants user belongs to
+	Tenants []Tenant `gorm:"many2many:user_tenants;joinForeignKey:UserID;JoinReferences:TenantID"` // all tenants user belongs to
 }
