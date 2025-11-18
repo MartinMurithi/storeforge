@@ -1,15 +1,15 @@
 package models
 
 type User struct {
-	ID           string `gorm:"primaryKey;type:uuid;default:gen_random_uuid()" json:"id"`
-	FullNames    string `gorm:"not null" json:"fullNames"`
-	Email        string `gorm:"unique;not null" json:"email"`
-	Phone        string `gorm:"unique;not null" json:"phone"`
-	PasswordHash string `gorm:"not null" json:"password"`
-	BusinessType string `gorm:"not null" json:"businessType"`        //help select default theme
-	BusinessName string `gorm:"unique;not null" json:"businessName"` //generates slug for domain
-	IsVerified   bool   `gorm:"default:false" json:"isVerified"`
-	Roles        []Role `gorm:"many2many:user_roles" json:"-"`
+	ID           string `json:"id"`
+	FullNames    string `json:"fullNames"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone"`
+	PasswordHash string `json:"password"`
+	BusinessType string `json:"businessType"` //help select default theme
+	BusinessName string `json:"businessName"` //generates slug for domain
+	IsVerified   bool   `json:"isVerified"`
+	Roles        []Role `json:"-"`
 
-	Tenants []Tenant `gorm:"many2many:user_tenants;joinForeignKey:UserID;JoinReferences:TenantID"` // all tenants user belongs to
+	Tenants []Tenant // all tenants(shops) user belongs to
 }
