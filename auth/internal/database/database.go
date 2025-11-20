@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -16,47 +17,108 @@ type Pool struct {
 	*pgxpool.Pool
 }
 
-func NewPool() (*Pool, error) {
-	dsn := os.Getenv("DB_URL")
+var (
+	db   *Pool
+	once sync.Once
+)
+
+func Get() *Pool {
+	return db
+}
+
+func InitDB(ctx context.Context) error {
+	var initErr error
+
+	once.Do(func() {
+		pool, err := NewPool(ctx)
+
+		if err != nil {
+			initErr = err
+			return
+		}
+		db = pool
+	})
+	return initErr
+}
+
+func NewPool(ctx context.Context) (*Pool, error) {
+
+	const maxConnections = 20
+	const minConnections = 4
+	const minIdleConnections = 3
+	const maxConnectionsLifeTime = 1 * time.Hour
+	const MaxConnIdleTime = 30 * time.Minute
+	const healthCheckPeriod = 1 * time.Minute
+	const connectionTimeout = 10 * time.Second //fail first on bad network
+
+	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		dsn = "ostgres://postgres:martin321!@localhost:5432/storeforge?sslmode=disable"
-		log.Printf("[DB CONFIG] : Warning, using default DSN; ensure DB URL is set for production environment.")
+		return nil, fmt.Errorf("Database_URL is required")
 	}
 
 	// Parse and configure a new connection pool
 	config, err := pgxpool.ParseConfig(dsn)
 
 	if err != nil {
-		return nil, fmt.Errorf("invalid dsn %w", err)
+		return nil, fmt.Errorf("invalid DATABASE_URL %s", err)
 	}
 
-	// customize pool settings
-	config.MaxConns = 6
-	config.MinIdleConns = 3
-	config.MaxConnLifetime = 60 * 60 * time.Second //1 hour
+	config.MaxConns = maxConnections
+	config.MinConns = minConnections
+	config.MinIdleConns = minIdleConnections
+	config.MaxConnLifetime = maxConnectionsLifeTime
+	config.MaxConnIdleTime = MaxConnIdleTime
+	config.HealthCheckPeriod = healthCheckPeriod
+	config.ConnConfig.ConnectTimeout = connectionTimeout
+	config.ConnConfig.RuntimeParams = map[string]string{
+		"application-name": "storeforge-api", //shows up in pg_stat_activity
+	}
+
+	// Enforce TLS in production, revisit this later
+	// if os.Getenv("ENV") != "development" && os.Getenv("GO_ENV") != "development" {
+	//     if config.ConnConfig.TLSConfig == nil {
+	//         config.ConnConfig.TLSConfig = &tls.Config{
+	//             // NEVER disable verification in prod
+	//             InsecureSkipVerify: false,
+	//             MinVersion:         tls.VersionTLS12,
+	//         }
+	//     }
+	// }
+
+	ctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+	defer cancel()
 
 	// create a new pool
-	pool, err := pgxpool.NewWithConfig(context.Background(), config)
+	pool, err := pgxpool.NewWithConfig(ctx, config)
 
 	if err != nil {
-		return nil, fmt.Errorf("an error occurred when creating a new connection pool %w", err)
+		return nil, fmt.Errorf("unable to create pool %w", err)
 	}
 
 	db := &Pool{pool}
 
 	if err := db.Ping(context.Background()); err != nil {
-		return nil, fmt.Errorf("database ping failed %w", err)
+		return nil, fmt.Errorf("initial database ping failed(DB unreachable) %w", err)
 	}
 
-	fmt.Printf("database connection successful!")
+	fmt.Printf("database connection successful maxConns=%d, minConns=%d!", config.MaxConns, config.MinConns)
 
 	return db, nil
+}
+
+func Close() {
+	if db != nil && db.Pool != nil {
+		db.Close()
+		db = nil
+		log.Println("Database connection closed!")
+	}
 }
 
 // migrate creates the users table if it does not exist.
 // => to Migrations
 func (d *Pool) migrate() error {
+
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
 			id SERIAL PRIMARY KEY,
