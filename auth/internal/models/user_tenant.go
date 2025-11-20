@@ -1,11 +1,15 @@
 package models
 
-type UserTenant struct {
-	UserID   string
-	TenantID string
-	RoleID   string
+import (
+	"time"
 
-	User   User
-	Tenant Tenant
-	Role   Role
+	"github.com/google/uuid"
+)
+
+type UserTenant struct {
+	UserID   uuid.UUID `json:"userId"`
+	TenantID uuid.UUID `json:"tenantId"`
+	RoleID   uuid.UUID `json:"roleId"`
+
+	JoinedAt time.Time `json:"joinedAt"`
 }

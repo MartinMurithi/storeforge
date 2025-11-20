@@ -45,7 +45,7 @@ func NewPool() (*Pool, error) {
 
 	db := &Pool{pool}
 
-	if err := db.Ping(context.Background()); err != nil{
+	if err := db.Ping(context.Background()); err != nil {
 		return nil, fmt.Errorf("database ping failed %w", err)
 	}
 
@@ -54,9 +54,8 @@ func NewPool() (*Pool, error) {
 	return db, nil
 }
 
-
 // migrate creates the users table if it does not exist.
-//=> to Migrations
+// => to Migrations
 func (d *Pool) migrate() error {
 	query := `
 		CREATE TABLE IF NOT EXISTS users (
@@ -71,4 +70,3 @@ func (d *Pool) migrate() error {
 	}
 	return nil
 }
-
