@@ -1,37 +1,50 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
-	"github.com/MartinMurithi/storeforge.io/internal/database"
-	"github.com/joho/godotenv"
+
+	"github.com/MartinMurithi/storeforge.io/internal/bootstrap"
 )
 
 func main() {
-	fmt.Printf("[AUTH SERVICE ENABLED]: Ready to launch in 3 ..... 2 ...... 1.......\n")
+	log.Println("[AUTH SERVICE]: Hello auth.....")
 
-	// connect to DB for testing purposes
-	err := godotenv.Load()
-
-	if err != nil {
-		fmt.Printf("failed to load env \n")
-	}
-
-	cfg := database.Config{
-		Host:     os.Getenv("DB_HOST"),
-		User:     os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Port:     os.Getenv("DB_PORT"),
-		SSLMode:  os.Getenv("DB_SSLMODE"),
-		Database: os.Getenv("DB_DATABASE"),
-	}
-
-	db, err := database.InitDB(cfg)
+	app, err := bootstrap.Init()
 
 	if err != nil {
-		fmt.Printf("failed to connect to database %s \n", err.Error())
+		log.Fatalf("failed to start application %s", err)
 	}
 
-	fmt.Printf("connected to database successfully %s \n", db.Name())
+	log.Println("[AUTH SERVICE]: Application started successfully")
+
+	//To help with graceful shutdown
+	stop := make(chan os.Signal, 1)
+
+	//SIGINT, listens for CTRL + C
+	//SIGTERM, listens for docker/kubernetes stop
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	log.Println("[AUTH SERVICE]: Running on port 8585. Press CTRL + C to stop")
+
+	<-stop
+
+	log.Println("[AUTH SERVICE]: Shutting down gracefully...")
+
+	//give active requests time to finish
+	// ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+	// defer cancel()
+
+	//Shutdown server
+	// if err := httpServer.Shutdown(ctx); err != nil {
+	//     log.Printf("HTTP server forced to shutdown: %v", err)
+	// }
+
+	if app.DB != nil {
+		app.DB.Close()
+	}
+
 }

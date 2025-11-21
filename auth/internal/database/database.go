@@ -71,9 +71,6 @@ func NewPool(ctx context.Context) (*Pool, error) {
 	config.MaxConnIdleTime = MaxConnIdleTime
 	config.HealthCheckPeriod = healthCheckPeriod
 	config.ConnConfig.ConnectTimeout = connectionTimeout
-	config.ConnConfig.RuntimeParams = map[string]string{
-		"application-name": "storeforge-api", //shows up in pg_stat_activity
-	}
 
 	// Enforce TLS in production, revisit this later
 	// if os.Getenv("ENV") != "development" && os.Getenv("GO_ENV") != "development" {
@@ -102,7 +99,7 @@ func NewPool(ctx context.Context) (*Pool, error) {
 		return nil, fmt.Errorf("initial database ping failed(DB unreachable) %w", err)
 	}
 
-	fmt.Printf("database connection successful maxConns=%d, minConns=%d!", config.MaxConns, config.MinConns)
+	fmt.Println("[DATABASE] : database connection successful maxConns=%w, minConns=%w", config.MaxConns, config.MinConns)
 
 	return db, nil
 }
