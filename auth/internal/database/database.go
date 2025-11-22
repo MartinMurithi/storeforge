@@ -112,6 +112,18 @@ func Close() {
 	}
 }
 
+/*
+SEEDING
+MIGRATION
+REPOSITORY
+SERVICES
+HANDLERS
+UTILS
+ROUTES
+BOOTSTRAP
+DOCUMENTATION
+*/
+
 // migrate creates the users table if it does not exist.
 // => to Migrations
 func (d *Pool) migrate() error {
