@@ -18,8 +18,8 @@ type Pool struct {
 }
 
 var (
-	db   *Pool
-	once sync.Once
+	db *Pool
+	mu sync.Mutex
 )
 
 func Get() *Pool {
@@ -27,18 +27,22 @@ func Get() *Pool {
 }
 
 func InitDB(ctx context.Context) error {
-	var initErr error
+	mu.Lock()
+	defer mu.Unlock()
 
-	once.Do(func() {
-		pool, err := NewPool(ctx)
+	if db != nil {
+		return nil
+	}
 
-		if err != nil {
-			initErr = err
-			return
-		}
-		db = pool
-	})
-	return initErr
+	pool, err := NewPool(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	db = pool
+	return nil
+
 }
 
 func NewPool(ctx context.Context) (*Pool, error) {
@@ -54,7 +58,7 @@ func NewPool(ctx context.Context) (*Pool, error) {
 	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		return nil, fmt.Errorf("Database_URL is required")
+		return nil, fmt.Errorf("Database_URL is required\n")
 	}
 
 	// Parse and configure a new connection pool
@@ -110,6 +114,11 @@ func Close() {
 		db = nil
 		log.Println("Database connection closed!")
 	}
+}
+
+//for testing purpose
+func Reset(){
+	db = nil
 }
 
 /*
