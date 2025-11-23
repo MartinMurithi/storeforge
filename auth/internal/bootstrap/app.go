@@ -6,11 +6,11 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/MartinMurithi/storeforge.io/internal/database"
+	"github.com/MartinMurithi/storeforge.io/internal/database/config"
 )
 
 type App struct {
-	DB *database.Pool
+	DB *config.Pool
 }
 
 func Init() (*App, error) {
@@ -25,13 +25,13 @@ func Init() (*App, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	err = database.InitDB(ctx)
+	err = config.InitDB(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	db := database.Get()
+	db := config.Get()
 
 	return &App{
 		DB: db,

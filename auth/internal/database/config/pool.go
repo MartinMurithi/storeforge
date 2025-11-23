@@ -1,11 +1,9 @@
-package database
+package config
 
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -17,33 +15,7 @@ type Pool struct {
 	*pgxpool.Pool
 }
 
-var (
-	db *Pool
-	mu sync.Mutex
-)
-
-func Get() *Pool {
-	return db
-}
-
-func InitDB(ctx context.Context) error {
-	mu.Lock()
-	defer mu.Unlock()
-
-	if db != nil {
-		return nil
-	}
-
-	pool, err := NewPool(ctx)
-
-	if err != nil {
-		return err
-	}
-
-	db = pool
-	return nil
-
-}
+var db *Pool
 
 func NewPool(ctx context.Context) (*Pool, error) {
 
@@ -58,7 +30,7 @@ func NewPool(ctx context.Context) (*Pool, error) {
 	dsn := os.Getenv("DATABASE_URL")
 
 	if dsn == "" {
-		return nil, fmt.Errorf("Database_URL is required\n")
+		return nil, fmt.Errorf("Database_URL is required")
 	}
 
 	// Parse and configure a new connection pool
@@ -106,19 +78,6 @@ func NewPool(ctx context.Context) (*Pool, error) {
 	fmt.Println("[DATABASE] : database connection successful maxConns=%w, minConns=%w", config.MaxConns, config.MinConns)
 
 	return db, nil
-}
-
-func Close() {
-	if db != nil && db.Pool != nil {
-		db.Close()
-		db = nil
-		log.Println("Database connection closed!")
-	}
-}
-
-//for testing purpose
-func Reset(){
-	db = nil
 }
 
 /*

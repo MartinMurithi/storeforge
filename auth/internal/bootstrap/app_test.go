@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MartinMurithi/storeforge.io/internal/database"
+	"github.com/MartinMurithi/storeforge.io/internal/database/config"
 )
 
 // TestInit_BadDSN_FailsImmediately ensures that when InitDB is given an invalid DSN:
@@ -15,20 +15,20 @@ import (
 //
 // The test resets the global DB state to stay isolated from other tests.
 func TestInit_BadDSN_FailsImmediately(t *testing.T) {
-	database.Reset()
+	config.Reset()
 
 	t.Setenv("DATABASE_URL", "postgres://user:pwd@localhost:5432/nonexistent")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := database.InitDB(ctx)
+	err := config.InitDB(ctx)
 
 	if err == nil {
 		t.Fatal("expected error with dsn(data source name), returned nil")
 	}
 
-	db := database.Get()
+	db := config.Get()
 
 	if db != nil {
 		t.Fatal("expected nil db after InitDB failed, returned non-nil")
@@ -46,7 +46,7 @@ func TestInit_RespectsContextTimeout(t *testing.T) {
 	defer cancel()
 
 	start := time.Now()
-	err := database.InitDB(ctx)
+	err := config.InitDB(ctx)
 	elapsed := time.Since(start)
 
 	if err == nil {
@@ -66,7 +66,7 @@ func TestInit_RespectsContextTimeout(t *testing.T) {
 }
 
 func TestInit_RepeatedInitialization(t *testing.T) {
-	database.Reset()
+	config.Reset()
 
 	t.Setenv("DATABASE_URL", "postgres://postgres:martin321!@localhost:5432/storeforge")
 
@@ -74,26 +74,26 @@ func TestInit_RepeatedInitialization(t *testing.T) {
 	defer cancel()
 
 	//1st DB initialization
-	err := database.InitDB(ctx)
+	err := config.InitDB(ctx)
 
 	if err != nil {
 		t.Fatalf("first init db failed %v", err)
 	}
 
-	db1 := database.Get()
+	db1 := config.Get()
 
 	if db1 == nil {
 		t.Fatalf("expected db to be non-nil after first initialization, got nil")
 	}
 
 	//2nd DB initialization
-	err = database.InitDB(ctx)
+	err = config.InitDB(ctx)
 
 	if err != nil {
 		t.Fatalf("second init db failed %v", err)
 	}
 
-	db2 := database.Get()
+	db2 := config.Get()
 
 	if db2 == nil {
 		t.Fatalf("expected db to be non-nil after second initialization, got nil")
