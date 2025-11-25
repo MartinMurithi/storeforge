@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -14,7 +15,6 @@ type App struct {
 }
 
 func Init() (*App, error) {
-
 
 	err := godotenv.Load(".env")
 
@@ -32,6 +32,12 @@ func Init() (*App, error) {
 	}
 
 	db := config.Get()
+
+	err = config.RunMigrations(os.Getenv("DATABASE_URL"))
+
+	if err != nil {
+		return nil, err
+	}
 
 	return &App{
 		DB: db,

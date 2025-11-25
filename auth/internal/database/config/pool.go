@@ -92,20 +92,3 @@ BOOTSTRAP
 DOCUMENTATION
 */
 
-// migrate creates the users table if it does not exist.
-// => to Migrations
-func (d *Pool) migrate() error {
-
-	query := `
-		CREATE TABLE IF NOT EXISTS users (
-			id SERIAL PRIMARY KEY,
-			name TEXT NOT NULL,
-			email TEXT NOT NULL
-		);
-	`
-	_, err := d.Exec(context.Background(), query)
-	if err != nil {
-		return fmt.Errorf("failed to create table: %w", err)
-	}
-	return nil
-}
