@@ -82,13 +82,11 @@ func NewPool(ctx context.Context) (*Pool, error) {
 
 /*
 SEEDING
-MIGRATION
 REPOSITORY
 SERVICES
 HANDLERS
 UTILS
 ROUTES
-BOOTSTRAP
 DOCUMENTATION
 */
 
