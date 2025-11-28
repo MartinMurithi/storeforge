@@ -46,40 +46,6 @@ It’s built for speed, scalability, and simplicity — combining a **Go backend
 ## 🏗️ System Architecture
 
 ```
-[User Browser]
-   |
-   v
-[Next.js Frontend + Builder]  ---> calls ---> [Go API (Gin)]
-                                              |
-                                              v
-                                      [PostgreSQL DB]
-                                              |
-                                              v
-                                        [S3 / R2 Storage]
-                                              |
-                                              v
-                                      [Payment APIs: Stripe/M-Pesa]
-```
-
----
-
-## 🧩 Folder Structure
-
-```
-storeforge/
- ├─ apps/
- │   ├─ frontend-next/       # Next.js storefront + builder + admin
- │   └─ api-go/              # Go backend (Gin)
- ├─ packages/
- │   ├─ ui-components/       # Shared React components
- │   └─ schemas/             # JSON schema definitions
- └─ infra/
-     ├─ docker-compose.yml
-     └─ k8s/
-```
-
----
-
 ## ⚙️ Local Setup
 
 ### 1. Clone the repo
