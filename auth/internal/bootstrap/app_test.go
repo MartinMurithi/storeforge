@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MartinMurithi/storeforge.io/internal/database/config"
+	"github.com/MartinMurithi/storeforge/internal/database/config"
 )
 
 // TestInit_BadDSN_FailsImmediately ensures that when InitDB is given an invalid DSN:

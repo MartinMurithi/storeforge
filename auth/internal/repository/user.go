@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/MartinMurithi/storeforge.io/internal/database/config"
-	"github.com/MartinMurithi/storeforge.io/pkg/dbhelper"
-	"github.com/MartinMurithi/storeforge.io/internal/models"
+	"github.com/MartinMurithi/storeforge/internal/database/config"
+	"github.com/MartinMurithi/storeforge/pkg/dbhelper"
+	"github.com/MartinMurithi/storeforge/internal/models"
 )
 
 type UserRepository struct {
