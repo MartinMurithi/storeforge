@@ -8,7 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/MartinMurithi/storeforge/internal/database/config"
+	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
 )
 
 type App struct {

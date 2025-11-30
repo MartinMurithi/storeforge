@@ -6,9 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/internal/database/config"
+	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
 )
-
 // TestInit_BadDSN_FailsImmediately ensures that when InitDB is given an invalid DSN:
 // 1. It returns an error immediately instead of hanging or succeeding silently.
 // 2. The global DB instance remains nil, preventing use of a partially initialized DB.

@@ -1,4 +1,4 @@
-module github.com/MartinMurithi/storeforge.io
+module github.com/MartinMurithi/storeforge
 
 go 1.25.1
 
