@@ -7,7 +7,7 @@ import (
 	"syscall"
 
 
-	"github.com/MartinMurithi/storeforge.io/internal/bootstrap"
+	"github.com/MartinMurithi/storeforge/auth/internal/bootstrap"
 )
 
 func main() {
