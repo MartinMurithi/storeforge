@@ -2,11 +2,14 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
+
+	"github.com/google/uuid"
 )
 
 type UserRepository struct {
@@ -15,11 +18,11 @@ type UserRepository struct {
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *models.User) error
-	GetUserById(ctx context.Context, id string) (*models.User, error)
-	GetUserByEmail(ctx context.Context, id string) (*models.User, error)
-	GetAllUsers(ctx context.Context) ([]*models.User, error)
-	UpdateUser(ctx context.Context, id string, user *models.User) (*models.User, error)
-	DeleteUser(ctx context.Context, id string) error
+	GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	GetAllUsers(ctx context.Context, page, limit int) ([]*models.User, error)
+	UpdateUser(ctx context.Context, id uuid.UUID, user *models.User) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
 
 func NewUserRepository(pool *config.Pool) *UserRepository {
@@ -44,18 +47,29 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	return nil
 }
 
-func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, error) {
+func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
 	const op = "UserRepository.GetAllUsers"
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	if page < 1 {
+		page = 1
+	}
+
+	if limit == 0 || limit > 15 {
+		limit = 15
+	}
+
+	offset := (page - 1) * limit
+
 	//add limit and offset for pagination
 	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
 	ORDER BY created_at DESC
+	LIMIT $1 OFFSET $2
 	`
 
-	rows, err := repo.DB.Query(ctx, query)
+	rows, err := repo.DB.Query(ctx, query, limit, offset)
 
 	if err != nil {
 		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
@@ -82,4 +96,91 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, er
 	}
 
 	return users, nil
+}
+
+func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	const op = "UserRepository.GetUserById"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	user := &models.User{}
+
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
+	WHERE id = $1`
+
+	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Roles)
+
+	if err != nil {
+		return nil, db.WrapDbError(ctx, op, 3*time.Second, err)
+	}
+	return user, nil
+}
+
+func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	const op = "UserRepository.GetUserByEmail"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	user := &models.User{}
+
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
+	WHERE id = $1`
+
+	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Roles)
+
+	if err != nil {
+		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
+	}
+	return user, nil
+}
+
+func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *models.User) error {
+	const op = "UserRepository.UpdateUser"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	query := `UPDATE users 
+	SET business_name=$1, business_type=$2
+	WHERE id=$3`
+
+	result, err := repo.DB.Exec(ctx, query, user.BusinessName, user.BusinessType, id)
+
+	if err != nil {
+		return db.WrapDbError(ctx, op, 3*time.Second, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: user not found id%s", op, id)
+	}
+
+	user.ID = id
+
+	return nil
+}
+
+func (repo *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	const op = "UserRepository.DeleteUser"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	query := `DELETE FROM users WHERE id=$1`
+
+	result, err := repo.DB.Exec(ctx, query, id)
+
+	if err != nil {
+		return db.WrapDbError(ctx, op, 3*time.Second, err)
+	}
+
+	rowsAffected := result.RowsAffected()
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("%s: user not found id%s", op, id)
+	}
+	return nil
 }
