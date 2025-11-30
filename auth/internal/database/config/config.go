@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 
@@ -52,11 +53,18 @@ func RunMigrations(databaseUrl string) error {
 	m, err := migrate.New("file://internal/database/migrations", databaseUrl)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("migrate init: %w", err)
 	}
 
-	if err := m.Up(); err != nil {
-		return err
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return fmt.Errorf("migrate up: %w", err)
+	}
+
+	if err == migrate.ErrNoChange {
+		log.Println("No new migrations to apply")
+	} else {
+		log.Println("Migrations applied successfully")
 	}
 
 	log.Println("Migrations applied (if any)")

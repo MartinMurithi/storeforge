@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	// "github.com/MartinMurithi/storeforge.io/internal/models"
 )
 
 // Create a postgres connection pool for the app

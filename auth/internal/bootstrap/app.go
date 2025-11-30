@@ -2,6 +2,7 @@ package bootstrap
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"time"
 
@@ -19,6 +20,7 @@ func Init() (*App, error) {
 	err := godotenv.Load(".env")
 
 	if err != nil {
+		fmt.Printf("an error occurred 1: %s", err)
 		return nil, err
 	}
 
@@ -28,6 +30,7 @@ func Init() (*App, error) {
 	err = config.InitDB(ctx)
 
 	if err != nil {
+		fmt.Printf("an error occurred 2: %s", err)
 		return nil, err
 	}
 
@@ -36,6 +39,7 @@ func Init() (*App, error) {
 	err = config.RunMigrations(os.Getenv("DATABASE_URL"))
 
 	if err != nil {
+		fmt.Printf("an error occurred 3: %s", err)
 		return nil, err
 	}
 
