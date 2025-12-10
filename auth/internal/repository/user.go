@@ -8,6 +8,7 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
+	"github.com/jackc/pgx/v5"
 
 	"github.com/google/uuid"
 )
@@ -36,9 +37,9 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := `INSERT INTO users (full_name, email, phone, password_hash, business_type, business_name, is_verified) VALUES($1, $2, $3, $4, $5, $6, $7) returning id`
+	query := `INSERT INTO users (full_name, email, phone, password_hash, business_type, business_name) VALUES($1, $2, $3, $4, $5, $6) returning id`
 
-	err := repo.DB.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName, user.IsVerified).Scan(&user.ID)
+	err := repo.DB.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName).Scan(&user.ID)
 
 	if err != nil {
 		return db.WrapDbError(ctx, op, 5*time.Second, err)
@@ -53,12 +54,14 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	const maxLimit = 15
+
 	if page < 1 {
 		page = 1
 	}
 
-	if limit == 0 || limit > 15 {
-		limit = 15
+	if limit == 0 || limit > maxLimit {
+		limit = maxLimit
 	}
 
 	offset := (page - 1) * limit
@@ -106,10 +109,10 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*mod
 
 	user := &models.User{}
 
-	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified, roles FROM users
 	WHERE id = $1`
 
-	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Roles)
+	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
 
 	if err != nil {
 		return nil, db.WrapDbError(ctx, op, 3*time.Second, err)
@@ -125,10 +128,10 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 
 	user := &models.User{}
 
-	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified, roles FROM users
 	WHERE id = $1`
 
-	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Roles)
+	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
 
 	if err != nil {
 		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
@@ -143,10 +146,22 @@ func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *
 	defer cancel()
 
 	query := `UPDATE users 
-	SET business_name=$1, business_type=$2
-	WHERE id=$3`
+	SET business_name=$1, business_type=$2, updated_at=$3
+	WHERE id=$4`
 
-	result, err := repo.DB.Exec(ctx, query, user.BusinessName, user.BusinessType, id)
+	tx, err := repo.DB.Begin(ctx)
+
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
+			fmt.Printf("%s: rollback failed %s", op, err)
+		}
+	}()
+
+	if err != nil {
+		return fmt.Errorf("%s: error starting a transaction %w", op, err)
+	}
+
+	result, err := tx.Exec(ctx, query, user.BusinessName, user.BusinessType, user.UpdatedAt, id.String())
 
 	if err != nil {
 		return db.WrapDbError(ctx, op, 3*time.Second, err)
@@ -155,10 +170,16 @@ func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *
 	rowsAffected := result.RowsAffected()
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("%s: user not found id%s", op, id)
+		return fmt.Errorf("%s: user not found id%w", op, id)
 	}
 
 	user.ID = id
+
+	err = tx.Commit(ctx)
+
+	if err != nil {
+		return fmt.Errorf("%s: error occurred when committing a transaction %w", op, err)
+	}
 
 	return nil
 }
@@ -180,7 +201,7 @@ func (repo *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error 
 	rowsAffected := result.RowsAffected()
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("%s: user not found id%s", op, id)
+		return fmt.Errorf("%s: user not found id%w", op, id)
 	}
 	return nil
 }
