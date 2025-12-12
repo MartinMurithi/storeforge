@@ -42,6 +42,19 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 	businessName := strings.TrimSpace(user.BusinessName)
 	businessType := strings.TrimSpace(user.BusinessType)
 
+	//check if email is already registered
+	//check if business name already exists
+
+	existingUser, err := srv.repo.GetUserByEmail(ctx, email)
+
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to get user by email %w", op, err)
+	}
+
+	if existingUser != nil {
+		return nil, fmt.Errorf("%s: user with email %s already exists %w", op, email, err)
+	}
+
 	//hashpassword
 	//salt password
 
@@ -57,7 +70,7 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 	}
 
 	//save user to db
-	err := srv.repo.CreateUser(ctx, newUser)
+	err = srv.repo.CreateUser(ctx, newUser)
 
 	if err != nil {
 		return nil, fmt.Errorf("%s: error occurred when creating user %w", op, err)
