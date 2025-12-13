@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -39,10 +40,28 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 
 	query := `INSERT INTO users (full_name, email, phone, password_hash, business_type, business_name) VALUES($1, $2, $3, $4, $5, $6) returning id`
 
-	err := repo.DB.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName).Scan(&user.ID)
+	tx, err := repo.DB.Begin(ctx)
+
+	if err != nil {
+		return fmt.Errorf("%s: error starting a transaction %w", op, err)
+	}
+
+	defer func() {
+		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
+			fmt.Printf("%s: rollback failed %s", op, err)
+		}
+	}()
+
+	err = tx.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName).Scan(&user.ID)
 
 	if err != nil {
 		return db.WrapDbError(ctx, op, 5*time.Second, err)
+	}
+
+	err = tx.Commit(ctx)
+
+	if err != nil {
+		return fmt.Errorf("%s: error occurred when committing a transaction %w", op, err)
 	}
 
 	return nil
@@ -115,7 +134,10 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*mod
 	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
 
 	if err != nil {
-		return nil, db.WrapDbError(ctx, op, 3*time.Second, err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%s: user not found %w", op, err)
+		}
+		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
 	return user, nil
 }
@@ -129,11 +151,14 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 	user := &models.User{}
 
 	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified, roles FROM users
-	WHERE id = $1`
+	WHERE email = $1`
 
 	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
 
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, fmt.Errorf("%s: user not found %w", op, err)
+		}
 		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
 	return user, nil
@@ -151,15 +176,15 @@ func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *
 
 	tx, err := repo.DB.Begin(ctx)
 
+	if err != nil {
+		return fmt.Errorf("%s: error starting a transaction %w", op, err)
+	}
+
 	defer func() {
 		if err := tx.Rollback(ctx); err != nil && err != pgx.ErrTxClosed {
 			fmt.Printf("%s: rollback failed %s", op, err)
 		}
 	}()
-
-	if err != nil {
-		return fmt.Errorf("%s: error starting a transaction %w", op, err)
-	}
 
 	result, err := tx.Exec(ctx, query, user.BusinessName, user.BusinessType, user.UpdatedAt, id.String())
 

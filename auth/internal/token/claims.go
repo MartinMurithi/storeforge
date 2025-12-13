@@ -30,8 +30,8 @@ func NewUserClaims(id uuid.UUID, email, role string, duration time.Duration) (*U
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        tokenId.String(),
-			Subject:   email,
-			Issuer:    "storeforge",
+			Subject:   id.String(),
+			Issuer:    "auth.storeforge",
 			Audience:  []string{"storeforge-api"},
 		},
 	}, nil

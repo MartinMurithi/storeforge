@@ -1,6 +1,7 @@
 package token
 
 import (
+	"crypto/rsa"
 	"fmt"
 	"time"
 
@@ -9,11 +10,11 @@ import (
 )
 
 type JWTMaker struct {
-	secretKey string
+	PrivateKey *rsa.PrivateKey
 }
 
-func NewJWTMaker(secretKey string) *JWTMaker {
-	return &JWTMaker{secretKey}
+func NewJWTMaker(privateKey *rsa.PrivateKey) *JWTMaker {
+	return &JWTMaker{PrivateKey: privateKey}
 }
 
 func (maker *JWTMaker) CreateToken(id uuid.UUID, email, role string, duration time.Duration) (string, *UserClaims, error) {
@@ -26,7 +27,7 @@ func (maker *JWTMaker) CreateToken(id uuid.UUID, email, role string, duration ti
 
 	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 
-	tokenStr, err := token.SignedString([]byte(maker.secretKey))
+	tokenStr, err := token.SignedString(maker.PrivateKey)
 
 	if err != nil {
 		return "", nil, fmt.Errorf("%s error signing token %w", OP, err)
@@ -34,10 +35,3 @@ func (maker *JWTMaker) CreateToken(id uuid.UUID, email, role string, duration ti
 
 	return tokenStr, claims, nil
 }
-
-// func VerifyToken(token string) (*UserClaims, error){
-// 	jwt.ParseWithClaims(token, &UserClaims{}, func(token *jwt.Token) (interface{}, error) {
-// 		//verify signing method
-// 		_, ok := token.Method.Verify(jwt.SigningMethodES256.Name)
-// 	})
-// }
