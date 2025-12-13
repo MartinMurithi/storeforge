@@ -86,7 +86,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([
 	offset := (page - 1) * limit
 
 	//add limit and offset for pagination
-	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, roles FROM users
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified, role FROM users
 	ORDER BY created_at DESC
 	LIMIT $1 OFFSET $2
 	`
@@ -104,7 +104,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([
 	for rows.Next() {
 		user := &models.User{}
 
-		err := rows.Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Roles)
+		err := rows.Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified, &user.Role)
 
 		if err != nil {
 			return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
@@ -131,7 +131,7 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*mod
 	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified, roles FROM users
 	WHERE id = $1`
 
-	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
+	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Role)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -153,7 +153,7 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified, roles FROM users
 	WHERE email = $1`
 
-	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Roles)
+	err := repo.DB.QueryRow(ctx, query, email).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified, &user.Role)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

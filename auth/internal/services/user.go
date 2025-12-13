@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/lib"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
-	"github.com/MartinMurithi/storeforge/auth/internal/utils"
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
+	"github.com/MartinMurithi/storeforge/auth/internal/utils"
 )
 
 type UserService struct {
-	repo *repository.UserRepository
+	repo     *repository.UserRepository
+	jwtMaker *token.JWTMaker
 }
 
 // create a factory function to initialize my service with repo
@@ -122,9 +124,14 @@ func (srv *UserService) LoginUser(email, password string, ctx context.Context) (
 	}
 
 	// Generate JWT
-	// err := token.
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.Email, existingUser.Role.Name, time.Hour)
 
-	return "", nil
+	if err != nil {
+		log.Printf("%s: error creating token %s", op, err)
+		return "", fmt.Errorf("failed to issue token %w", err)
+	}
+
+	return token, nil
 }
 
 func (srv *UserService) FetchAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
