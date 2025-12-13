@@ -17,9 +17,9 @@ func NewJWTMaker(privateKey *rsa.PrivateKey) *JWTMaker {
 	return &JWTMaker{PrivateKey: privateKey}
 }
 
-func (maker *JWTMaker) CreateToken(id uuid.UUID, email, role string, duration time.Duration) (string, *UserClaims, error) {
+func (maker *JWTMaker) CreateToken(id, tenantId uuid.UUID, email, role string, duration time.Duration) (string, *UserClaims, error) {
 	const OP = "Token.CreateToken"
-	claims, err := NewUserClaims(id, email, role, duration)
+	claims, err := NewUserClaims(id, tenantId, email, role, duration)
 
 	if err != nil {
 		return "", nil, fmt.Errorf("%s: error creating user claims %w", OP, err)

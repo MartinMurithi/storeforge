@@ -9,13 +9,14 @@ import (
 )
 
 type UserClaims struct {
-	Id    uuid.UUID `json:"id"`
-	Role  string    `json:"role"`
-	Email string    `json:"email"`
+	Id       uuid.UUID `json:"id"`
+	Role     string    `json:"role"`
+	Email    string    `json:"email"`
+	TenantId uuid.UUID `json:"tenantId"`
 	jwt.RegisteredClaims
 }
 
-func NewUserClaims(id uuid.UUID, email, role string, duration time.Duration) (*UserClaims, error) {
+func NewUserClaims(id uuid.UUID, tenantId uuid.UUID, email, role string, duration time.Duration) (*UserClaims, error) {
 	tokenId, err := uuid.NewRandom()
 
 	if err != nil {
@@ -26,6 +27,7 @@ func NewUserClaims(id uuid.UUID, email, role string, duration time.Duration) (*U
 		Id:    id,
 		Role:  role,
 		Email: email,
+		TenantId: tenantId,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
