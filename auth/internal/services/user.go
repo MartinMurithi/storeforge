@@ -7,6 +7,8 @@ import (
 
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
+	"github.com/MartinMurithi/storeforge/auth/internal/utils"
+	// "github.com/MartinMurithi/storeforge/auth/internal/token"
 )
 
 type UserService struct {
@@ -42,29 +44,29 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 	businessName := strings.TrimSpace(user.BusinessName)
 	businessType := strings.TrimSpace(user.BusinessType)
 
-	//check if email is already registered
-	//check if business name already exists
-
+	//check if user already exists
 	existingUser, err := srv.repo.GetUserByEmail(ctx, email)
 
 	if err != nil {
-		return nil, fmt.Errorf("%s: failed to get user by email %w", op, err)
+		return nil, fmt.Errorf("%s: user not found %w", op, err)
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("%s: user with email %s already exists %w", op, email, err)
+		return nil, fmt.Errorf("%s: user already exists %w", op, err)
 	}
 
 	//hashpassword
-	//salt password
+	hashedPassword, err := utils.Hashpassword(password)
 
-	// create user first for testing
+	if err != nil{
+		return nil, fmt.Errorf("%s: error hashing password %w", op, err)
+	}
 
 	newUser := &models.User{
 		FullName:     fullName,
 		Email:        email,
 		Phone:        phone,
-		PasswordHash: password,
+		PasswordHash: hashedPassword,
 		BusinessType: businessType,
 		BusinessName: businessName,
 	}
@@ -78,6 +80,40 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 
 	return newUser, nil
 }
+
+func (srv *UserService) LoginUser(email, password string, ctx context.Context) (string, error){
+	const op = "UserService.LoginUser"
+	if email == "" || password == "" {
+		return "", fmt.Errorf("%s:both email and password are required ", op)
+	}
+
+	//verify if email is valid
+	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
+	sanitizedPassword := strings.TrimSpace(password)
+
+	//check if user already exists
+	existingUser, err := srv.repo.GetUserByEmail(ctx, sanitizedEmail)
+
+	if err != nil {
+		return "", fmt.Errorf("%s: user not found %w", op, err)
+	}
+
+	//check password
+	err = utils.CheckPassword(sanitizedPassword, existingUser.PasswordHash)
+
+	if err != nil{
+		return "", fmt.Errorf("%s: invalid email or password %w", err)
+	}
+
+	//generate token 
+	// token, userClaims, err := token.
+	return "", nil
+}
+
+
+
+
+
 
 func (srv *UserService) FetchAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
 	const op = "UserService.FetchAllUsers"
