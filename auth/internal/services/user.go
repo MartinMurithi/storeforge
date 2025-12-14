@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	// "time"
+	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/lib"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
@@ -126,14 +126,14 @@ func (srv *UserService) LoginUser(email, password string, ctx context.Context) (
 	// Before issuing JWT, create a tenant first, will revisit this later
 
 	// Generate JWT
-	// token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.Email, existingUser.Role.Name, time.Hour)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, existingUser.Role.Name, time.Hour)
 
-	// if err != nil {
-	// 	log.Printf("%s: error creating token %s", op, err)
-	// 	return "", fmt.Errorf("failed to issue token %w", err)
-	// }
+	if err != nil {
+		log.Printf("%s: error creating token %s", op, err)
+		return "", fmt.Errorf("failed to issue token %w", err)
+	}
 
-	return "", nil
+	return token, nil
 }
 
 func (srv *UserService) FetchAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
