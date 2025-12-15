@@ -1,10 +1,10 @@
-package handlers
+package handler
 
 import (
 	"net/http"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/dto"
-	"github.com/MartinMurithi/storeforge/auth/internal/handlers/httpx"
+	"github.com/MartinMurithi/storeforge/auth/internal/handler/httpx"
 	"github.com/MartinMurithi/storeforge/auth/internal/mapper"
 	"github.com/MartinMurithi/storeforge/auth/internal/services"
 
