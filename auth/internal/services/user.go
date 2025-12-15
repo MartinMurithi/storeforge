@@ -24,26 +24,31 @@ func NewUserService(repo *repository.UserRepository) *UserService {
 	return &UserService{repo: repo}
 }
 
-type RegisterUserDTO struct {
+type RegisterUserInput struct {
 	FullName     string
 	Email        string
 	Phone        string
-	PasswordHash string
+	Password     string
 	BusinessType string
 	BusinessName string
 }
 
-func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO) (*models.User, error) {
+type LoginUserInput struct {
+	Email        string
+	Password     string
+}
+
+func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserInput) (*models.User, error) {
 	const op = "UserService.RegisterUser"
 
-	if user.FullName == "" || user.Email == "" || user.Phone == "" || user.PasswordHash == "" || user.BusinessType == "" || user.BusinessName == "" {
+	if user.FullName == "" || user.Email == "" || user.Phone == "" || user.Password == "" || user.BusinessType == "" || user.BusinessName == "" {
 		return nil, fmt.Errorf("%s:all fields are required ", op)
 	}
 
 	fullName := strings.TrimSpace(user.FullName)
 	email := strings.ToLower(strings.TrimSpace(user.Email))
 	phone := strings.TrimSpace(user.Phone)
-	password := strings.TrimSpace(user.PasswordHash)
+	password := strings.TrimSpace(user.Password)
 	businessName := strings.TrimSpace(user.BusinessName)
 	businessType := strings.TrimSpace(user.BusinessType)
 
@@ -65,7 +70,7 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 	}
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("%s: user already exists", op)
+		return nil, fmt.Errorf("%s: user with that email already exists", op)
 	}
 
 	//hashpassword
@@ -95,45 +100,45 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserDTO)
 	return newUser, nil
 }
 
-func (srv *UserService) LoginUser(email, password string, ctx context.Context) (string, error) {
+func (srv *UserService) LoginUser(input *LoginUserInput, ctx context.Context) (*models.User, string, error) {
 	const op = "UserService.LoginUser"
-	if email == "" || password == "" {
-		return "", fmt.Errorf("%s:both email and password are required ", op)
+
+	if input.Email == "" || input.Password == "" {
+		return nil, "", fmt.Errorf("%s:both email and password are required ", op)
 	}
 
-	//verify if email is valid
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(email))
-	sanitizedPassword := strings.TrimSpace(password)
+	sanitizedEmail := strings.ToLower(strings.TrimSpace(input.Email))
+	sanitizedPassword := strings.TrimSpace(input.Password)
 
-	if !lib.IsEmailValid(email) {
-		return "", fmt.Errorf("%s: invalid email or password", op)
+	if !lib.IsEmailValid(sanitizedEmail) {
+		return nil, "", fmt.Errorf("%s: invalid email or password", op)
 	}
 
 	//check if user already exists
 	existingUser, err := srv.repo.GetUserByEmail(ctx, sanitizedEmail)
 
-	if err != nil {
-		return "", fmt.Errorf("%s: invalid email or password", op)
+	if err != nil || existingUser == nil {
+		return nil, "", fmt.Errorf("%s: invalid email or password", op)
 	}
 
-	//check password
+	//verify password
 	err = utils.CheckPassword(sanitizedPassword, existingUser.PasswordHash)
 
 	if err != nil {
-		return "", fmt.Errorf("invalid email or password %s", err)
+		return nil, "", fmt.Errorf("invalid email or password %s", err)
 	}
 
 	// Before issuing JWT, create a tenant first, will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, existingUser.Role.Name, time.Hour)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, existingUser.Role.Name, 1*time.Hour)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)
-		return "", fmt.Errorf("failed to issue token %w", err)
+		return nil, "", fmt.Errorf("failed to issue token %w", err)
 	}
 
-	return token, nil
+	return existingUser, token, nil
 }
 
 func (srv *UserService) FetchAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
