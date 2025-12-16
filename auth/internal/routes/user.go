@@ -10,7 +10,7 @@ type UserRouter struct {
 	UserHandler *handler.UserHandler
 }
 
-func NewUserRouter(handler *handler.UserHandler) *UserRouter {
+func NewUserRouter(r *gin.Engine, handler *handler.UserHandler) *UserRouter {
 	return &UserRouter{UserHandler: handler}
 }
 

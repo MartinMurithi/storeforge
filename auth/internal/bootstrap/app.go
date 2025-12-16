@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	
 	"github.com/joho/godotenv"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
@@ -21,7 +21,6 @@ type App struct {
 	Repo    *repository.UserRepository
 	Service *services.UserService
 	Handler *handler.UserHandler
-	Router  *gin.Engine
 }
 
 func Init() (*App, error) {
@@ -53,13 +52,10 @@ func Init() (*App, error) {
 	srv := services.NewUserService(repo)
 	handler := handler.NewUserHandler(srv)
 
-	router := gin.Default()
-
 	return &App{
 		DB:      db,
 		Repo:    repo,
 		Service: srv,
 		Handler: handler,
-		Router:  router,
 	}, err
 }
