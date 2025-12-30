@@ -11,6 +11,11 @@ import (
 // LoadPrivateKey loads a PEM-encoded RSA private key from file
 func LoadPrivateKey(path string) (*rsa.PrivateKey, error) {
 	const op = "keys.LoadPrivateKey"
+
+	if path == "" {
+		return nil, fmt.Errorf("%s: private key file path was not provided", op)
+	}
+
 	data, err := os.ReadFile(path)
 
 	if err != nil {
@@ -19,17 +24,21 @@ func LoadPrivateKey(path string) (*rsa.PrivateKey, error) {
 
 	block, _ := pem.Decode(data)
 
-	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		return nil, fmt.Errorf("invalid private key PEM")
+	if block == nil || block.Type != "PRIVATE KEY" {
+		return nil, fmt.Errorf("%s: invalid private key PEM", op)
 	}
 
-	key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-
+	parsedKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing RSA private key%w", err)
+		return nil, fmt.Errorf("%s: error parsing PKCS#8 private key %w", op, err)
 	}
 
-	return key, nil
+	rsaKey, ok := parsedKey.(*rsa.PrivateKey)
+	if !ok {
+		return nil, fmt.Errorf("%s: not an RSA private key", op)
+	}
+
+	return rsaKey, nil
 }
 
 // LoadPublicKey, loads a PEM encoded RSA public key from a file

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/dto"
@@ -20,6 +21,7 @@ func NewUserHandler(userService *services.UserService) *UserHandler {
 }
 
 func (handler *UserHandler) RegisterUser(c *gin.Context) {
+
 	var req dto.RegisterUserRequestDTO
 
 	err := c.ShouldBindJSON(&req)
@@ -40,6 +42,8 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 
 	user, err := handler.UserService.RegisterUser(c.Request.Context(), input)
 
+	fmt.Println("user ..... ", user)
+
 	if err != nil {
 		httpx.Error(c, http.StatusInternalServerError, "internal server error")
 		return
@@ -54,8 +58,11 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 func (handler *UserHandler) LoginUser(c *gin.Context) {
 	var req dto.LoginUserRequestDTO
 
-	err := c.ShouldBindJSON(&req)
+	fmt.Println("user login 1..... ")
 
+	err := c.ShouldBindJSON(&req)
+	
+fmt.Println("user login 2..... ")
 	// Invalid request
 	if err != nil {
 		httpx.ValidationError(c)
@@ -66,14 +73,20 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 		Password: req.Password,
 	}
 
+	fmt.Println("user login 3..... ")
+
 	user, token, err := handler.UserService.LoginUser(input, c.Request.Context())
+
+	fmt.Println("user login 4..... ", err)
 
 	if err != nil {
 		httpx.Error(c, http.StatusInternalServerError, "internal server error")
 		return
 	}
+	fmt.Println("user login 5..... ")
 
 	response := mapper.ToLoginUserResponse(token, user)
+	fmt.Println("user login 6..... ")
 
 	httpx.JSON(c, http.StatusCreated, response)
 

@@ -20,8 +20,16 @@ type UserService struct {
 }
 
 // create a factory function to initialize my service with repo
-func NewUserService(repo *repository.UserRepository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo *repository.UserRepository, jwtMaker *token.JWTMaker) *UserService {
+
+	if jwtMaker == nil {
+		panic("jwt maker must not be nil")
+	}
+
+	return &UserService{
+		repo:     repo,
+		jwtMaker: jwtMaker,
+	}
 }
 
 type RegisterUserInput struct {
@@ -34,8 +42,8 @@ type RegisterUserInput struct {
 }
 
 type LoginUserInput struct {
-	Email        string
-	Password     string
+	Email    string
+	Password string
 }
 
 func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserInput) (*models.User, error) {
@@ -63,11 +71,6 @@ func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserInpu
 
 	//check if user already exists
 	existingUser, err := srv.repo.GetUserByEmail(ctx, email)
-
-	if err != nil {
-		log.Printf("db error: %s", err)
-		return nil, fmt.Errorf("%s: internal error", op)
-	}
 
 	if existingUser != nil {
 		return nil, fmt.Errorf("%s: user with that email already exists", op)
@@ -117,21 +120,23 @@ func (srv *UserService) LoginUser(input *LoginUserInput, ctx context.Context) (*
 	//check if user already exists
 	existingUser, err := srv.repo.GetUserByEmail(ctx, sanitizedEmail)
 
+	fmt.Println("exisiting user", existingUser)
+
 	if err != nil || existingUser == nil {
 		return nil, "", fmt.Errorf("%s: invalid email or password", op)
 	}
 
 	//verify password
-	err = utils.CheckPassword(sanitizedPassword, existingUser.PasswordHash)
+	err = utils.VerifyPassword(sanitizedPassword, existingUser.PasswordHash)
 
 	if err != nil {
 		return nil, "", fmt.Errorf("invalid email or password %s", err)
 	}
 
-	// Before issuing JWT, create a tenant first, will revisit this later
+	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, existingUser.Role.Name, 1*time.Hour)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 1*time.Hour)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)

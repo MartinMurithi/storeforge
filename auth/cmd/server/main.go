@@ -27,19 +27,15 @@ func main() {
 
 	router := gin.Default()
 
-	if err := router.SetTrustedProxies([]string{"192.168.1.2"}); err != nil {
+	if err := router.SetTrustedProxies([]string{}); err != nil {
 		log.Fatalf("failed to set trusted proxies%v", err)
 	}
 
-	routes.NewUserRouter(router, app.Handler)
-
 	router.GET("/", func(c *gin.Context) {
-		// If the client is 192.168.1.2, use the X-Forwarded-For
-		// header to deduce the original client IP from the trust-
-		// worthy parts of that header.
-		// Otherwise, simply return the direct client IP
 		fmt.Printf("ClientIP: %s\n", c.ClientIP())
 	})
+
+	routes.RegisterUserRoutes(router, app.Handler)
 
 	srv := &http.Server{
 		Addr:         ":8585",
@@ -54,6 +50,7 @@ func main() {
 		syscall.SIGINT,
 		syscall.SIGTERM,
 	)
+
 	defer stop()
 
 	go func() {

@@ -35,6 +35,7 @@ func VerifyToken(pubKey *rsa.PublicKey, tokenStr, expectedAudience, expectedIssu
 
 	// Extract claims from token
 	claims, ok := token.Claims.(*UserClaims)
+	
 	if !ok || !token.Valid {
 		return nil, ErrInvalidToken
 	}

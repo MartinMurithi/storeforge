@@ -6,19 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type UserRouter struct {
-	UserHandler *handler.UserHandler
-}
-
-func NewUserRouter(r *gin.Engine, handler *handler.UserHandler) *UserRouter {
-	return &UserRouter{UserHandler: handler}
-}
-
-func UserRoutes(r *gin.Engine, h *handler.UserHandler) {
+func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler) {
+	// group endpoints based on api version
 	v1 := r.Group("/api/v1")
 
 	// Public routes
 	public := v1.Group("/users")
+
 	{
 		public.POST("/register", h.RegisterUser)
 		public.POST("/login", h.LoginUser)
