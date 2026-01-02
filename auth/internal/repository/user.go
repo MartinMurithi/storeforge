@@ -38,7 +38,7 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	query := `INSERT INTO users (full_name, email, phone, password_hash, business_type, business_name) VALUES($1, $2, $3, $4, $5, $6) returning id`
+	query := `INSERT INTO users (full_name, email, phone, password_hash, business_type, business_name) VALUES($1, $2, $3, $4, $5, $6) returning id, created_at`
 
 	tx, err := repo.DB.Begin(ctx)
 
@@ -52,7 +52,7 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 		}
 	}()
 
-	err = tx.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName).Scan(&user.ID)
+	err = tx.QueryRow(ctx, query, user.FullName, user.Email, user.Phone, user.PasswordHash, user.BusinessType, user.BusinessName).Scan(&user.ID, &user.CreatedAt)
 
 	if err != nil {
 		return db.WrapDbError(ctx, op, 5*time.Second, err)
