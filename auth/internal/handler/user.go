@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
+	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/handler/httpx"
 	"github.com/MartinMurithi/storeforge/auth/internal/mapper"
@@ -26,26 +30,37 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 
 	err := c.ShouldBindJSON(&req)
 
-	// Invalid request
 	if err != nil {
-		httpx.ValidationError(c)
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[RegisterUser] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "malformed JSON")
+			return
+		}
 	}
 
-	input := &services.RegisterUserInput{
-		FullName:     req.FullName,
-		Email:        req.Email,
-		Phone:        req.Phone,
-		Password:     req.Password,
-		BusinessType: req.BusinessType,
-		BusinessName: req.BusinessName,
-	}
-
-	user, err := handler.UserService.RegisterUser(c.Request.Context(), input)
-
-	fmt.Println("user ..... ", user)
+	user, err := handler.UserService.RegisterUser(c.Request.Context(), &req)
 
 	if err != nil {
-		httpx.Error(c, http.StatusInternalServerError, "internal server error")
+		switch {
+		case errors.Is(err, apperrors.ErrFullNameRequired),
+			errors.Is(err, apperrors.ErrEmailRequired),
+			errors.Is(err, apperrors.ErrPhoneRequired),
+			errors.Is(err, apperrors.ErrPasswordRequired),
+			errors.Is(err, apperrors.ErrBusinessTypeRequired),
+			errors.Is(err, apperrors.ErrBusinessNameRequired):
+			httpx.Error(c, http.StatusBadRequest, "all fields are required")
+		case errors.Is(err, apperrors.ErrInvalidEmailFormat):
+			httpx.Error(c, http.StatusBadRequest, "invalid email format")
+		case errors.Is(err, apperrors.ErrInvalidPhoneNumber):
+			httpx.Error(c, http.StatusBadRequest, "invalid phone number")
+		case errors.Is(err, apperrors.ErrUserAlreadyExists):
+			httpx.Error(c, http.StatusConflict, "email already registered")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "internal server error")
+		}
 		return
 	}
 
@@ -61,8 +76,8 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 	fmt.Println("user login 1..... ")
 
 	err := c.ShouldBindJSON(&req)
-	
-fmt.Println("user login 2..... ")
+
+	fmt.Println("user login 2..... ")
 	// Invalid request
 	if err != nil {
 		httpx.ValidationError(c)

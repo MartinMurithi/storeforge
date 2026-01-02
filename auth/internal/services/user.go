@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MartinMurithi/storeforge/auth/internal/dto"
+	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
@@ -32,72 +34,80 @@ func NewUserService(repo *repository.UserRepository, jwtMaker *token.JWTMaker) *
 	}
 }
 
-type RegisterUserInput struct {
-	FullName     string
-	Email        string
-	Phone        string
-	Password     string
-	BusinessType string
-	BusinessName string
-}
-
 type LoginUserInput struct {
 	Email    string
 	Password string
 }
 
-func (srv *UserService) RegisterUser(ctx context.Context, user *RegisterUserInput) (*models.User, error) {
+func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*models.User, error) {
 	const op = "UserService.RegisterUser"
 
-	if user.FullName == "" || user.Email == "" || user.Phone == "" || user.Password == "" || user.BusinessType == "" || user.BusinessName == "" {
-		return nil, fmt.Errorf("%s:all fields are required ", op)
+	// Normalize user input
+	input.Normalize()
+
+	checks := []struct {
+		FieldName string
+		Value     string
+		Err       error
+	}{
+		{"FullName", input.FullName, apperrors.ErrFullNameRequired},
+		{"Email", input.Email, apperrors.ErrEmailRequired},
+		{"Phone", input.Phone, apperrors.ErrPhoneRequired},
+		{"Password", input.Password, apperrors.ErrPasswordRequired},
+		{"BusinessType", input.BusinessType, apperrors.ErrBusinessTypeRequired},
+		{"BusinessName", input.BusinessName, apperrors.ErrBusinessNameRequired},
 	}
 
-	fullName := strings.TrimSpace(user.FullName)
-	email := strings.ToLower(strings.TrimSpace(user.Email))
-	phone := strings.TrimSpace(user.Phone)
-	password := strings.TrimSpace(user.Password)
-	businessName := strings.TrimSpace(user.BusinessName)
-	businessType := strings.TrimSpace(user.BusinessType)
-
-	if !lib.IsEmailValid(email) {
-		return nil, fmt.Errorf("%s: invalid email format", op)
+	for _, check := range checks {
+		if check.Value == "" {
+			log.Printf("[%s] missing required field '%s':", op, check.FieldName)
+			return nil, check.Err
+		}
 	}
 
-	ValidatedPhone, err := lib.ValidatePhone(phone)
+	if err := lib.ValidateEmail(input.Email); err != nil {
+		log.Printf("[%s] error validating email '%s': ", op, input.Email)
+		return nil, err
+	}
+
+	_, err := lib.ValidatePhone(input.Phone)
+
 	if err != nil {
-		return nil, fmt.Errorf("%s: %w", op, err)
+		log.Printf("[%s] error validating phone number '%s': ", op, input.Phone)
+		return nil, err
 	}
 
 	//check if user already exists
-	existingUser, err := srv.repo.GetUserByEmail(ctx, email)
+	existingUser, err := srv.repo.GetUserByEmail(ctx, input.Email)
 
 	if existingUser != nil {
-		return nil, fmt.Errorf("%s: user with that email already exists", op)
+		log.Printf("[%s] user with email %s is already registered ", op, input.Email)
+		return nil, apperrors.ErrUserAlreadyExists
 	}
 
 	//hashpassword
-	hashedPassword, err := utils.Hashpassword(password)
+	hashedPassword, err := utils.Hashpassword(input.Password)
 
 	if err != nil {
 		log.Printf("error hashing password %s", err)
-		return nil, fmt.Errorf("%s: internal error", op)
+		return nil, fmt.Errorf("internal server error")
 	}
 
 	newUser := &models.User{
-		FullName:     fullName,
-		Email:        email,
-		Phone:        ValidatedPhone,
+		FullName:     input.FullName,
+		Email:        input.Email,
+		Phone:        input.Phone,
 		PasswordHash: hashedPassword,
-		BusinessType: businessType,
-		BusinessName: businessName,
+		BusinessType: input.BusinessType,
+		BusinessName: input.BusinessName,
 	}
 
 	//save user to db
 	err = srv.repo.CreateUser(ctx, newUser)
 
 	if err != nil {
-		return nil, fmt.Errorf("%s: error occurred when creating user %w", op, err)
+		log.Printf("%s: error occurred when registering user %v", op, err)
+		return nil, fmt.Errorf("internal server error")
 	}
 
 	return newUser, nil
@@ -113,8 +123,9 @@ func (srv *UserService) LoginUser(input *LoginUserInput, ctx context.Context) (*
 	sanitizedEmail := strings.ToLower(strings.TrimSpace(input.Email))
 	sanitizedPassword := strings.TrimSpace(input.Password)
 
-	if !lib.IsEmailValid(sanitizedEmail) {
-		return nil, "", fmt.Errorf("%s: invalid email or password", op)
+	if err := lib.ValidateEmail(input.Email); err != nil {
+		log.Printf("[%s] error validating email '%s': %+v", op, input.Email)
+		return nil, "", err
 	}
 
 	//check if user already exists

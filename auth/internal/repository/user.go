@@ -165,6 +165,8 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 	return user, nil
 }
 
+// Remember to check if business name already exists
+
 func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *models.User) error {
 	const op = "UserRepository.UpdateUser"
 

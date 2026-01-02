@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -28,7 +29,20 @@ type RegisterUserRequestDTO struct {
 }
 
 type RegisterUserResponseDTO struct {
-	Id uuid.UUID `json:"id"`
+    Status  string           `json:"status"`
+    Message string           `json:"message"`
+    Data *UserResponseDTO         `json:"data"`
+}
+
+// Normalize Registration user input
+// Email and phone are also normalized in the validators
+func (regInput *RegisterUserRequestDTO) Normalize() {
+	regInput.FullName = strings.TrimSpace(regInput.FullName)
+	regInput.Email = strings.TrimSpace(regInput.Email)
+	regInput.Phone = strings.TrimSpace(regInput.Phone)
+	regInput.Password = strings.TrimSpace(regInput.Password)
+	regInput.BusinessType = strings.TrimSpace(regInput.BusinessType)
+	regInput.BusinessName = strings.TrimSpace(regInput.BusinessName)
 }
 
 type LoginUserRequestDTO struct {

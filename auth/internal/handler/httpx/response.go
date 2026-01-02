@@ -8,9 +8,11 @@ type APIResponse struct {
 }
 
 func JSON(c *gin.Context, status int, data any) {
-	c.JSON(status, APIResponse{Data: data})
+	c.Header("Content-Type", "application/json")
+	c.JSON(status, data)
 }
 
 func Error(c *gin.Context, status int, msg string) {
+	c.Header("Content-Type", "application/json")
 	c.JSON(status, APIResponse{Error: msg})
 }

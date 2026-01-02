@@ -7,5 +7,5 @@ import (
 )
 
 func ValidationError(c *gin.Context) {
-	Error(c, http.StatusBadRequest, "invalid request")
+	Error(c, http.StatusBadRequest, "malformed JSON")
 }
