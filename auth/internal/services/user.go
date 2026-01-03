@@ -131,7 +131,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	}
 
 	//verify password
-	err = utils.VerifyPassword(input.Email, existingUser.PasswordHash)
+	err = utils.VerifyPassword(input.Password, existingUser.PasswordHash)
 
 	if err != nil {
 		return nil, "", fmt.Errorf("invalid email or password %w", err)

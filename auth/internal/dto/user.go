@@ -61,6 +61,6 @@ type LoginUserRequestDTO struct {
 }
 
 type LoginUserResponseDTO struct {
-	Token string `json:"string"`
+	Token string `json:"token"`
 	User  *UserResponseDTO
 }
