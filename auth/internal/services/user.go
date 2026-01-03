@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
@@ -32,11 +31,6 @@ func NewUserService(repo *repository.UserRepository, jwtMaker *token.JWTMaker) *
 		repo:     repo,
 		jwtMaker: jwtMaker,
 	}
-}
-
-type LoginUserInput struct {
-	Email    string
-	Password string
 }
 
 func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*models.User, error) {
@@ -113,35 +107,34 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	return newUser, nil
 }
 
-func (srv *UserService) LoginUser(input *LoginUserInput, ctx context.Context) (*models.User, string, error) {
+func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*models.User, string, error) {
 	const op = "UserService.LoginUser"
+
+	input.Normalize()
 
 	if input.Email == "" || input.Password == "" {
 		return nil, "", fmt.Errorf("%s:both email and password are required ", op)
 	}
 
-	sanitizedEmail := strings.ToLower(strings.TrimSpace(input.Email))
-	sanitizedPassword := strings.TrimSpace(input.Password)
-
 	if err := lib.ValidateEmail(input.Email); err != nil {
-		log.Printf("[%s] error validating email '%s': %+v", op, input.Email)
+		log.Printf("[%s] error validating email '%s': ", op, input.Email)
 		return nil, "", err
 	}
 
 	//check if user already exists
-	existingUser, err := srv.repo.GetUserByEmail(ctx, sanitizedEmail)
+	existingUser, err := srv.repo.GetUserByEmail(ctx, input.Email)
 
 	fmt.Println("exisiting user", existingUser)
 
 	if err != nil || existingUser == nil {
-		return nil, "", fmt.Errorf("%s: invalid email or password", op)
+		return nil, "", fmt.Errorf("invalid email or password %w", err)
 	}
 
 	//verify password
-	err = utils.VerifyPassword(sanitizedPassword, existingUser.PasswordHash)
+	err = utils.VerifyPassword(input.Email, existingUser.PasswordHash)
 
 	if err != nil {
-		return nil, "", fmt.Errorf("invalid email or password %s", err)
+		return nil, "", fmt.Errorf("invalid email or password %w", err)
 	}
 
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later

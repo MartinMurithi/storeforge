@@ -32,6 +32,7 @@ type RegisterUserResponseDTO struct {
     Status  string           `json:"status"`
     Message string           `json:"message"`
     Data *UserResponseDTO         `json:"data"`
+	Error string	`json:"error"`
 }
 
 // Normalize Registration user input
@@ -44,6 +45,15 @@ func (regInput *RegisterUserRequestDTO) Normalize() {
 	regInput.BusinessType = strings.TrimSpace(regInput.BusinessType)
 	regInput.BusinessName = strings.TrimSpace(regInput.BusinessName)
 }
+
+
+
+// Normalize Login user input
+// Email and phone are also normalized in the validators
+func (regInput *LoginUserRequestDTO) Normalize() {
+	regInput.Email = strings.TrimSpace(regInput.Email)
+	regInput.Password = strings.TrimSpace(regInput.Password)}
+
 
 type LoginUserRequestDTO struct {
 	Email    string `json:"email" binding:"required,email"`

@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -73,35 +72,28 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 func (handler *UserHandler) LoginUser(c *gin.Context) {
 	var req dto.LoginUserRequestDTO
 
-	fmt.Println("user login 1..... ")
-
 	err := c.ShouldBindJSON(&req)
 
-	fmt.Println("user login 2..... ")
-	// Invalid request
 	if err != nil {
-		httpx.ValidationError(c)
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[LoginUser] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "malformed JSON")
+			return
+		}
 	}
 
-	input := &services.LoginUserInput{
-		Email:    req.Email,
-		Password: req.Password,
-	}
-
-	fmt.Println("user login 3..... ")
-
-	user, token, err := handler.UserService.LoginUser(input, c.Request.Context())
-
-	fmt.Println("user login 4..... ", err)
+	user, token, err := handler.UserService.LoginUser(c.Request.Context(), &req)
 
 	if err != nil {
+		log.Printf("[Login user] : %v", err)
 		httpx.Error(c, http.StatusInternalServerError, "internal server error")
 		return
 	}
-	fmt.Println("user login 5..... ")
 
 	response := mapper.ToLoginUserResponse(token, user)
-	fmt.Println("user login 6..... ")
 
 	httpx.JSON(c, http.StatusCreated, response)
 
