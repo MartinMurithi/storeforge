@@ -46,8 +46,21 @@ func Init() (*App, error) {
 
 	jwtMaker, err := token.NewJWTMaker(privateKey)
 
-	if err != nil{
+	if err != nil {
 		return nil, fmt.Errorf("error initializing JWT Maker %w", err)
+	}
+
+	// Load Public Key for Token Verification
+	jwtPublicKeyPath := os.Getenv("JWT_PUBLIC_KEY_PATH")
+
+	if jwtPublicKeyPath == "" {
+		return nil, fmt.Errorf("JWT_PUBLIC_KEY_PATH is not set")
+	}
+
+	_, err = token.LoadPublicKey(jwtPublicKeyPath)
+
+	if err != nil {
+		return nil, fmt.Errorf("error loading JWT_PUBLIC_KEY %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -72,10 +85,10 @@ func Init() (*App, error) {
 	handler := handler.NewUserHandler(srv)
 
 	return &App{
-		DB:      db,
-		Repo:    repo,
-		Service: srv,
-		Handler: handler,
+		DB:       db,
+		Repo:     repo,
+		Service:  srv,
+		Handler:  handler,
 		JWTMaker: jwtMaker,
 	}, err
 }
