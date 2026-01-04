@@ -4,6 +4,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MartinMurithi/storeforge/auth/internal/token"
+
 	"github.com/google/uuid"
 )
 
@@ -29,10 +31,8 @@ type RegisterUserRequestDTO struct {
 }
 
 type RegisterUserResponseDTO struct {
-    Status  string           `json:"status"`
-    Message string           `json:"message"`
-    Data *UserResponseDTO         `json:"data"`
-	Error string	`json:"error"`
+	User    *UserResponseDTO `json:"user"`
+	Message string           `json:"message"`
 }
 
 // Normalize Registration user input
@@ -46,14 +46,12 @@ func (regInput *RegisterUserRequestDTO) Normalize() {
 	regInput.BusinessName = strings.TrimSpace(regInput.BusinessName)
 }
 
-
-
 // Normalize Login user input
 // Email and phone are also normalized in the validators
 func (regInput *LoginUserRequestDTO) Normalize() {
 	regInput.Email = strings.TrimSpace(regInput.Email)
-	regInput.Password = strings.TrimSpace(regInput.Password)}
-
+	regInput.Password = strings.TrimSpace(regInput.Password)
+}
 
 type LoginUserRequestDTO struct {
 	Email    string `json:"email" binding:"required,email"`
@@ -61,6 +59,6 @@ type LoginUserRequestDTO struct {
 }
 
 type LoginUserResponseDTO struct {
-	Token string `json:"token"`
-	User  *UserResponseDTO
+	User  *UserResponseDTO `json:"user"`
+	Token *token.Token     `json:"token"`
 }

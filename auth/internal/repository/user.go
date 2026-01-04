@@ -158,7 +158,7 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("%s: user not found %w", op, err)
+			return nil, fmt.Errorf("[%s]: user not found: %w", op, err)
 		}
 		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}

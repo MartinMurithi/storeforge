@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -13,6 +14,8 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
 	"github.com/MartinMurithi/storeforge/auth/internal/utils"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -107,18 +110,18 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	return newUser, nil
 }
 
-func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*models.User, string, error) {
+func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*models.User, *token.Token, error) {
 	const op = "UserService.LoginUser"
 
 	input.Normalize()
 
 	if input.Email == "" || input.Password == "" {
-		return nil, "", fmt.Errorf("%s:both email and password are required ", op)
+		return nil, nil, fmt.Errorf("%s:both email and password are required ", op)
 	}
 
 	if err := lib.ValidateEmail(input.Email); err != nil {
 		log.Printf("[%s] error validating email '%s': ", op, input.Email)
-		return nil, "", err
+		return nil, nil, err
 	}
 
 	//check if user already exists
@@ -126,25 +129,33 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 
 	fmt.Println("exisiting user", existingUser)
 
-	if err != nil || existingUser == nil {
-		return nil, "", fmt.Errorf("invalid email or password %w", err)
+	if err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			log.Printf("[%s] user not found '%s': ", op, err)
+			return nil, nil, apperrors.ErrUserNotFound
+		}
+		log.Printf("[%s] get user by email failed '%s': ", op, err)
+		return nil, nil, err
 	}
 
 	//verify password
 	err = utils.VerifyPassword(input.Password, existingUser.PasswordHash)
 
 	if err != nil {
-		return nil, "", fmt.Errorf("invalid email or password %w", err)
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return nil, nil, apperrors.ErrInvalidCredentials
+		}
+		return nil, nil, err // unexpected crypto failure
 	}
 
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 1*time.Hour)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Minute)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)
-		return nil, "", fmt.Errorf("failed to issue token %w", err)
+		return nil, nil, fmt.Errorf("failed to issue token %w", err)
 	}
 
 	return existingUser, token, nil

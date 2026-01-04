@@ -35,7 +35,7 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 
 		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
 			log.Printf("[RegisterUser] malformed JSON: %v", err)
-			httpx.Error(c, http.StatusBadRequest, "malformed JSON")
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
 			return
 		}
 	}
@@ -50,15 +50,15 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 			errors.Is(err, apperrors.ErrPasswordRequired),
 			errors.Is(err, apperrors.ErrBusinessTypeRequired),
 			errors.Is(err, apperrors.ErrBusinessNameRequired):
-			httpx.Error(c, http.StatusBadRequest, "all fields are required")
+			httpx.Error(c, http.StatusBadRequest, "ALL_FIELDS_REQUIRED", "all fields are required")
 		case errors.Is(err, apperrors.ErrInvalidEmailFormat):
-			httpx.Error(c, http.StatusBadRequest, "invalid email format")
+			httpx.Error(c, http.StatusBadRequest, "INVALID_EMAIL_FORMAT", "invalid email format")
 		case errors.Is(err, apperrors.ErrInvalidPhoneNumber):
-			httpx.Error(c, http.StatusBadRequest, "invalid phone number")
+			httpx.Error(c, http.StatusBadRequest, "INVALID_PHONE_NUMBER", "invalid phone number")
 		case errors.Is(err, apperrors.ErrUserAlreadyExists):
-			httpx.Error(c, http.StatusConflict, "email already registered")
+			httpx.Error(c, http.StatusConflict, "USER_ALREADY_EXISTS", "email already registered")
 		default:
-			httpx.Error(c, http.StatusInternalServerError, "internal server error")
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
 		}
 		return
 	}
@@ -80,7 +80,7 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 
 		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
 			log.Printf("[LoginUser] malformed JSON: %v", err)
-			httpx.Error(c, http.StatusBadRequest, "malformed JSON")
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
 			return
 		}
 	}
@@ -88,13 +88,23 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 	user, token, err := handler.UserService.LoginUser(c.Request.Context(), &req)
 
 	if err != nil {
-		log.Printf("[Login user] : %v", err)
-		httpx.Error(c, http.StatusInternalServerError, "internal server error")
+		switch {
+		case
+			errors.Is(err, apperrors.ErrEmailRequired),
+			errors.Is(err, apperrors.ErrPasswordRequired):
+			httpx.Error(c, http.StatusBadRequest, "EMAIL_AND_PASSWORD_REQUIRED", "both email and password are required")
+		case errors.Is(err, apperrors.ErrInvalidEmailFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_EMAIL_FORMAT", "invalid email format")
+		case errors.Is(err, apperrors.ErrInvalidCredentials):
+			httpx.Error(c, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email or password")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
 		return
 	}
 
 	response := mapper.ToLoginUserResponse(token, user)
 
-	httpx.JSON(c, http.StatusCreated, response)
+	httpx.JSON(c, http.StatusOK, response)
 
 }
