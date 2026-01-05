@@ -151,7 +151,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Minute)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Second)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)

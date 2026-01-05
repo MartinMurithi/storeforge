@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler) {
+func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler, authMiddleware gin.HandlerFunc) {
 	// group endpoints based on api version
 	v1 := r.Group("/api/v1")
 
@@ -20,12 +20,12 @@ func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler) {
 	}
 
 	// Protected routes, revisit this later
-	// protected := v1.Group("/users")
-	// protected.Use(middleware.AuthMiddleware(publicKey, "storeforge-api", "auth.storeforge.io"))
-	// {
-	//     protected.GET("/", h.ListAllUsers)        // admin-only in handler logic
+	protected := v1.Group("/users")
+	protected.Use(authMiddleware)
+	{
+	    protected.GET("/test")        // admin-only in handler logic
 	//     protected.GET("/:id", h.GetUserById)     // self or admin
 	//     protected.PUT("/:id", h.UpdateUser)      // self or admin
 	//     protected.DELETE("/:id", h.DeleteUser)  // admin-only
-	// }
+	}
 }

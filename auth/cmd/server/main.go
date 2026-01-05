@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os/signal"
@@ -10,9 +9,6 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/bootstrap"
-	"github.com/MartinMurithi/storeforge/auth/internal/routes"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -23,23 +19,9 @@ func main() {
 		log.Fatalf("failed to initialize app: %v", err)
 	}
 
-	gin.SetMode(gin.ReleaseMode)
-
-	router := gin.Default()
-
-	if err := router.SetTrustedProxies([]string{}); err != nil {
-		log.Fatalf("failed to set trusted proxies%v", err)
-	}
-
-	router.GET("/", func(c *gin.Context) {
-		fmt.Printf("ClientIP: %s\n", c.ClientIP())
-	})
-
-	routes.RegisterUserRoutes(router, app.Handler)
-
 	srv := &http.Server{
 		Addr:         ":8585",
-		Handler:      router,
+		Handler:      app.Router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 		IdleTimeout:  120 * time.Second,

@@ -53,7 +53,6 @@ func AuthMiddleware(jwtMaker *token.JWTMaker, pubKey *rsa.PublicKey, expectedAud
 			return
 		}
 
-		// Token is valid
 		c.Set("userID", claims.ID)
 		c.Set("tenantID", claims.TenantId)
 		c.Set("role", claims.Role)
