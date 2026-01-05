@@ -108,3 +108,32 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, response)
 
 }
+
+func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
+
+	p, err := dto.ParsePagination(c)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrInvalidPageNumber):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_PAGE_NUMBER", "invalid page number")
+		case errors.Is(err, apperrors.ErrInvalidLimitNumber):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_LIMIT_NUMBER", "invalid limit number")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+	}
+
+	users, meta, err := handler.UserService.FetchAllUsers(c.Request.Context(), p)
+
+	if err != nil {
+		log.Printf("[FetchAllUsers] failed to fetch users: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	response := mapper.ToFetchAllUsersResponse(users, meta)
+
+	httpx.JSON(c, http.StatusOK, response)
+
+}

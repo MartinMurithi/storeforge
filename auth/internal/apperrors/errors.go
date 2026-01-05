@@ -38,3 +38,9 @@ var (
 var (
 	ErrUserNotFound = errors.New("user not found")
 )
+
+// Pagination errors
+var (
+	ErrInvalidPageNumber = errors.New("invalid page")
+	ErrInvalidLimitNumber = errors.New("invalid limit")
+)

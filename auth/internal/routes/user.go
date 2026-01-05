@@ -12,7 +12,7 @@ func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler, authMiddleware gi
 	v1 := r.Group("/api/v1")
 
 	// Public routes
-	public := v1.Group("/users")
+	public := v1.Group("/auth")
 
 	{
 		public.POST("/register", h.RegisterUser)
@@ -20,10 +20,10 @@ func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler, authMiddleware gi
 	}
 
 	// Protected routes, revisit this later
-	protected := v1.Group("/users")
+	protected := v1.Group("/auth")
 	protected.Use(authMiddleware)
 	{
-	    protected.GET("/test")        // admin-only in handler logic
+	    protected.GET("/users", h.FetchAllUsers)        // admin-only in handler logic
 	//     protected.GET("/:id", h.GetUserById)     // self or admin
 	//     protected.PUT("/:id", h.UpdateUser)      // self or admin
 	//     protected.DELETE("/:id", h.DeleteUser)  // admin-only

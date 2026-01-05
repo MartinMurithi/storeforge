@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
@@ -151,7 +152,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Second)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Minute)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)
@@ -161,17 +162,24 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	return existingUser, token, nil
 }
 
-func (srv *UserService) FetchAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
+func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.PaginationMeta) ([]*models.User, dto.PaginationMeta, error) {
 	const op = "UserService.FetchAllUsers"
-	users, err := srv.repo.GetAllUsers(ctx, page, limit)
+	users, total, err := srv.repo.GetAllUsers(ctx, dto.PaginationMeta{Page: p.Limit, Limit: p.Limit})
 
 	if err != nil {
-		return nil, fmt.Errorf("%s: error fetching users %w", op, err)
+		return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
 	}
 
-	if len(users) == 0 {
-		return []*models.User{}, nil
+	totalPages := int(math.Ceil(float64(total) / float64(p.Limit)))
+
+	meta := dto.PaginationMeta{
+		Page:       p.Page,
+		Limit:      p.Limit,
+		Total:      total,
+		TotalPages: totalPages,
+		HasNext:    p.Page < totalPages,
+		HasPrev:    p.Page > 1,
 	}
 
-	return users, nil
+	return users, meta, nil
 }

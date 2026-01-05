@@ -62,3 +62,27 @@ func ToLoginUserResponse(token *token.Token, user *models.User) *dto.LoginUserRe
 		Token: token,
 	}
 }
+
+func ToFetchAllUsersResponse(users []*models.User, meta dto.PaginationMeta) *dto.FetchAllUsersResponseDTO {
+
+	usersDTO := make([]dto.UserResponseDTO, 0, len(users))
+
+	for _, u := range users {
+		usersDTO = append(usersDTO, dto.UserResponseDTO{
+			Id:           u.ID,
+			FullName:     u.FullName,
+			Email:        u.Email,
+			Phone:        u.Phone,
+			BusinessType: u.BusinessType,
+			BusinessName: u.BusinessName,
+			CreatedAt:    u.CreatedAt,
+			UpdatedAt:    u.UpdatedAt,
+			IsVerified:   u.IsVerified,
+		})
+	}
+
+	return &dto.FetchAllUsersResponseDTO{
+		Users:      usersDTO,
+		Pagination: meta,
+	}
+}

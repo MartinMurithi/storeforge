@@ -62,3 +62,8 @@ type LoginUserResponseDTO struct {
 	User  *UserResponseDTO `json:"user"`
 	Token *token.Token     `json:"token"`
 }
+
+type FetchAllUsersResponseDTO struct{
+	Users []UserResponseDTO `json:"users"`
+	Pagination PaginationMeta `json:"pagination"`
+}

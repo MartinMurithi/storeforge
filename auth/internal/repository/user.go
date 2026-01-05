@@ -4,14 +4,16 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
+	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
-	"github.com/jackc/pgx/v5"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 type UserRepository struct {
@@ -67,35 +69,47 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	return nil
 }
 
-func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([]*models.User, error) {
+func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.PaginationMeta) ([]*models.User, int, error) {
 	const op = "UserRepository.GetAllUsers"
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	var totalUsers int
+
+	totalCountQuery := `SELECT COUNT(*) FROM users`
+
+	err := repo.DB.QueryRow(ctx, totalCountQuery).Scan(&totalUsers)
+
+	if err != nil {
+		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+	}
+
+	log.Printf("total users %v", totalUsers)
+
 	const maxLimit = 15
-
-	if page < 1 {
-		page = 1
+	
+	if p.Page < 1 {
+		p.Page = 1
 	}
 
-	if limit == 0 || limit > maxLimit {
-		limit = maxLimit
+	if p.Limit == 0 || p.Limit > maxLimit {
+		p.Limit = maxLimit
 	}
 
-	offset := (page - 1) * limit
+	offset := (p.Page - 1) * p.Limit
 
-	//add limit and offset for pagination
+	// add limit and offset for pagination
 	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified
-	+ FROM users
+	FROM users
 	ORDER BY created_at DESC
 	LIMIT $1 OFFSET $2
 	`
 
-	rows, err := repo.DB.Query(ctx, query, limit, offset)
+	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
 
 	if err != nil {
-		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
+		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
 
 	defer rows.Close()
@@ -108,17 +122,19 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, page, limit int) ([
 		err := rows.Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified)
 
 		if err != nil {
-			return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
+			return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
 		}
 
 		users = append(users, user)
 	}
 
 	if rows.Err() != nil {
-		return nil, db.WrapDbError(ctx, op, 5*time.Second, err)
+		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, rows.Err())
 	}
 
-	return users, nil
+	log.Printf("all users %v", users)
+
+	return users, totalUsers, nil
 }
 
 func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error) {
