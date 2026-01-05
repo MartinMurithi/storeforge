@@ -3,11 +3,11 @@ package models
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type User struct {
-	ID           uuid.UUID  `json:"id"`
+	ID           pgtype.UUID  `json:"id"`
 	FullName     string     `json:"fullName"`
 	Email        string     `json:"email"`
 	Phone        string     `json:"phone"`

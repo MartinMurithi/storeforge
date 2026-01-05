@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type JWTMaker struct {
@@ -32,7 +32,7 @@ func NewJWTMaker(privateKey *rsa.PrivateKey) (*JWTMaker, error) {
 	return &JWTMaker{PrivateKey: privateKey}, nil
 }
 
-func (maker *JWTMaker) CreateToken(id, tenantId uuid.UUID, email, role string, duration time.Duration) (*Token, *UserClaims, error) {
+func (maker *JWTMaker) CreateToken(id, tenantId pgtype.UUID, email, role string, duration time.Duration) (*Token, *UserClaims, error) {
 	const OP = "Token.CreateToken"
 
 	if maker == nil || maker.PrivateKey == nil {

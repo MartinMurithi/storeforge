@@ -6,11 +6,12 @@ import (
 
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+
 )
 
 type UserResponseDTO struct {
-	Id           uuid.UUID  `json:"id"`
+	Id           pgtype.UUID  `json:"id"`
 	FullName     string     `json:"fullName"`
 	Email        string     `json:"email"`
 	Phone        string     `json:"phone"`

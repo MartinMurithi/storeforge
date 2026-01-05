@@ -162,9 +162,9 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	return existingUser, token, nil
 }
 
-func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.PaginationMeta) ([]*models.User, dto.PaginationMeta, error) {
+func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*models.User, dto.PaginationMeta, error) {
 	const op = "UserService.FetchAllUsers"
-	users, total, err := srv.repo.GetAllUsers(ctx, dto.PaginationMeta{Page: p.Limit, Limit: p.Limit})
+	users, total, err := srv.repo.GetAllUsers(ctx, dto.Pagination{Page: p.Limit, Limit: p.Limit})
 
 	if err != nil {
 		return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)

@@ -7,6 +7,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Pagination struct {
+	Page       int  `json:"page"`
+	Limit      int  `json:"limit"`
+}
+
 type PaginationMeta struct {
 	Page       int  `json:"page"`
 	Limit      int  `json:"limit"`
@@ -16,21 +21,21 @@ type PaginationMeta struct {
 	HasPrev    bool `json:"has_prev"`
 }
 
-func ParsePagination(c *gin.Context) (PaginationMeta, error) {
+func ParsePagination(c *gin.Context) (Pagination, error) {
 	pageStr := c.DefaultQuery("page", "1")
 	limitStr := c.DefaultQuery("limit", "15")
 
 	page, err := strconv.Atoi(pageStr)
 	if err != nil || page < 1 {
-		return PaginationMeta{}, errors.New("invalid page")
+		return Pagination{}, errors.New("invalid page")
 	}
 
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit < 1 || limit > 100 {
-		return PaginationMeta{}, errors.New("invalid limit")
+		return Pagination{}, errors.New("invalid limit")
 	}
 
-	return PaginationMeta{
+	return Pagination{
 		Page:  page,
 		Limit: limit,
 	}, nil

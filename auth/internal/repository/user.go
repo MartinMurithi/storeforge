@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	// "log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
@@ -12,7 +12,7 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 
-	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -22,11 +22,11 @@ type UserRepository struct {
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *models.User) error
-	GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	GetAllUsers(ctx context.Context, page, limit int) ([]*models.User, error)
-	UpdateUser(ctx context.Context, id uuid.UUID, user *models.User) error
-	DeleteUser(ctx context.Context, id uuid.UUID) error
+	UpdateUser(ctx context.Context, id pgtype.UUID, user *models.User) error
+	DeleteUser(ctx context.Context, id pgtype.UUID) error
 }
 
 func NewUserRepository(pool *config.Pool) *UserRepository {
@@ -69,49 +69,54 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	return nil
 }
 
-func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.PaginationMeta) ([]*models.User, int, error) {
+
+func (repo *UserRepository) GetAllUsers(
+	ctx context.Context,
+	p dto.Pagination,
+) ([]*models.User, int, error) {
+
 	const op = "UserRepository.GetAllUsers"
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
+	// --- total count ---
 	var totalUsers int
-
-	totalCountQuery := `SELECT COUNT(*) FROM users`
-
-	err := repo.DB.QueryRow(ctx, totalCountQuery).Scan(&totalUsers)
-
-	if err != nil {
+	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
 		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
 
-	log.Printf("total users %v", totalUsers)
-
 	const maxLimit = 15
-	
 	if p.Page < 1 {
 		p.Page = 1
 	}
-
-	if p.Limit == 0 || p.Limit > maxLimit {
+	if p.Limit <= 0 || p.Limit > maxLimit {
 		p.Limit = maxLimit
 	}
 
 	offset := (p.Page - 1) * p.Limit
 
-	// add limit and offset for pagination
-	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, is_verified
+	query := `
+	SELECT
+		id,
+		full_name,
+		email,
+		phone,
+		business_type,
+		business_name,
+		created_at,
+		updated_at,
+		deleted_at,
+		is_verified
 	FROM users
 	ORDER BY created_at DESC
 	LIMIT $1 OFFSET $2
 	`
 
 	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
-
 	if err != nil {
 		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
-
 	defer rows.Close()
 
 	var users []*models.User
@@ -119,25 +124,132 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.PaginationMet
 	for rows.Next() {
 		user := &models.User{}
 
-		err := rows.Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.IsVerified)
+		var (
+			id        pgtype.UUID
+			updatedAt pgtype.Timestamp
+			deletedAt pgtype.Timestamp
+		)
 
-		if err != nil {
+		if err := rows.Scan(
+			&id,
+			&user.FullName,
+			&user.Email,
+			&user.Phone,
+			&user.BusinessType,
+			&user.BusinessName,
+			&user.CreatedAt,
+			&updatedAt,
+			&deletedAt,
+			&user.IsVerified,
+		); err != nil {
 			return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+		}
+
+		// assign decoded values
+		user.ID = id
+
+		if updatedAt.Valid {
+			user.UpdatedAt = &updatedAt.Time
+		}
+		if deletedAt.Valid {
+			user.DeletedAt = &deletedAt.Time
 		}
 
 		users = append(users, user)
 	}
 
-	if rows.Err() != nil {
-		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, rows.Err())
+	if err := rows.Err(); err != nil {
+		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
 	}
-
-	log.Printf("all users %v", users)
 
 	return users, totalUsers, nil
 }
 
-func (repo *UserRepository) GetUserById(ctx context.Context, id uuid.UUID) (*models.User, error) {
+
+
+// func (repo *UserRepository) GetAllUsers(
+//     ctx context.Context,
+//     p dto.Pagination,
+// ) ([]*models.User, int, error) {
+
+//     const op = "UserRepository.GetAllUsers"
+
+//     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+//     defer cancel()
+
+//     var totalUsers int
+//     if err := repo.DB.
+//         QueryRow(ctx, `SELECT COUNT(*) FROM users`).
+//         Scan(&totalUsers); err != nil {
+//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+//     }
+
+//     const maxLimit = 15
+//     if p.Page < 1 {
+//         p.Page = 1
+//     }
+//     if p.Limit <= 0 || p.Limit > maxLimit {
+//         p.Limit = maxLimit
+//     }
+
+//     offset := (p.Page - 1) * p.Limit
+
+//     query := `
+//         SELECT id, full_name, email, phone,
+//                business_type, business_name,
+//                created_at, updated_at, deleted_at, is_verified
+//         FROM users
+//         ORDER BY created_at DESC
+//         LIMIT $1 OFFSET $2
+//     `
+
+//     rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
+//     if err != nil {
+//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+//     }
+//     defer rows.Close()
+
+//     log.Printf("field descriptions: %v", rows.FieldDescriptions())
+
+//     var users []*models.User
+// log.Printf("ctx err before rows.Next(): %v", ctx.Err())
+
+// for rows.Next() {
+//     user := &models.User{}
+
+//     var id pgtype.UUID
+//     var updatedAt, deletedAt *time.Time
+
+//     if err := rows.Scan(
+//         &id,
+//         &user.FullName,
+//         &user.Email,
+//         &user.Phone,
+//         &user.BusinessType,
+//         &user.BusinessName,
+//         &user.CreatedAt,
+//         &updatedAt,
+//         &deletedAt,
+//         &user.IsVerified,
+//     ); err != nil {
+//         return nil, 0, err
+//     }
+
+//     user.ID = id
+//     user.UpdatedAt = updatedAt
+//     user.DeletedAt = deletedAt
+
+//     users = append(users, user)
+// }
+
+//     if err := rows.Err(); err != nil {
+//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+//     }
+
+//     return users, totalUsers, nil
+// }
+
+func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
 	const op = "UserRepository.GetUserById"
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
@@ -183,7 +295,7 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 
 // Remember to check if business name already exists
 
-func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *models.User) error {
+func (repo *UserRepository) UpdateUser(ctx context.Context, id pgtype.UUID, user *models.User) error {
 	const op = "UserRepository.UpdateUser"
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
@@ -228,7 +340,7 @@ func (repo *UserRepository) UpdateUser(ctx context.Context, id uuid.UUID, user *
 	return nil
 }
 
-func (repo *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
+func (repo *UserRepository) DeleteUser(ctx context.Context, id pgtype.UUID) error {
 	const op = "UserRepository.DeleteUser"
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
