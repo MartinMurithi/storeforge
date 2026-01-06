@@ -15,12 +15,15 @@ var (
 	ErrPasswordRequired     = errors.New("password is required")
 	ErrBusinessTypeRequired = errors.New("business type is required")
 	ErrBusinessNameRequired = errors.New("business name is required")
+	ErrIdIsRequired         = errors.New("id is required")
 )
 
 // Format/validation errors
 var (
 	ErrInvalidEmailFormat = errors.New("invalid email format")
 	ErrInvalidPhoneNumber = errors.New("invalid phone number")
+	ErrInvalidUUIDFormat  = errors.New("invalid UUID format")
+	ErrInvalidUserIdFormat = errors.New("invalid user id format")
 )
 
 // Business rule errors
@@ -41,6 +44,6 @@ var (
 
 // Pagination errors
 var (
-	ErrInvalidPageNumber = errors.New("invalid page")
+	ErrInvalidPageNumber  = errors.New("invalid page")
 	ErrInvalidLimitNumber = errors.New("invalid limit")
 )

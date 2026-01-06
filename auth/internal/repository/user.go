@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
+
 	// "log"
 	"time"
 
@@ -12,8 +14,8 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
 	"github.com/MartinMurithi/storeforge/auth/internal/models"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type UserRepository struct {
@@ -130,19 +132,20 @@ func (repo *UserRepository) GetAllUsers(
     return users, totalUsers, nil
 }
 
-
 func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
 	const op = "UserRepository.GetUserById"
+
+	log.Printf("[REPO]: user id %v", id.Valid)
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
 	user := &models.User{}
 
-	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, is_verified FROM users
+	query := `SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified FROM users
 	WHERE id = $1`
 
-	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.IsVerified)
+	err := repo.DB.QueryRow(ctx, query, id).Scan(&user.ID, &user.FullName, &user.Email, &user.Phone, &user.BusinessType, &user.BusinessName, &user.CreatedAt, &user.UpdatedAt, &user.DeletedAt, &user.IsVerified)
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {

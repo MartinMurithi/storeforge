@@ -137,3 +137,34 @@ func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, response)
 
 }
+
+func (handler *UserHandler) FetchUserById(c *gin.Context) {
+
+	id, err := dto.GetUserId(c)
+
+	log.Printf("[HANDLER]: user id %v", id.Valid)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "id not found in context")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user id format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+	}
+
+	user, err := handler.UserService.GetUserById(c.Request.Context(), id)
+
+	if err != nil {
+		log.Printf("[FetchUser] failed to fetch user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	response := mapper.ToFetchUserResponse(user)
+
+	httpx.JSON(c, http.StatusOK, response)
+
+}

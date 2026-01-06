@@ -23,9 +23,9 @@ func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler, authMiddleware gi
 	protected := v1.Group("/auth")
 	protected.Use(authMiddleware)
 	{
-	    protected.GET("/users", h.FetchAllUsers)        // admin-only in handler logic
-	//     protected.GET("/:id", h.GetUserById)     // self or admin
-	//     protected.PUT("/:id", h.UpdateUser)      // self or admin
-	//     protected.DELETE("/:id", h.DeleteUser)  // admin-only
+		protected.GET("/users", h.FetchAllUsers) // admin-only in handler logic
+		protected.GET("/user", h.FetchUserById)   // self or admin
+		//     protected.PUT("/:id", h.UpdateUser)      // self or admin
+		//     protected.DELETE("/:id", h.DeleteUser)  // admin-only
 	}
 }

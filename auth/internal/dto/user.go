@@ -68,3 +68,7 @@ type FetchAllUsersResponseDTO struct{
 	Users []UserResponseDTO `json:"users"`
 	Pagination PaginationMeta `json:"pagination"`
 }
+
+type FetchUserResponseDTO struct{
+	User *UserResponseDTO `json:"user"`
+}

@@ -86,3 +86,21 @@ func ToFetchAllUsersResponse(users []*models.User, meta dto.PaginationMeta) *dto
 		Pagination: meta,
 	}
 }
+
+func ToFetchUserResponse(user *models.User) *dto.FetchUserResponseDTO {
+	if user == nil {
+		return nil
+	}
+	return &dto.FetchUserResponseDTO{
+		User: &dto.UserResponseDTO{
+			Id:           user.ID,
+			FullName:     user.FullName,
+			Email:        user.Email,
+			Phone:        user.Phone,
+			BusinessType: user.BusinessType,
+			BusinessName: user.BusinessName,
+			CreatedAt:    user.CreatedAt,
+			IsVerified:   user.IsVerified,
+		},
+	}
+}

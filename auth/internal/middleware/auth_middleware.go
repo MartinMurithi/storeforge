@@ -53,8 +53,8 @@ func AuthMiddleware(jwtMaker *token.JWTMaker, pubKey *rsa.PublicKey, expectedAud
 			return
 		}
 
-		c.Set("userID", claims.ID)
-		c.Set("tenantID", claims.TenantId)
+		c.Set("userId", claims.Id)
+		c.Set("tenantId", claims.TenantId)
 		c.Set("role", claims.Role)
 		c.Set("email", claims.Email)
 		c.Set("realm", fmt.Sprintf("%s/%s", serviceName, claims.TenantId.String()))

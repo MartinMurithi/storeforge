@@ -14,6 +14,7 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
 	"github.com/MartinMurithi/storeforge/auth/internal/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -151,7 +152,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 1*time.Hour)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Minute)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)
@@ -161,29 +162,42 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	return existingUser, token, nil
 }
 
-
 func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*models.User, dto.PaginationMeta, error) {
-    const op = "UserService.FetchAllUsers"
+	const op = "UserService.FetchAllUsers"
 
-    users, total, err := srv.repo.GetAllUsers(ctx, p) 
+	users, total, err := srv.repo.GetAllUsers(ctx, p)
 
-    if err != nil {
-        return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
-    }
+	if err != nil {
+		return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
+	}
 
-    totalPages := 0
-    if total > 0 {
-        totalPages = (total + p.Limit - 1) / p.Limit
-    }
+	totalPages := 0
+	if total > 0 {
+		totalPages = (total + p.Limit - 1) / p.Limit
+	}
 
-    meta := dto.PaginationMeta{
-        Page:       p.Page,
-        Limit:      p.Limit,
-        Total:      total,
-        TotalPages: totalPages,
-        HasNext:    p.Page < totalPages,
-        HasPrev:    p.Page > 1,
-    }
+	meta := dto.PaginationMeta{
+		Page:       p.Page,
+		Limit:      p.Limit,
+		Total:      total,
+		TotalPages: totalPages,
+		HasNext:    p.Page < totalPages,
+		HasPrev:    p.Page > 1,
+	}
 
-    return users, meta, nil
+	return users, meta, nil
+}
+
+func (srv *UserService) GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
+	const op = "UserService.FetchUserById"
+
+	log.Printf("user id %v", id.Valid)
+
+	user, err := srv.repo.GetUserById(ctx, id)
+
+	if err != nil {
+		return nil, fmt.Errorf("%s: error fetching user %w", op, err)
+	}
+
+	return user, nil
 }
