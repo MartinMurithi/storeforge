@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
@@ -152,7 +151,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	// Before issuing JWT, create a tenant first(this will issue role to the user as owner), will revisit this later
 
 	// Generate JWT
-	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 30*time.Minute)
+	token, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 1*time.Hour)
 
 	if err != nil {
 		log.Printf("%s: error creating token %s", op, err)
@@ -162,24 +161,29 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	return existingUser, token, nil
 }
 
+
 func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*models.User, dto.PaginationMeta, error) {
-	const op = "UserService.FetchAllUsers"
-	users, total, err := srv.repo.GetAllUsers(ctx, dto.Pagination{Page: p.Limit, Limit: p.Limit})
+    const op = "UserService.FetchAllUsers"
 
-	if err != nil {
-		return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
-	}
+    users, total, err := srv.repo.GetAllUsers(ctx, p) 
 
-	totalPages := int(math.Ceil(float64(total) / float64(p.Limit)))
+    if err != nil {
+        return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
+    }
 
-	meta := dto.PaginationMeta{
-		Page:       p.Page,
-		Limit:      p.Limit,
-		Total:      total,
-		TotalPages: totalPages,
-		HasNext:    p.Page < totalPages,
-		HasPrev:    p.Page > 1,
-	}
+    totalPages := 0
+    if total > 0 {
+        totalPages = (total + p.Limit - 1) / p.Limit
+    }
 
-	return users, meta, nil
+    meta := dto.PaginationMeta{
+        Page:       p.Page,
+        Limit:      p.Limit,
+        Total:      total,
+        TotalPages: totalPages,
+        HasNext:    p.Page < totalPages,
+        HasPrev:    p.Page > 1,
+    }
+
+    return users, meta, nil
 }

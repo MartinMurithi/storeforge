@@ -69,185 +69,67 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) e
 	return nil
 }
 
-
 func (repo *UserRepository) GetAllUsers(
-	ctx context.Context,
-	p dto.Pagination,
+    ctx context.Context,
+    p dto.Pagination,
 ) ([]*models.User, int, error) {
 
-	const op = "UserRepository.GetAllUsers"
+    const op = "UserRepository.GetAllUsers"
 
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
+    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+    defer cancel()
 
-	// --- total count ---
-	var totalUsers int
-	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
-		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-	}
+    // --- Total Users Count ---
+    var totalUsers int
+    if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
+        return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+    }
 
-	const maxLimit = 15
-	if p.Page < 1 {
-		p.Page = 1
-	}
-	if p.Limit <= 0 || p.Limit > maxLimit {
-		p.Limit = maxLimit
-	}
+    const maxLimit = 15
+    if p.Page < 1 { p.Page = 1 }
+    if p.Limit <= 0 || p.Limit > maxLimit { p.Limit = maxLimit }
 
-	offset := (p.Page - 1) * p.Limit
+    offset := (p.Page - 1) * p.Limit
 
-	query := `
-	SELECT
-		id,
-		full_name,
-		email,
-		phone,
-		business_type,
-		business_name,
-		created_at,
-		updated_at,
-		deleted_at,
-		is_verified
-	FROM users
-	ORDER BY created_at DESC
-	LIMIT $1 OFFSET $2
-	`
+    query := `
+    SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
+    FROM users
+    ORDER BY created_at DESC
+    LIMIT $1 OFFSET $2`
 
-	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
-	if err != nil {
-		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-	}
-	defer rows.Close()
+    rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
+    if err != nil {
+        return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+    }
+    defer rows.Close()
 
-	var users []*models.User
+    var users []*models.User
+    for rows.Next() {
+        user := &models.User{}
 
-	for rows.Next() {
-		user := &models.User{}
+        err := rows.Scan(
+            &user.ID, &user.FullName, &user.Email, &user.Phone,
+            &user.BusinessType, &user.BusinessName, &user.CreatedAt,
+            &user.UpdatedAt, &user.DeletedAt, &user.IsVerified,
+        )
+        
+        if err != nil {
+            fmt.Printf("[%s] SCAN ERROR: %v\n", op, err)
+            return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+        }
 
-		var (
-			id        pgtype.UUID
-			updatedAt pgtype.Timestamp
-			deletedAt pgtype.Timestamp
-		)
+        users = append(users, user)
+    }
 
-		if err := rows.Scan(
-			&id,
-			&user.FullName,
-			&user.Email,
-			&user.Phone,
-			&user.BusinessType,
-			&user.BusinessName,
-			&user.CreatedAt,
-			&updatedAt,
-			&deletedAt,
-			&user.IsVerified,
-		); err != nil {
-			return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-		}
+    if err := rows.Err(); err != nil {
+        fmt.Printf("[%s] ROWS ERROR: %v\n", op, err)
+        return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
+    }
 
-		// assign decoded values
-		user.ID = id
-
-		if updatedAt.Valid {
-			user.UpdatedAt = &updatedAt.Time
-		}
-		if deletedAt.Valid {
-			user.DeletedAt = &deletedAt.Time
-		}
-
-		users = append(users, user)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-	}
-
-	return users, totalUsers, nil
+    fmt.Printf("[%s] Returning %d users\n", op, len(users))
+    return users, totalUsers, nil
 }
 
-
-
-// func (repo *UserRepository) GetAllUsers(
-//     ctx context.Context,
-//     p dto.Pagination,
-// ) ([]*models.User, int, error) {
-
-//     const op = "UserRepository.GetAllUsers"
-
-//     ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-//     defer cancel()
-
-//     var totalUsers int
-//     if err := repo.DB.
-//         QueryRow(ctx, `SELECT COUNT(*) FROM users`).
-//         Scan(&totalUsers); err != nil {
-//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-//     }
-
-//     const maxLimit = 15
-//     if p.Page < 1 {
-//         p.Page = 1
-//     }
-//     if p.Limit <= 0 || p.Limit > maxLimit {
-//         p.Limit = maxLimit
-//     }
-
-//     offset := (p.Page - 1) * p.Limit
-
-//     query := `
-//         SELECT id, full_name, email, phone,
-//                business_type, business_name,
-//                created_at, updated_at, deleted_at, is_verified
-//         FROM users
-//         ORDER BY created_at DESC
-//         LIMIT $1 OFFSET $2
-//     `
-
-//     rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
-//     if err != nil {
-//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-//     }
-//     defer rows.Close()
-
-//     log.Printf("field descriptions: %v", rows.FieldDescriptions())
-
-//     var users []*models.User
-// log.Printf("ctx err before rows.Next(): %v", ctx.Err())
-
-// for rows.Next() {
-//     user := &models.User{}
-
-//     var id pgtype.UUID
-//     var updatedAt, deletedAt *time.Time
-
-//     if err := rows.Scan(
-//         &id,
-//         &user.FullName,
-//         &user.Email,
-//         &user.Phone,
-//         &user.BusinessType,
-//         &user.BusinessName,
-//         &user.CreatedAt,
-//         &updatedAt,
-//         &deletedAt,
-//         &user.IsVerified,
-//     ); err != nil {
-//         return nil, 0, err
-//     }
-
-//     user.ID = id
-//     user.UpdatedAt = updatedAt
-//     user.DeletedAt = deletedAt
-
-//     users = append(users, user)
-// }
-
-//     if err := rows.Err(); err != nil {
-//         return nil, 0, db.WrapDbError(ctx, op, 5*time.Second, err)
-//     }
-
-//     return users, totalUsers, nil
-// }
 
 func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
 	const op = "UserRepository.GetUserById"
