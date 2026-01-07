@@ -3,65 +3,76 @@ package dto
 import (
 	"errors"
 	"fmt"
-	// "log"
 
+	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// func GetUserId(c *gin.Context) (pgtype.UUID, error) {
-
-// 	var id pgtype.UUID
-
-// 	val, exists := c.Get("userId")
-
-// 	log.Printf("user id from parser %v", val)
-
-// 	if !exists {
-// 		return pgtype.UUID{}, errors.New("id not found")
-// 	}
-
-// 	// Use pgtype's internal Scan method to parse the string
-// 	// This handles the conversion from "550e8400-e2..." to the byte array
-
-// 	err := id.Scan(val)
-
-// 	if err != nil {
-// 		return pgtype.UUID{}, errors.New("invalid user id type")
-// 	}
-
-// 	return id, nil
-// }
-
+// GetUserID retrieves the logged-in user's ID from the Gin context
 func GetUserId(c *gin.Context) (pgtype.UUID, error) {
     val, exists := c.Get("userId")
-
     if !exists {
-        return pgtype.UUID{}, errors.New("id not found in context")
+        return pgtype.UUID{}, errors.New("user ID not found in context")
     }
 
-    // 1. Cast the context value to a string
-    strID, ok := val.(string)
-	
-    if !ok {
-        // If it's already a pgtype.UUID (unlikely but possible), return it
-        if uuid, ok := val.(pgtype.UUID); ok {
-            return uuid, nil
+    switch v := val.(type) {
+    case string:
+        var id pgtype.UUID
+        if err := id.Scan(v); err != nil {
+            return pgtype.UUID{}, fmt.Errorf("failed to parse UUID string: %w", err)
         }
-        return pgtype.UUID{}, errors.New("user id in context is not a string")
+        if !id.Valid {
+            return pgtype.UUID{}, errors.New("parsed UUID is invalid")
+        }
+        return id, nil
+
+    case pgtype.UUID:
+        if !v.Valid {
+            return pgtype.UUID{}, errors.New("UUID in context is invalid")
+        }
+        return v, nil
+
+    default:
+        return pgtype.UUID{}, errors.New("user ID in context has invalid type")
+    }
+}
+
+
+// GetUserParamID parses the "id" URL parameter into a pgtype.UUID
+func GetUserParamId(c *gin.Context) (pgtype.UUID, error) {
+    strID := c.Param("id")
+
+    if strID == "" {
+        return pgtype.UUID{}, errors.New("id parameter is required")
     }
 
     var id pgtype.UUID
 
-    err := id.Scan(strID) 
-	
-    if err != nil {
+    if err := id.Scan(strID); err != nil {
         return pgtype.UUID{}, fmt.Errorf("failed to parse uuid string: %w", err)
     }
 
     if !id.Valid {
-        return pgtype.UUID{}, errors.New("parsed uuid is marked as invalid")
+        return pgtype.UUID{}, errors.New("parsed uuid is invalid")
     }
 
     return id, nil
+}
+
+
+func GetUserRole(c *gin.Context) (string, error) {
+	val, exists := c.Get("role")
+
+	if !exists {
+		return "", apperrors.ErrRoleIsRequired
+	}
+
+	role, ok := val.(string)
+
+	if !ok {
+		return "", errors.New("role has invalid type")
+	}
+
+	return role, nil
 }

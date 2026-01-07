@@ -219,3 +219,73 @@ func (h *UserHandler) PatchMe(c *gin.Context) {
 
 	httpx.JSON(c, http.StatusOK, response)
 }
+
+func (h *UserHandler) DeleteMe(c *gin.Context) {
+	// Get logged-in user ID from token
+	userID, err := dto.GetUserId(c)
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "user ID not found")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user ID format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	// Call service to delete (soft delete)
+	if err := h.UserService.SoftDeleteUser(c.Request.Context(), userID); err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[DeleteMe] failed to delete user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	httpx.JSON(c, http.StatusNoContent, nil)
+}
+
+func (h *UserHandler) DeleteUserByID(c *gin.Context) {
+	// Get target user ID from URL param
+	targetID, err := dto.GetUserParamId(c)
+
+	if err != nil {
+		httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID", "invalid user id")
+		return
+	}
+
+	// Get logged-in user role from token
+	role, err := dto.GetUserRole(c)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrRoleIsRequired):
+			httpx.Error(c, http.StatusUnauthorized, "ROLE_NOT_FOUND", "role is required")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	// Only allow admin or owner
+	if role != "admin" && role != "owner" {
+		httpx.Error(c, http.StatusForbidden, "FORBIDDEN", "you are not allowed to delete this user")
+		return
+	}
+
+	if err := h.UserService.SoftDeleteUser(c.Request.Context(), targetID); err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[DeleteUserByID] failed to delete user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	httpx.JSON(c, http.StatusNoContent, nil)
+}

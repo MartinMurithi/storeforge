@@ -8,6 +8,7 @@ import (
 
 	"time"
 
+	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
 	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib/db"
@@ -219,7 +220,7 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 	if err != nil {
 
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("[%s]: %w", op, err)
+			return nil, apperrors.ErrUserNotFound
 		}
 		log.Printf("[%s]: an error occurred when updating user %s", op, err)
 		return nil, db.WrapDbError(ctx, op, 3*time.Second, err)
@@ -228,24 +229,33 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 	return &user, nil
 }
 
+// Soft Delete, these updates the deleted_at column
 func (repo *UserRepository) DeleteUser(ctx context.Context, id pgtype.UUID) error {
-	const op = "UserRepository.DeleteUser"
+	const op = "UserRepository.SoftDeleteUser"
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	query := `DELETE FROM users WHERE id=$1`
+	query := `
+		UPDATE users
+		SET
+			deleted_at = NOW()
+		WHERE id = $3
+	`
 
-	result, err := repo.DB.Exec(ctx, query, id)
+	err := repo.DB.QueryRow(
+		ctx,
+		query,
+		id,
+	).Scan(id)
 
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return apperrors.ErrUserNotFound
+		}
+		log.Printf("[%s]: an error occurred when soft deleting user user %s", op, err)
 		return db.WrapDbError(ctx, op, 3*time.Second, err)
 	}
 
-	rowsAffected := result.RowsAffected()
-
-	if rowsAffected == 0 {
-		return fmt.Errorf("%s: user not found id%s", op, id)
-	}
 	return nil
 }

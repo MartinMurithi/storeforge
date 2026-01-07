@@ -220,12 +220,29 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 
 	updatedUser, err := srv.repo.PatchUser(ctx, input.Id, patch)
 
-	if err != nil{
-		if errors.Is(err, apperrors.ErrUserNotFound){
-			return nil, fmt.Errorf("[%s]: %w",op, apperrors.ErrUserNotFound)
+	if err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			return nil, fmt.Errorf("[%s]: %w", op, apperrors.ErrUserNotFound)
 		}
 		return nil, fmt.Errorf("[%s]: [%w]", op, err)
 	}
 
 	return updatedUser, nil
+}
+
+func (srv *UserService) SoftDeleteUser(ctx context.Context, id pgtype.UUID) error {
+	const op = "UserService.SoftDeleteUser"
+
+	log.Printf("user id %v", id.Valid)
+
+	err := srv.repo.DeleteUser(ctx, id)
+
+	if err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			return fmt.Errorf("[%s]: %w", op, apperrors.ErrUserNotFound)
+		}
+		return fmt.Errorf("[%s]: [%w]", op, err)
+	}
+
+	return nil
 }
