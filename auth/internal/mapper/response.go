@@ -100,6 +100,7 @@ func ToFetchUserResponse(user *models.User) *dto.FetchUserResponseDTO {
 			BusinessType: user.BusinessType,
 			BusinessName: user.BusinessName,
 			CreatedAt:    user.CreatedAt,
+			UpdatedAt:    user.UpdatedAt,
 			IsVerified:   user.IsVerified,
 		},
 	}

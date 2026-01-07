@@ -138,7 +138,7 @@ func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 
 }
 
-func (handler *UserHandler) FetchUserById(c *gin.Context) {
+func (handler *UserHandler) GetCurrentUser(c *gin.Context) {
 
 	id, err := dto.GetUserId(c)
 
@@ -155,7 +155,7 @@ func (handler *UserHandler) FetchUserById(c *gin.Context) {
 		}
 	}
 
-	user, err := handler.UserService.GetUserById(c.Request.Context(), id)
+	user, err := handler.UserService.GetCurrentUserById(c.Request.Context(), id)
 
 	if err != nil {
 		log.Printf("[FetchUser] failed to fetch user: %v", err)
@@ -167,4 +167,55 @@ func (handler *UserHandler) FetchUserById(c *gin.Context) {
 
 	httpx.JSON(c, http.StatusOK, response)
 
+}
+
+func (h *UserHandler) PatchMe(c *gin.Context) {
+	var req dto.PatchUserRequestDTO
+
+	err := c.ShouldBindJSON(&req)
+
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[PatchMe] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
+			return
+		}
+	}
+
+	id, err := dto.GetUserId(c)
+
+	log.Printf("[HANDLER]: user id %v", id.Valid)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "id not found")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user id format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	input := mapper.ToPatchUserRequest(id, &req)
+
+	updatedUser, err := h.UserService.UpdateCurrentUser(c.Request.Context(), input)
+
+	if err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[PatchMe] failed to update user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	response := mapper.ToFetchUserResponse(updatedUser)
+
+	httpx.JSON(c, http.StatusOK, response)
 }

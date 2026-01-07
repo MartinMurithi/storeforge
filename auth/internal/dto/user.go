@@ -7,19 +7,18 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
 
 	"github.com/jackc/pgx/v5/pgtype"
-
 )
 
 type UserResponseDTO struct {
-	Id           pgtype.UUID  `json:"id"`
-	FullName     string     `json:"fullName"`
-	Email        string     `json:"email"`
-	Phone        string     `json:"phone"`
-	BusinessType string     `json:"businessType"`
-	BusinessName string     `json:"businessName"`
-	CreatedAt    time.Time  `json:"createdAt"`
-	UpdatedAt    *time.Time `json:"updatedAt"`
-	IsVerified   bool       `json:"isVerified"`
+	Id           pgtype.UUID `json:"id"`
+	FullName     string      `json:"fullName"`
+	Email        string      `json:"email"`
+	Phone        string      `json:"phone"`
+	BusinessType string      `json:"businessType"`
+	BusinessName string      `json:"businessName"`
+	CreatedAt    time.Time   `json:"createdAt"`
+	UpdatedAt    *time.Time  `json:"updatedAt"`
+	IsVerified   bool        `json:"isVerified"`
 }
 
 type RegisterUserRequestDTO struct {
@@ -64,11 +63,16 @@ type LoginUserResponseDTO struct {
 	Token *token.Token     `json:"token"`
 }
 
-type FetchAllUsersResponseDTO struct{
-	Users []UserResponseDTO `json:"users"`
-	Pagination PaginationMeta `json:"pagination"`
+type FetchAllUsersResponseDTO struct {
+	Users      []UserResponseDTO `json:"users"`
+	Pagination PaginationMeta    `json:"pagination"`
 }
 
-type FetchUserResponseDTO struct{
+type FetchUserResponseDTO struct {
 	User *UserResponseDTO `json:"user"`
+}
+
+type PatchUserRequestDTO struct {
+	BusinessName *string `json:"businessName"`
+	BusinessType *string `json:"businessType"`
 }

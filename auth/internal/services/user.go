@@ -37,6 +37,12 @@ func NewUserService(repo *repository.UserRepository, jwtMaker *token.JWTMaker) *
 	}
 }
 
+type PatchUserInput struct {
+	Id           pgtype.UUID
+	BusinessName *string
+	BusinessType *string
+}
+
 func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*models.User, error) {
 	const op = "UserService.RegisterUser"
 
@@ -188,7 +194,7 @@ func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]
 	return users, meta, nil
 }
 
-func (srv *UserService) GetUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
+func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
 	const op = "UserService.FetchUserById"
 
 	log.Printf("user id %v", id.Valid)
@@ -200,4 +206,26 @@ func (srv *UserService) GetUserById(ctx context.Context, id pgtype.UUID) (*model
 	}
 
 	return user, nil
+}
+
+func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserInput) (*models.User, error) {
+	const op = "UserService.UpdateCurrentUser"
+
+	log.Printf("user id %v", input.Id.Valid)
+
+	patch := &repository.UpdateUserInput{
+		BusinessName: input.BusinessName,
+		BusinessType: input.BusinessType,
+	}
+
+	updatedUser, err := srv.repo.PatchUser(ctx, input.Id, patch)
+
+	if err != nil{
+		if errors.Is(err, apperrors.ErrUserNotFound){
+			return nil, fmt.Errorf("[%s]: %w",op, apperrors.ErrUserNotFound)
+		}
+		return nil, fmt.Errorf("[%s]: [%w]", op, err)
+	}
+
+	return updatedUser, nil
 }
