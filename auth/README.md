@@ -268,3 +268,11 @@ Identity → Verification → Ownership → Authorization
 ```
 
 Only after ownership exists does **power** (roles + JWT) get issued.
+
+## TO-DO
+1. FIX FOLDER STRUCTURE
+2. IMPLEMENT EMAIL VERIFICATION
+3. IMPLEMENT REFRESH TOKEN FLOW
+4. LOGOUT FLOW
+5. PASSWORD RESET FLOW
+6. PBAC FLOW
