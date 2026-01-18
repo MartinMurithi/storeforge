@@ -276,3 +276,66 @@ Only after ownership exists does **power** (roles + JWT) get issued.
 4. LOGOUT FLOW
 5. PASSWORD RESET FLOW
 6. PBAC FLOW
+
+```
+user-management/
+│
+├─ cmd/                          # Entry point
+│   └─ server/
+│       └─ main.go               # Starts gRPC & HTTP server
+│
+├─ config/                       # Configuration files
+│   └─ config.go
+│
+├─ bootstrap/                     # App initialization
+│   └─ bootstrap.go
+│
+├─ proto/                         # gRPC protobuf definitions
+│   └─ user.proto
+│
+├─ internal/
+│   ├─ domain/
+│   │   ├─ user.go                # Core User entity
+│   │   ├─ role.go                # Roles & policies
+│   │   └─ session.go             # Refresh token entity
+│   │
+│   ├─ repository/
+│   │   ├─ user_repository.go     # DB operations for users
+│   │   ├─ session_repository.go  # DB operations for refresh tokens
+│   │   └─ role_repository.go     # Role storage / policies
+│   │
+│   ├─ service/
+│   │   ├─ auth_service.go        # Registration, login, OTP verification
+│   │   ├─ session_service.go     # JWT + refresh token logic
+│   │   ├─ password_service.go    # Reset, change password
+│   │   └─ pbac_service.go        # Policy evaluation & enforcement
+│   │
+│   ├─ handlers/                  # HTTP / gRPC endpoints
+│   │   ├─ auth_handler.go
+│   │   ├─ session_handler.go
+│   │   └─ password_handler.go
+│   │
+│   ├─ dto/                       # Input/Output structures
+│   │   ├─ auth_dto.go
+│   │   ├─ session_dto.go
+│   │   └─ password_dto.go
+│   │
+│   ├─ mappers/                   # Map DTOs to domain entities and vice versa
+│   │   └─ user_mapper.go
+│   │
+│   ├─ errors/                    # Custom error types
+│   │   ├─ app_errors.go
+│   │   └─ db_errors.go
+│   │
+│   └─ utils/                     # Helper functions
+│       ├─ jwt_utils.go
+│       ├─ otp_utils.go
+│       └─ hash_utils.go
+│
+├─ database/
+│   ├─ migrations/
+│   ├─ config/
+│   └─ seeding/
+│
+└─ go.mod
+```
