@@ -10,7 +10,7 @@ import (
 	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/auth/internal/dto"
 	"github.com/MartinMurithi/storeforge/auth/internal/lib"
-	"github.com/MartinMurithi/storeforge/auth/internal/models"
+	"github.com/MartinMurithi/storeforge/auth/internal/domain"
 	"github.com/MartinMurithi/storeforge/auth/internal/repository"
 	"github.com/MartinMurithi/storeforge/auth/internal/token"
 	"github.com/MartinMurithi/storeforge/auth/internal/utils"
