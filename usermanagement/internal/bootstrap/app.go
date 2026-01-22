@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/database"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
@@ -20,7 +20,7 @@ import (
 )
 
 type App struct {
-	DB       *database.Pool
+	DB       *postgres.Pool
 	Repo     *repository.UserRepository
 	Service  *application.UserService
 	Handler  *handler.UserHandler
@@ -76,17 +76,17 @@ func Init() (*App, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = database.InitDB(ctx)
+	err = postgres.InitDB(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to init db: %s", err)
 	}
 
-	db := database.Get()
+	db := postgres.Get()
 
 	// --------- RUN DB MIGRATIONS ---------
 
-	err = database.RunMigrations(os.Getenv("DATABASE_URL"))
+	err = postgres.RunMigrations(os.Getenv("DATABASE_URL"))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to run migrations %w", err)

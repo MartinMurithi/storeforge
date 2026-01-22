@@ -16,20 +16,20 @@ import (
 )
 
 type UserRepository struct {
-	DB *database.Pool
+	DB database.DB
 }
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *entity.User) error
 	GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
-	GetAllUsers(ctx context.Context, page, limit int) ([]*entity.User, error)
-	UpdateUser(ctx context.Context, id pgtype.UUID, user *entity.User) error
+	GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error)
+	PatchUser(ctx context.Context, id pgtype.UUID, input *UpdateUserInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 }
 
-func NewUserRepository(pool *database.Pool) *UserRepository {
-	return &UserRepository{DB: pool}
+func NewUserRepository(db database.DB) IUserRepository {
+	return &UserRepository{DB: db}
 }
 
 type UpdateUserInput struct {
@@ -75,68 +75,6 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) e
 	}
 
 	return nil
-}
-
-func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error) {
-	const op = "UserRepository.GetAllUsers"
-
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	// --- Total Users Count ---
-	var totalUsers int
-	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
-	}
-
-	const maxLimit = 15
-	if p.Page < 1 {
-		p.Page = 1
-	}
-	if p.Limit <= 0 || p.Limit > maxLimit {
-		p.Limit = maxLimit
-	}
-
-	offset := (p.Page - 1) * p.Limit
-
-	query := `
-		SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
-		FROM users
-		ORDER BY created_at DESC
-		LIMIT $1 OFFSET $2
-	`
-
-	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
-	if err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
-	}
-	defer rows.Close()
-
-	users := make([]*entity.User, 0, p.Limit)
-	for rows.Next() {
-		user := &entity.User{}
-		if err := rows.Scan(
-			&user.ID,
-			&user.FullName,
-			&user.Email,
-			&user.Phone,
-			&user.BusinessType,
-			&user.BusinessName,
-			&user.CreatedAt,
-			&user.UpdatedAt,
-			&user.DeletedAt,
-			&user.IsVerified,
-		); err != nil {
-			return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
-		}
-		users = append(users, user)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
-	}
-
-	return users, totalUsers, nil
 }
 
 func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
@@ -213,6 +151,68 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 	}
 
 	return user, nil
+}
+
+func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error) {
+	const op = "UserRepository.GetAllUsers"
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// --- Total Users Count ---
+	var totalUsers int
+	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
+		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+	}
+
+	const maxLimit = 15
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	if p.Limit <= 0 || p.Limit > maxLimit {
+		p.Limit = maxLimit
+	}
+
+	offset := (p.Page - 1) * p.Limit
+
+	query := `
+		SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
+		FROM users
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2
+	`
+
+	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
+	if err != nil {
+		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+	}
+	defer rows.Close()
+
+	users := make([]*entity.User, 0, p.Limit)
+	for rows.Next() {
+		user := &entity.User{}
+		if err := rows.Scan(
+			&user.ID,
+			&user.FullName,
+			&user.Email,
+			&user.Phone,
+			&user.BusinessType,
+			&user.BusinessName,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&user.DeletedAt,
+			&user.IsVerified,
+		); err != nil {
+			return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+	}
+
+	return users, totalUsers, nil
 }
 
 // Remember to check if business name already exists
