@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )

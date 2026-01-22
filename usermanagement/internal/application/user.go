@@ -1,4 +1,4 @@
-package services
+package application
 
 import (
 	"context"
@@ -7,15 +7,15 @@ import (
 	"log"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
-	"github.com/MartinMurithi/storeforge/auth/internal/dto"
-	"github.com/MartinMurithi/storeforge/auth/internal/lib"
-	"github.com/MartinMurithi/storeforge/auth/internal/domain"
-	"github.com/MartinMurithi/storeforge/auth/internal/repository"
-	"github.com/MartinMurithi/storeforge/auth/internal/token"
-	"github.com/MartinMurithi/storeforge/auth/internal/utils"
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 
+
+	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -43,7 +43,7 @@ type PatchUserInput struct {
 	BusinessType *string
 }
 
-func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*models.User, error) {
+func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*entity.User, error) {
 	const op = "UserService.RegisterUser"
 
 	// Normalize user input
@@ -69,12 +69,12 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		}
 	}
 
-	if err := lib.ValidateEmail(input.Email); err != nil {
+	if err := utils.ValidateEmail(input.Email); err != nil {
 		log.Printf("[%s] error validating email '%s': ", op, input.Email)
 		return nil, err
 	}
 
-	_, err := lib.ValidatePhone(input.Phone)
+	_, err := utils.ValidatePhone(input.Phone)
 
 	if err != nil {
 		log.Printf("[%s] error validating phone number '%s': ", op, input.Phone)
@@ -97,7 +97,7 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		return nil, fmt.Errorf("internal server error")
 	}
 
-	newUser := &models.User{
+	newUser := &entity.User{
 		FullName:     input.FullName,
 		Email:        input.Email,
 		Phone:        input.Phone,
@@ -117,7 +117,7 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	return newUser, nil
 }
 
-func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*models.User, *token.Token, error) {
+func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*entity.User, *token.Token, error) {
 	const op = "UserService.LoginUser"
 
 	input.Normalize()
@@ -126,7 +126,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		return nil, nil, fmt.Errorf("%s:both email and password are required ", op)
 	}
 
-	if err := lib.ValidateEmail(input.Email); err != nil {
+	if err := utils.ValidateEmail(input.Email); err != nil {
 		log.Printf("[%s] error validating email '%s': ", op, input.Email)
 		return nil, nil, err
 	}
@@ -168,7 +168,7 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	return existingUser, token, nil
 }
 
-func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*models.User, dto.PaginationMeta, error) {
+func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, dto.PaginationMeta, error) {
 	const op = "UserService.FetchAllUsers"
 
 	users, total, err := srv.repo.GetAllUsers(ctx, p)
@@ -194,7 +194,7 @@ func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]
 	return users, meta, nil
 }
 
-func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) (*models.User, error) {
+func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
 	const op = "UserService.FetchUserById"
 
 	log.Printf("user id %v", id.Valid)
@@ -208,7 +208,7 @@ func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) 
 	return user, nil
 }
 
-func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserInput) (*models.User, error) {
+func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserInput) (*entity.User, error) {
 	const op = "UserService.UpdateCurrentUser"
 
 	log.Printf("user id %v", input.Id.Valid)

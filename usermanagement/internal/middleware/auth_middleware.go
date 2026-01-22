@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,8 +1,7 @@
 package routes
 
 import (
-	"github.com/MartinMurithi/storeforge/auth/internal/handler"
-	// "github.com/MartinMurithi/storeforge/auth/internal/middleware"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
 
 	"github.com/gin-gonic/gin"
 )

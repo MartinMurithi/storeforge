@@ -1,4 +1,4 @@
-package config
+package database
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func InitDB(ctx context.Context) error {
 		return nil
 	}
 
-	pool, err := NewPool(ctx)
+	pool, err := Connect(ctx)
 
 	if err != nil {
 		return err

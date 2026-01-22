@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/bootstrap"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/bootstrap"
 )
 
 func main() {

@@ -1,11 +1,12 @@
-package lib
+package utils
 
 import (
 	"net/mail"
 	"regexp"
 	"strings"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
+	
 )
 
 var e164Regex = regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)

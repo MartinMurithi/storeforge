@@ -1,12 +1,12 @@
 package mapper
 
 import (
-	"github.com/MartinMurithi/storeforge/auth/internal/dto"
-	"github.com/MartinMurithi/storeforge/auth/internal/models"
-	"github.com/MartinMurithi/storeforge/auth/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 )
 
-func ToUserResponse(user *models.User) *dto.UserResponseDTO {
+func ToUserResponse(user *entity.User) *dto.UserResponseDTO {
 	if user == nil {
 		return nil
 	}
@@ -23,7 +23,7 @@ func ToUserResponse(user *models.User) *dto.UserResponseDTO {
 	}
 }
 
-func ToRegisterUserResponse(user *models.User) *dto.RegisterUserResponseDTO {
+func ToRegisterUserResponse(user *entity.User) *dto.RegisterUserResponseDTO {
 	if user == nil {
 		return nil
 	}
@@ -43,7 +43,7 @@ func ToRegisterUserResponse(user *models.User) *dto.RegisterUserResponseDTO {
 
 }
 
-func ToLoginUserResponse(token *token.Token, user *models.User) *dto.LoginUserResponseDTO {
+func ToLoginUserResponse(token *token.Token, user *entity.User) *dto.LoginUserResponseDTO {
 	if user == nil {
 		return nil
 	}
@@ -63,7 +63,7 @@ func ToLoginUserResponse(token *token.Token, user *models.User) *dto.LoginUserRe
 	}
 }
 
-func ToFetchAllUsersResponse(users []*models.User, meta dto.PaginationMeta) *dto.FetchAllUsersResponseDTO {
+func ToFetchAllUsersResponse(users []*entity.User, meta dto.PaginationMeta) *dto.FetchAllUsersResponseDTO {
 
 	usersDTO := make([]dto.UserResponseDTO, 0, len(users))
 
@@ -87,7 +87,7 @@ func ToFetchAllUsersResponse(users []*models.User, meta dto.PaginationMeta) *dto
 	}
 }
 
-func ToFetchUserResponse(user *models.User) *dto.FetchUserResponseDTO {
+func ToFetchUserResponse(user *entity.User) *dto.FetchUserResponseDTO {
 	if user == nil {
 		return nil
 	}

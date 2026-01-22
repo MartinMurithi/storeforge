@@ -10,19 +10,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/database/config"
-	"github.com/MartinMurithi/storeforge/auth/internal/handler"
-	"github.com/MartinMurithi/storeforge/auth/internal/middleware"
-	"github.com/MartinMurithi/storeforge/auth/internal/repository"
-	"github.com/MartinMurithi/storeforge/auth/internal/routes"
-	"github.com/MartinMurithi/storeforge/auth/internal/services"
-	"github.com/MartinMurithi/storeforge/auth/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/database"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/routes"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 )
 
 type App struct {
-	DB       *config.Pool
+	DB       *database.Pool
 	Repo     *repository.UserRepository
-	Service  *services.UserService
+	Service  *application.UserService
 	Handler  *handler.UserHandler
 	Router   *gin.Engine
 	JWTMaker *token.JWTMaker
@@ -76,17 +76,17 @@ func Init() (*App, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = config.InitDB(ctx)
+	err = database.InitDB(ctx)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to init db: %s", err)
 	}
 
-	db := config.Get()
+	db := database.Get()
 
 	// --------- RUN DB MIGRATIONS ---------
 
-	err = config.RunMigrations(os.Getenv("DATABASE_URL"))
+	err = database.RunMigrations(os.Getenv("DATABASE_URL"))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to run migrations %w", err)
@@ -94,7 +94,7 @@ func Init() (*App, error) {
 
 	// --------- DOMAIN ---------
 	repo := repository.NewUserRepository(db)
-	srv := services.NewUserService(repo, jwtMaker)
+	srv := application.NewUserService(repo, jwtMaker)
 	handler := handler.NewUserHandler(srv)
 
 	// -------- ROUTER ---------

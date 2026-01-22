@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgtype"
 )

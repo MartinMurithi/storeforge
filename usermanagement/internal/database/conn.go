@@ -1,4 +1,4 @@
-package config
+package database
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type Pool struct {
 
 var db *Pool
 
-func NewPool(ctx context.Context) (*Pool, error) {
+func Connect(ctx context.Context) (*Pool, error) {
 
 	const maxConnections = 20
 	const minConnections = 4
@@ -78,14 +78,4 @@ func NewPool(ctx context.Context) (*Pool, error) {
 
 	return db, nil
 }
-
-/*
-SEEDING
-REPOSITORY
-SERVICES
-HANDLERS
-UTILS
-ROUTES
-DOCUMENTATION
-*/
 

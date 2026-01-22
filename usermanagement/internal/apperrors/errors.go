@@ -17,6 +17,7 @@ var (
 	ErrBusinessNameRequired = errors.New("business name is required")
 	ErrIdIsRequired         = errors.New("id is required")
 	ErrRoleIsRequired         = errors.New("role is required")
+	ErrInvalidInput         = errors.New("invalid input")
 )
 
 // Format/validation errors

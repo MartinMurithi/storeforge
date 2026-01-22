@@ -6,20 +6,21 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/MartinMurithi/storeforge/auth/internal/apperrors"
-	"github.com/MartinMurithi/storeforge/auth/internal/dto"
-	"github.com/MartinMurithi/storeforge/auth/internal/handler/httpx"
-	"github.com/MartinMurithi/storeforge/auth/internal/mapper"
-	"github.com/MartinMurithi/storeforge/auth/internal/services"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler/httpx"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/mapper"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	UserService *services.UserService
+	UserService *application.UserService
 }
 
-func NewUserHandler(userService *services.UserService) *UserHandler {
+func NewUserHandler(userService *application.UserService) *UserHandler {
 	return &UserHandler{UserService: userService}
 }
 
@@ -108,7 +109,6 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, response)
 
 }
-
 func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 
 	p, err := dto.ParsePagination(c)
@@ -132,11 +132,19 @@ func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 		return
 	}
 
-	response := mapper.ToFetchAllUsersResponse(users, meta)
+	// convert []domain.User (value slice) to []*domain.User expected by mapper
+	var domainUsers []*entity.User
+	for i := range users {
+		u := users[i]
+		domainUsers = append(domainUsers, u)
+	}
+
+	response := mapper.ToFetchAllUsersResponse(domainUsers, meta)
 
 	httpx.JSON(c, http.StatusOK, response)
 
 }
+
 
 func (handler *UserHandler) GetCurrentUser(c *gin.Context) {
 
