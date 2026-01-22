@@ -20,12 +20,12 @@ import (
 )
 
 type UserService struct {
-	repo     *repository.UserRepository
+	repo     repository.IUserRepository
 	jwtMaker *token.JWTMaker
 }
 
 // create a factory function to initialize my service with repo
-func NewUserService(repo *repository.UserRepository, jwtMaker *token.JWTMaker) *UserService {
+func NewUserService(repo repository.IUserRepository, jwtMaker *token.JWTMaker) *UserService {
 
 	if jwtMaker == nil {
 		panic("jwt maker must not be nil")

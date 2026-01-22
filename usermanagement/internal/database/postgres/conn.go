@@ -14,7 +14,7 @@ type Pool struct {
 	*pgxpool.Pool
 }
 
-var db *Pool
+var dbPool *Pool
 
 func Connect(ctx context.Context) (*Pool, error) {
 
@@ -78,4 +78,3 @@ func Connect(ctx context.Context) (*Pool, error) {
 
 	return db, nil
 }
-

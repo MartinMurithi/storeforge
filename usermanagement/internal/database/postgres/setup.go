@@ -17,7 +17,7 @@ func InitDB(ctx context.Context) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	if db != nil {
+	if dbPool != nil {
 		return nil
 	}
 
@@ -27,30 +27,32 @@ func InitDB(ctx context.Context) error {
 		return err
 	}
 
-	db = pool
+	dbPool = pool
 	return nil
 
 }
 
+// Get returns the singleton pool
 func Get() *Pool {
-	return db
+	return dbPool
 }
 
+// Close safely closes the pool
 func Close() {
-	if db != nil && db.Pool != nil {
-		db.Close()
-		db = nil
-		log.Println("Database connection closed!")
+	if dbPool != nil && dbPool.Pool != nil {
+		dbPool.Close()
+		dbPool = nil
+		log.Println("[DATABASE] Connection closed")
 	}
 }
 
-// for testing purpose
+// Reset is only for tests
 func Reset() {
-	db = nil
+	dbPool = nil
 }
 
 func RunMigrations(databaseUrl string) error {
-	m, err := migrate.New("file://internal/database/migrations", databaseUrl)
+	m, err := migrate.New("file://migrations", databaseUrl)
 
 	if err != nil {
 		return fmt.Errorf("migrate init: %w", err)

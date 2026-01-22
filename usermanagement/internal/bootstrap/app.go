@@ -10,18 +10,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/routes"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 )
 
 type App struct {
 	DB       *postgres.Pool
-	Repo     *repository.UserRepository
+	Repo     repository.IUserRepository
 	Service  *application.UserService
 	Handler  *handler.UserHandler
 	Router   *gin.Engine
@@ -82,8 +82,6 @@ func Init() (*App, error) {
 		return nil, fmt.Errorf("failed to init db: %s", err)
 	}
 
-	db := postgres.Get()
-
 	// --------- RUN DB MIGRATIONS ---------
 
 	err = postgres.RunMigrations(os.Getenv("DATABASE_URL"))
@@ -93,10 +91,12 @@ func Init() (*App, error) {
 	}
 
 	// --------- DOMAIN ---------
-	repo := repository.NewUserRepository(db)
+	pool := postgres.Get()                   // *postgres.Pool
+	pgxPool := pool.Pool                     // *pgxpool.Pool
+	db := postgres.NewAdapter(pgxPool)       // database.DB interface
+	repo := repository.NewUserRepository(db) // IUserRepository
 	srv := application.NewUserService(repo, jwtMaker)
 	handler := handler.NewUserHandler(srv)
-
 	// -------- ROUTER ---------
 	gin.SetMode(gin.ReleaseMode)
 
@@ -113,11 +113,11 @@ func Init() (*App, error) {
 	routes.RegisterUserRoutes(router, handler, authMiddleware)
 
 	return &App{
-		DB:       db,
+		DB:       pool,
 		Repo:     repo,
 		Service:  srv,
 		Handler:  handler,
-		Router: router,
+		Router:   router,
 		JWTMaker: jwtMaker,
 	}, err
 }
