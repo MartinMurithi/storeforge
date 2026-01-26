@@ -10,7 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
@@ -20,12 +21,13 @@ import (
 )
 
 type App struct {
-	DB       *postgres.Pool
-	Repo     repository.IUserRepository
-	Service  *application.UserService
-	Handler  *handler.UserHandler
-	Router   *gin.Engine
-	JWTMaker *token.JWTMaker
+	DB          *postgres.Pool
+	Repo        repository.IUserRepository
+	UserService *user.UserService
+	AuthService *auth.AuthService
+	Handler     *handler.UserHandler
+	Router      *gin.Engine
+	JWTMaker    *token.JWTMaker
 }
 
 func Init() (*App, error) {
@@ -95,8 +97,9 @@ func Init() (*App, error) {
 	pgxPool := pool.Pool                     // *pgxpool.Pool
 	db := postgres.NewAdapter(pgxPool)       // database.DB interface
 	repo := repository.NewUserRepository(db) // IUserRepository
-	srv := application.NewUserService(repo, jwtMaker)
-	handler := handler.NewUserHandler(srv)
+	userSrv := user.NewUserService(repo)
+	authSrv := auth.NewAuthService(repo, jwtMaker)
+	handler := handler.NewUserHandler(userSrv, authSrv)
 	// -------- ROUTER ---------
 	gin.SetMode(gin.ReleaseMode)
 
@@ -113,11 +116,12 @@ func Init() (*App, error) {
 	routes.RegisterUserRoutes(router, handler, authMiddleware)
 
 	return &App{
-		DB:       pool,
-		Repo:     repo,
-		Service:  srv,
-		Handler:  handler,
-		Router:   router,
-		JWTMaker: jwtMaker,
+		DB:          pool,
+		Repo:        repo,
+		UserService: userSrv,
+		AuthService: authSrv,
+		Handler:     handler,
+		Router:      router,
+		JWTMaker:    jwtMaker,
 	}, err
 }

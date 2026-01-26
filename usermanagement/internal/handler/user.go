@@ -7,21 +7,26 @@ import (
 	"net/http"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler/httpx"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/mapper"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/application"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler/httpx"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/mapper"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	UserService *application.UserService
+	UserService *user.UserService
+	AuthService *auth.AuthService
 }
 
-func NewUserHandler(userService *application.UserService) *UserHandler {
-	return &UserHandler{UserService: userService}
+func NewUserHandler(userService *user.UserService, authService *auth.AuthService) *UserHandler {
+	return &UserHandler{
+		UserService: userService,
+		AuthService: authService,
+	}
 }
 
 func (handler *UserHandler) RegisterUser(c *gin.Context) {
@@ -41,7 +46,7 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 		}
 	}
 
-	user, err := handler.UserService.RegisterUser(c.Request.Context(), &req)
+	user, err := handler.AuthService.RegisterUser(c.Request.Context(), &req)
 
 	if err != nil {
 		switch {
@@ -57,7 +62,7 @@ func (handler *UserHandler) RegisterUser(c *gin.Context) {
 		case errors.Is(err, apperrors.ErrInvalidPhoneNumber):
 			httpx.Error(c, http.StatusBadRequest, "INVALID_PHONE_NUMBER", "invalid phone number")
 		case errors.Is(err, apperrors.ErrUserAlreadyExists):
-			httpx.Error(c, http.StatusConflict, "USER_ALREADY_EXISTS", "email already registered")
+			httpx.Error(c, http.StatusConflict, "USER_ALREADY_EXISTS", "user already registered")
 		default:
 			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
 		}
@@ -86,7 +91,7 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 		}
 	}
 
-	user, token, err := handler.UserService.LoginUser(c.Request.Context(), &req)
+	user, token, err := handler.AuthService.LoginUser(c.Request.Context(), &req)
 
 	if err != nil {
 		switch {
@@ -144,7 +149,6 @@ func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, response)
 
 }
-
 
 func (handler *UserHandler) GetCurrentUser(c *gin.Context) {
 

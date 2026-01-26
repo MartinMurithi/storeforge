@@ -1,4 +1,4 @@
-package application
+package auth
 
 import (
 	"context"
@@ -8,43 +8,35 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
 
-
-	"github.com/jackc/pgx/v5/pgtype"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserService struct {
+type AuthService struct {
 	repo     repository.IUserRepository
 	jwtMaker *token.JWTMaker
 }
 
 // create a factory function to initialize my service with repo
-func NewUserService(repo repository.IUserRepository, jwtMaker *token.JWTMaker) *UserService {
+func NewAuthService(repo repository.IUserRepository, jwtMaker *token.JWTMaker) *AuthService {
 
 	if jwtMaker == nil {
 		panic("jwt maker must not be nil")
 	}
 
-	return &UserService{
+	return &AuthService{
 		repo:     repo,
 		jwtMaker: jwtMaker,
 	}
 }
 
-type PatchUserInput struct {
-	Id           pgtype.UUID
-	BusinessName *string
-	BusinessType *string
-}
-
-func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*entity.User, error) {
-	const op = "UserService.RegisterUser"
+func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUserRequestDTO) (*entity.User, error) {
+	const op = "AuthService.RegisterUser"
 
 	// Normalize user input
 	input.Normalize()
@@ -81,11 +73,19 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		return nil, err
 	}
 
-	//check if user already exists
+	//check if user already exists by email
 	existingUser, err := srv.repo.GetUserByEmail(ctx, input.Email)
 
 	if existingUser != nil {
 		log.Printf("[%s] user with email %s is already registered ", op, input.Email)
+		return nil, apperrors.ErrUserAlreadyExists
+	}
+
+	//check if phone already exists
+	existingPhone, err := srv.repo.GetUserByPhone(ctx, input.Phone)
+
+	if existingPhone != nil {
+		log.Printf("[%s] user with phone number %s already exists ", op, input.Phone)
 		return nil, apperrors.ErrUserAlreadyExists
 	}
 
@@ -117,8 +117,8 @@ func (srv *UserService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	return newUser, nil
 }
 
-func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*entity.User, *token.Token, error) {
-	const op = "UserService.LoginUser"
+func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*entity.User, *token.Token, error) {
+	const op = "AuthService.LoginUser"
 
 	input.Normalize()
 
@@ -166,83 +166,4 @@ func (srv *UserService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	}
 
 	return existingUser, token, nil
-}
-
-func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, dto.PaginationMeta, error) {
-	const op = "UserService.FetchAllUsers"
-
-	users, total, err := srv.repo.GetAllUsers(ctx, p)
-
-	if err != nil {
-		return nil, dto.PaginationMeta{}, fmt.Errorf("%s: error fetching users %w", op, err)
-	}
-
-	totalPages := 0
-	if total > 0 {
-		totalPages = (total + p.Limit - 1) / p.Limit
-	}
-
-	meta := dto.PaginationMeta{
-		Page:       p.Page,
-		Limit:      p.Limit,
-		Total:      total,
-		TotalPages: totalPages,
-		HasNext:    p.Page < totalPages,
-		HasPrev:    p.Page > 1,
-	}
-
-	return users, meta, nil
-}
-
-func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
-	const op = "UserService.FetchUserById"
-
-	log.Printf("user id %v", id.Valid)
-
-	user, err := srv.repo.GetUserById(ctx, id)
-
-	if err != nil {
-		return nil, fmt.Errorf("%s: error fetching user %w", op, err)
-	}
-
-	return user, nil
-}
-
-func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserInput) (*entity.User, error) {
-	const op = "UserService.UpdateCurrentUser"
-
-	log.Printf("user id %v", input.Id.Valid)
-
-	patch := &repository.UpdateUserInput{
-		BusinessName: input.BusinessName,
-		BusinessType: input.BusinessType,
-	}
-
-	updatedUser, err := srv.repo.PatchUser(ctx, input.Id, patch)
-
-	if err != nil {
-		if errors.Is(err, apperrors.ErrUserNotFound) {
-			return nil, fmt.Errorf("[%s]: %w", op, apperrors.ErrUserNotFound)
-		}
-		return nil, fmt.Errorf("[%s]: [%w]", op, err)
-	}
-
-	return updatedUser, nil
-}
-
-func (srv *UserService) SoftDeleteUser(ctx context.Context, id pgtype.UUID) error {
-	const op = "UserService.SoftDeleteUser"
-
-	log.Printf("user id %v", id.Valid)
-
-	err := srv.repo.DeleteUser(ctx, id)
-
-	if err != nil {
-		if errors.Is(err, apperrors.ErrUserNotFound) {
-			return fmt.Errorf("[%s]: %w", op, apperrors.ErrUserNotFound)
-		}
-		return fmt.Errorf("[%s]: [%w]", op, err)
-	}
-
-	return nil
 }
