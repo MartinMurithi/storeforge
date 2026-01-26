@@ -1,4 +1,4 @@
-package user
+package tests
 
 import (
 	"context"
@@ -17,19 +17,32 @@ type MockRepository struct {
 
 // CreateUser implements [repository.IUserRepository].
 func (m *MockRepository) CreateUser(ctx context.Context, user *entity.User) error {
-	panic("unimplemented")
+	args := m.Called(ctx, user)
+	return args.Error(0)
 }
 
 // GetUserByEmail implements [repository.IUserRepository].
 func (m *MockRepository) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
 	args := m.Called(ctx, email)
-	return args.Get(0).(*entity.User), args.Error(1)
+
+	var user *entity.User
+	if args.Get(0) != nil {
+		user = args.Get(0).(*entity.User)
+	}
+
+	return user, args.Error(1)
 }
 
 // GetUserByPhone implements [repository.IUserRepository].
 func (m *MockRepository) GetUserByPhone(ctx context.Context, phone string) (*entity.User, error) {
 	args := m.Called(ctx, phone)
-	return args.Get(0).(*entity.User), args.Error(1)
+	var user *entity.User
+
+	if args.Get(0) != nil {
+		user = args.Get(0).(*entity.User)
+	}
+
+	return user, args.Error(1)
 }
 
 func (m *MockRepository) GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error) {
@@ -45,7 +58,13 @@ func (m *MockRepository) GetAllUsers(ctx context.Context, p dto.Pagination) ([]*
 
 func (m *MockRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).(*entity.User), args.Error(1)
+	var user *entity.User
+	
+	if args.Get(0) != nil {
+		user = args.Get(0).(*entity.User)
+	}
+
+	return user, args.Error(1)
 }
 
 func (m *MockRepository) PatchUser(ctx context.Context, id pgtype.UUID, input *repository.UpdateUserInput) (*entity.User, error) {
