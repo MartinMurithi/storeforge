@@ -2,21 +2,21 @@ package repository
 
 import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/database"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 )
 
 // translateUserRepoError converts infra-level DB errors into domain-level errors.
 func TranslateUserRepoError(err error) error {
 	// Map infra error to a stable set of infra DB errors first
-	switch database.MapPostgresError(err) {
+	switch postgres.MapPostgresError(err) {
 
-	case database.ErrNotFound:
+	case postgres.ErrNotFound:
 		return apperrors.ErrUserNotFound
 
-	case database.ErrUniqueViolation:
+	case postgres.ErrUniqueViolation:
 		return apperrors.ErrUserAlreadyExists
 
-	case database.ErrNotNull:
+	case postgres.ErrNotNull:
 		return apperrors.ErrInvalidInput
 
 	default:

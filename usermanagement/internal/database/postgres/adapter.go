@@ -15,7 +15,6 @@ type Adapter struct {
 	pool *pgxpool.Pool
 }
 
-// NewAdapter creates a new Adapter from a pgxpool.Pool
 func NewAdapter(pool *pgxpool.Pool) database.DB {
 	return &Adapter{pool: pool}
 }
@@ -42,15 +41,14 @@ func (c *CommandTagAdapter) RowsAffected() int64 {
 
 // -------------------- QueryRow --------------------
 
+// RowAdapter wraps pgx.Row to implement database.Row
+type RowAdapter struct {
+	row pgx.Row
+}
 // QueryRow executes a query that returns a single row
 func (a *Adapter) QueryRow(ctx context.Context, sql string, args ...any) database.Row {
 	row := a.pool.QueryRow(ctx, sql, args...)
 	return &RowAdapter{row: row}
-}
-
-// RowAdapter wraps pgx.Row to implement database.Row
-type RowAdapter struct {
-	row pgx.Row
 }
 
 func (r *RowAdapter) Scan(dest ...any) error {
@@ -59,6 +57,11 @@ func (r *RowAdapter) Scan(dest ...any) error {
 
 // -------------------- Query --------------------
 
+// RowsAdapter wraps pgx.Rows to implement database.Rows
+type RowsAdapter struct {
+	rows pgx.Rows
+}
+
 // Query executes a query that returns multiple rows
 func (a *Adapter) Query(ctx context.Context, sql string, args ...any) (database.Rows, error) {
 	rows, err := a.pool.Query(ctx, sql, args...)
@@ -66,11 +69,6 @@ func (a *Adapter) Query(ctx context.Context, sql string, args ...any) (database.
 		return nil, err
 	}
 	return &RowsAdapter{rows: rows}, nil
-}
-
-// RowsAdapter wraps pgx.Rows to implement database.Rows
-type RowsAdapter struct {
-	rows pgx.Rows
 }
 
 func (r *RowsAdapter) Next() bool {

@@ -30,7 +30,7 @@ var (
 
 // Business rule errors
 var (
-	ErrUserAlreadyExists         = errors.New("user with that email already exists")
+	ErrUserAlreadyExists         = errors.New("user already exists")
 	ErrBusinessNameAlreadyExists = errors.New("business name already exists")
 )
 

@@ -8,6 +8,7 @@ import (
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 
@@ -23,6 +24,7 @@ type IUserRepository interface {
 	CreateUser(ctx context.Context, user *entity.User) error
 	GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
+	GetUserByPhone(ctx context.Context, phone string) (*entity.User, error)
 	GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error)
 	PatchUser(ctx context.Context, id pgtype.UUID, input *UpdateUserInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
@@ -68,7 +70,7 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) e
 		log.Printf("[%s]: error creating user: %v", op, err)
 
 		// Map DB/driver errors → infra errors
-		infraErr := database.MapPostgresError(err)
+		infraErr := postgres.MapPostgresError(err)
 
 		// Translate infra → domain errors
 		return TranslateUserRepoError(infraErr)
@@ -109,7 +111,7 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*e
 			return nil, apperrors.ErrUserNotFound
 		}
 
-		return nil, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return user, nil
@@ -147,7 +149,45 @@ func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*
 			return nil, apperrors.ErrUserNotFound
 		}
 
-		return nil, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
+	}
+
+	return user, nil
+}
+
+func (repo *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*entity.User, error) {
+	const op = "UserRepository.GetUserByPhone"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	user := &entity.User{}
+
+	query := `
+		SELECT id, full_name, email, phone, password_hash, business_type, business_name, created_at, updated_at, is_verified
+		FROM users
+		WHERE phone = $1
+	`
+
+	err := repo.DB.QueryRow(ctx, query, phone).Scan(
+		&user.ID,
+		&user.FullName,
+		&user.Email,
+		&user.Phone,
+		&user.PasswordHash,
+		&user.BusinessType,
+		&user.BusinessName,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+		&user.IsVerified,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, apperrors.ErrUserNotFound
+		}
+
+		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return user, nil
@@ -162,7 +202,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 	// --- Total Users Count ---
 	var totalUsers int
 	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, 0, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	const maxLimit = 15
@@ -184,7 +224,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 
 	rows, err := repo.DB.Query(ctx, query, p.Limit, offset)
 	if err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, 0, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 	defer rows.Close()
 
@@ -203,13 +243,13 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 			&user.DeletedAt,
 			&user.IsVerified,
 		); err != nil {
-			return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+			return nil, 0, TranslateUserRepoError(postgres.MapPostgresError(err))
 		}
 		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, 0, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, 0, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return users, totalUsers, nil
@@ -266,7 +306,7 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 			return nil, apperrors.ErrUserNotFound
 		}
 
-		return nil, TranslateUserRepoError(database.MapPostgresError(err))
+		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return &user, nil
@@ -293,7 +333,7 @@ func (repo *UserRepository) DeleteUser(ctx context.Context, id pgtype.UUID) erro
 			return apperrors.ErrUserNotFound
 		}
 
-		return TranslateUserRepoError(database.MapPostgresError(err))
+		return TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return nil
