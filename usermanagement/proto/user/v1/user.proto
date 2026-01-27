@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package storeforge.user.v1;
 
-option go_package = "github.com/storeforge/storeforge/proto/user/v1;userv1";
+option go_package = "github.com/storeforge/usermanagement/proto/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
 
