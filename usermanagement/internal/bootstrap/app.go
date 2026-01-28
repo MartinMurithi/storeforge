@@ -13,7 +13,7 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/routes"
@@ -25,7 +25,7 @@ type App struct {
 	Repo        repository.IUserRepository
 	UserService *user.UserService
 	AuthService *auth.AuthService
-	Handler     *handler.UserHandler
+	Handler     *http.UserHandler
 	Router      *gin.Engine
 	JWTMaker    *token.JWTMaker
 }
@@ -99,7 +99,8 @@ func Init() (*App, error) {
 	repo := repository.NewUserRepository(db) // IUserRepository
 	userSrv := user.NewUserService(repo)
 	authSrv := auth.NewAuthService(repo, jwtMaker)
-	handler := handler.NewUserHandler(userSrv, authSrv)
+	handler := http.NewUserHandler(userSrv, authSrv)
+	
 	// -------- ROUTER ---------
 	gin.SetMode(gin.ReleaseMode)
 

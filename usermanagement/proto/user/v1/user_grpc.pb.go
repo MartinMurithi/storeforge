@@ -19,9 +19,7 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	UserService_GetUserById_FullMethodName    = "/storeforge.user.v1.UserService/GetUserById"
-	UserService_GetUserByEmail_FullMethodName = "/storeforge.user.v1.UserService/GetUserByEmail"
-	UserService_GetUserByPhone_FullMethodName = "/storeforge.user.v1.UserService/GetUserByPhone"
+	UserService_GetCurrentUser_FullMethodName = "/storeforge.user.v1.UserService/GetCurrentUser"
 	UserService_GetAllUsers_FullMethodName    = "/storeforge.user.v1.UserService/GetAllUsers"
 	UserService_UpdateUser_FullMethodName     = "/storeforge.user.v1.UserService/UpdateUser"
 	UserService_DeleteUser_FullMethodName     = "/storeforge.user.v1.UserService/DeleteUser"
@@ -33,12 +31,8 @@ const (
 //
 // UserService provides operations for managing user accounts and profiles.
 type UserServiceClient interface {
-	// GetUserById retrieves a user by their unique identifier.
-	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
-	// GetUserByEmail retrieves a user by their email address.
-	GetUserByEmail(ctx context.Context, in *GetUserByEmailRequest, opts ...grpc.CallOption) (*GetUserByEmailResponse, error)
-	// GetUserByPhone retrieves a user by their phone number.
-	GetUserByPhone(ctx context.Context, in *GetUserByPhoneRequest, opts ...grpc.CallOption) (*GetUserByPhoneResponse, error)
+	// GetCurrentUser retrieves a user by their unique identifier.
+	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error)
 	// GetAllUsers retrieves all users with pagination support.
 	GetAllUsers(ctx context.Context, in *GetAllUsersRequest, opts ...grpc.CallOption) (*GetAllUsersResponse, error)
 	// UpdateUser updates an existing user's profile information.
@@ -55,30 +49,10 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error) {
+func (c *userServiceClient) GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserByIdResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserById_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) GetUserByEmail(ctx context.Context, in *GetUserByEmailRequest, opts ...grpc.CallOption) (*GetUserByEmailResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserByEmailResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserByEmail_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userServiceClient) GetUserByPhone(ctx context.Context, in *GetUserByPhoneRequest, opts ...grpc.CallOption) (*GetUserByPhoneResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserByPhoneResponse)
-	err := c.cc.Invoke(ctx, UserService_GetUserByPhone_FullMethodName, in, out, cOpts...)
+	out := new(GetCurrentUserResponse)
+	err := c.cc.Invoke(ctx, UserService_GetCurrentUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -121,12 +95,8 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 //
 // UserService provides operations for managing user accounts and profiles.
 type UserServiceServer interface {
-	// GetUserById retrieves a user by their unique identifier.
-	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
-	// GetUserByEmail retrieves a user by their email address.
-	GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserByEmailResponse, error)
-	// GetUserByPhone retrieves a user by their phone number.
-	GetUserByPhone(context.Context, *GetUserByPhoneRequest) (*GetUserByPhoneResponse, error)
+	// GetCurrentUser retrieves a user by their unique identifier.
+	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
 	// GetAllUsers retrieves all users with pagination support.
 	GetAllUsers(context.Context, *GetAllUsersRequest) (*GetAllUsersResponse, error)
 	// UpdateUser updates an existing user's profile information.
@@ -143,14 +113,8 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetUserById not implemented")
-}
-func (UnimplementedUserServiceServer) GetUserByEmail(context.Context, *GetUserByEmailRequest) (*GetUserByEmailResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetUserByEmail not implemented")
-}
-func (UnimplementedUserServiceServer) GetUserByPhone(context.Context, *GetUserByPhoneRequest) (*GetUserByPhoneResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetUserByPhone not implemented")
+func (UnimplementedUserServiceServer) GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCurrentUser not implemented")
 }
 func (UnimplementedUserServiceServer) GetAllUsers(context.Context, *GetAllUsersRequest) (*GetAllUsersResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAllUsers not implemented")
@@ -182,56 +146,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_GetUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserByIdRequest)
+func _UserService_GetCurrentUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCurrentUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserById(ctx, in)
+		return srv.(UserServiceServer).GetCurrentUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_GetUserById_FullMethodName,
+		FullMethod: UserService_GetCurrentUser_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserById(ctx, req.(*GetUserByIdRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_GetUserByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserByEmailRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserByEmail(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetUserByEmail_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserByEmail(ctx, req.(*GetUserByEmailRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserService_GetUserByPhone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserByPhoneRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserServiceServer).GetUserByPhone(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: UserService_GetUserByPhone_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).GetUserByPhone(ctx, req.(*GetUserByPhoneRequest))
+		return srv.(UserServiceServer).GetCurrentUser(ctx, req.(*GetCurrentUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,16 +226,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetUserById",
-			Handler:    _UserService_GetUserById_Handler,
-		},
-		{
-			MethodName: "GetUserByEmail",
-			Handler:    _UserService_GetUserByEmail_Handler,
-		},
-		{
-			MethodName: "GetUserByPhone",
-			Handler:    _UserService_GetUserByPhone_Handler,
+			MethodName: "GetCurrentUser",
+			Handler:    _UserService_GetCurrentUser_Handler,
 		},
 		{
 			MethodName: "GetAllUsers",
