@@ -1,4 +1,4 @@
-package handler
+package http
 
 import (
 	"encoding/json"
@@ -10,9 +10,9 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler/httpx"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/mapper"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http/httpx"
 
 	"github.com/gin-gonic/gin"
 )
@@ -114,6 +114,7 @@ func (handler *UserHandler) LoginUser(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, response)
 
 }
+
 func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
 
 	p, err := dto.ParsePagination(c)

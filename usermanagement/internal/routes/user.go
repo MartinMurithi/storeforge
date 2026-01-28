@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/handler"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterUserRoutes(r *gin.Engine, h *handler.UserHandler, authMiddleware gin.HandlerFunc) {
+func RegisterUserRoutes(r *gin.Engine, h *http.UserHandler, authMiddleware gin.HandlerFunc) {
 	// group endpoints based on api version
 	v1 := r.Group("/api/v1")
 
