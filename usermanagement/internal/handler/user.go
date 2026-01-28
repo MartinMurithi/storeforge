@@ -165,6 +165,7 @@ func (handler *UserHandler) GetCurrentUser(c *gin.Context) {
 		default:
 			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
 		}
+		return
 	}
 
 	user, err := handler.UserService.GetCurrentUserById(c.Request.Context(), id)

@@ -372,6 +372,514 @@ func (x *GetUserByIdResponse) GetUser() *UserResponse {
 	return nil
 }
 
+type GetUserByEmailRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByEmailRequest) Reset() {
+	*x = GetUserByEmailRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByEmailRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByEmailRequest) ProtoMessage() {}
+
+func (x *GetUserByEmailRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByEmailRequest.ProtoReflect.Descriptor instead.
+func (*GetUserByEmailRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetUserByEmailRequest) GetEmail() string {
+	if x != nil {
+		return x.Email
+	}
+	return ""
+}
+
+type GetUserByEmailResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *UserResponse          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByEmailResponse) Reset() {
+	*x = GetUserByEmailResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByEmailResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByEmailResponse) ProtoMessage() {}
+
+func (x *GetUserByEmailResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByEmailResponse.ProtoReflect.Descriptor instead.
+func (*GetUserByEmailResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetUserByEmailResponse) GetUser() *UserResponse {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type GetUserByPhoneRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Phone         string                 `protobuf:"bytes,1,opt,name=phone,proto3" json:"phone,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByPhoneRequest) Reset() {
+	*x = GetUserByPhoneRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByPhoneRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByPhoneRequest) ProtoMessage() {}
+
+func (x *GetUserByPhoneRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByPhoneRequest.ProtoReflect.Descriptor instead.
+func (*GetUserByPhoneRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetUserByPhoneRequest) GetPhone() string {
+	if x != nil {
+		return x.Phone
+	}
+	return ""
+}
+
+type GetUserByPhoneResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *UserResponse          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserByPhoneResponse) Reset() {
+	*x = GetUserByPhoneResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserByPhoneResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserByPhoneResponse) ProtoMessage() {}
+
+func (x *GetUserByPhoneResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserByPhoneResponse.ProtoReflect.Descriptor instead.
+func (*GetUserByPhoneResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetUserByPhoneResponse) GetUser() *UserResponse {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type Pagination struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Pagination) Reset() {
+	*x = Pagination{}
+	mi := &file_user_v1_user_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Pagination) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Pagination) ProtoMessage() {}
+
+func (x *Pagination) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Pagination.ProtoReflect.Descriptor instead.
+func (*Pagination) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *Pagination) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *Pagination) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetAllUsersRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Pagination    *Pagination            `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllUsersRequest) Reset() {
+	*x = GetAllUsersRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUsersRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUsersRequest) ProtoMessage() {}
+
+func (x *GetAllUsersRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUsersRequest.ProtoReflect.Descriptor instead.
+func (*GetAllUsersRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetAllUsersRequest) GetPagination() *Pagination {
+	if x != nil {
+		return x.Pagination
+	}
+	return nil
+}
+
+type GetAllUsersResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          []*UserResponse        `protobuf:"bytes,1,rep,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAllUsersResponse) Reset() {
+	*x = GetAllUsersResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAllUsersResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAllUsersResponse) ProtoMessage() {}
+
+func (x *GetAllUsersResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAllUsersResponse.ProtoReflect.Descriptor instead.
+func (*GetAllUsersResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetAllUsersResponse) GetUser() []*UserResponse {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type UpdateUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	BusinessName  string                 `protobuf:"bytes,2,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
+	BusinessType  string                 `protobuf:"bytes,3,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUserRequest) Reset() {
+	*x = UpdateUserRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserRequest) ProtoMessage() {}
+
+func (x *UpdateUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserRequest.ProtoReflect.Descriptor instead.
+func (*UpdateUserRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *UpdateUserRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetBusinessName() string {
+	if x != nil {
+		return x.BusinessName
+	}
+	return ""
+}
+
+func (x *UpdateUserRequest) GetBusinessType() string {
+	if x != nil {
+		return x.BusinessType
+	}
+	return ""
+}
+
+type UpdateUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	User          *UserResponse          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateUserResponse) Reset() {
+	*x = UpdateUserResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateUserResponse) ProtoMessage() {}
+
+func (x *UpdateUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateUserResponse.ProtoReflect.Descriptor instead.
+func (*UpdateUserResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UpdateUserResponse) GetUser() *UserResponse {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+type DeleteUserRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteUserRequest) Reset() {
+	*x = DeleteUserRequest{}
+	mi := &file_user_v1_user_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteUserRequest) ProtoMessage() {}
+
+func (x *DeleteUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteUserRequest.ProtoReflect.Descriptor instead.
+func (*DeleteUserRequest) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *DeleteUserRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteUserResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteUserResponse) Reset() {
+	*x = DeleteUserResponse{}
+	mi := &file_user_v1_user_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteUserResponse) ProtoMessage() {}
+
+func (x *DeleteUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteUserResponse.ProtoReflect.Descriptor instead.
+func (*DeleteUserResponse) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteUserResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 var File_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_proto_rawDesc = "" +
@@ -410,9 +918,44 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"deleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"K\n" +
 	"\x13GetUserByIdResponse\x124\n" +
-	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user2o\n" +
+	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"-\n" +
+	"\x15GetUserByEmailRequest\x12\x14\n" +
+	"\x05email\x18\x01 \x01(\tR\x05email\"N\n" +
+	"\x16GetUserByEmailResponse\x124\n" +
+	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"-\n" +
+	"\x15GetUserByPhoneRequest\x12\x14\n" +
+	"\x05phone\x18\x01 \x01(\tR\x05phone\"N\n" +
+	"\x16GetUserByPhoneResponse\x124\n" +
+	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"6\n" +
+	"\n" +
+	"Pagination\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"T\n" +
+	"\x12GetAllUsersRequest\x12>\n" +
+	"\n" +
+	"pagination\x18\x01 \x01(\v2\x1e.storeforge.user.v1.PaginationR\n" +
+	"pagination\"K\n" +
+	"\x13GetAllUsersResponse\x124\n" +
+	"\x04user\x18\x01 \x03(\v2 .storeforge.user.v1.UserResponseR\x04user\"m\n" +
+	"\x11UpdateUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
+	"\rbusiness_name\x18\x02 \x01(\tR\fbusinessName\x12#\n" +
+	"\rbusiness_type\x18\x03 \x01(\tR\fbusinessType\"J\n" +
+	"\x12UpdateUserResponse\x124\n" +
+	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"#\n" +
+	"\x11DeleteUserRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\".\n" +
+	"\x12DeleteUserResponse\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xe5\x04\n" +
 	"\vUserService\x12`\n" +
-	"\vGetUserById\x12&.storeforge.user.v1.GetUserByIdRequest\x1a'.storeforge.user.v1.GetUserByIdResponse\"\x00B;Z9github.com/storeforge/usermanagement/proto/user/v1;userv1b\x06proto3"
+	"\vGetUserById\x12&.storeforge.user.v1.GetUserByIdRequest\x1a'.storeforge.user.v1.GetUserByIdResponse\"\x00\x12i\n" +
+	"\x0eGetUserByEmail\x12).storeforge.user.v1.GetUserByEmailRequest\x1a*.storeforge.user.v1.GetUserByEmailResponse\"\x00\x12i\n" +
+	"\x0eGetUserByPhone\x12).storeforge.user.v1.GetUserByPhoneRequest\x1a*.storeforge.user.v1.GetUserByPhoneResponse\"\x00\x12`\n" +
+	"\vGetAllUsers\x12&.storeforge.user.v1.GetAllUsersRequest\x1a'.storeforge.user.v1.GetAllUsersResponse\"\x00\x12]\n" +
+	"\n" +
+	"UpdateUser\x12%.storeforge.user.v1.UpdateUserRequest\x1a&.storeforge.user.v1.UpdateUserResponse\"\x00\x12]\n" +
+	"\n" +
+	"DeleteUser\x12%.storeforge.user.v1.DeleteUserRequest\x1a&.storeforge.user.v1.DeleteUserResponse\"\x00B;Z9github.com/storeforge/usermanagement/proto/user/v1;userv1b\x06proto3"
 
 var (
 	file_user_v1_user_proto_rawDescOnce sync.Once
@@ -426,32 +969,58 @@ func file_user_v1_user_proto_rawDescGZIP() []byte {
 	return file_user_v1_user_proto_rawDescData
 }
 
-var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_user_v1_user_proto_goTypes = []any{
-	(*User)(nil),                  // 0: storeforge.user.v1.User
-	(*UserProfile)(nil),           // 1: storeforge.user.v1.UserProfile
-	(*GetUserByIdRequest)(nil),    // 2: storeforge.user.v1.GetUserByIdRequest
-	(*UserResponse)(nil),          // 3: storeforge.user.v1.UserResponse
-	(*GetUserByIdResponse)(nil),   // 4: storeforge.user.v1.GetUserByIdResponse
-	(*timestamppb.Timestamp)(nil), // 5: google.protobuf.Timestamp
+	(*User)(nil),                   // 0: storeforge.user.v1.User
+	(*UserProfile)(nil),            // 1: storeforge.user.v1.UserProfile
+	(*GetUserByIdRequest)(nil),     // 2: storeforge.user.v1.GetUserByIdRequest
+	(*UserResponse)(nil),           // 3: storeforge.user.v1.UserResponse
+	(*GetUserByIdResponse)(nil),    // 4: storeforge.user.v1.GetUserByIdResponse
+	(*GetUserByEmailRequest)(nil),  // 5: storeforge.user.v1.GetUserByEmailRequest
+	(*GetUserByEmailResponse)(nil), // 6: storeforge.user.v1.GetUserByEmailResponse
+	(*GetUserByPhoneRequest)(nil),  // 7: storeforge.user.v1.GetUserByPhoneRequest
+	(*GetUserByPhoneResponse)(nil), // 8: storeforge.user.v1.GetUserByPhoneResponse
+	(*Pagination)(nil),             // 9: storeforge.user.v1.Pagination
+	(*GetAllUsersRequest)(nil),     // 10: storeforge.user.v1.GetAllUsersRequest
+	(*GetAllUsersResponse)(nil),    // 11: storeforge.user.v1.GetAllUsersResponse
+	(*UpdateUserRequest)(nil),      // 12: storeforge.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),     // 13: storeforge.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),      // 14: storeforge.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),     // 15: storeforge.user.v1.DeleteUserResponse
+	(*timestamppb.Timestamp)(nil),  // 16: google.protobuf.Timestamp
 }
 var file_user_v1_user_proto_depIdxs = []int32{
 	1,  // 0: storeforge.user.v1.User.profile:type_name -> storeforge.user.v1.UserProfile
-	5,  // 1: storeforge.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	5,  // 2: storeforge.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 3: storeforge.user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	16, // 1: storeforge.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	16, // 2: storeforge.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 3: storeforge.user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
 	1,  // 4: storeforge.user.v1.UserResponse.profile:type_name -> storeforge.user.v1.UserProfile
-	5,  // 5: storeforge.user.v1.UserResponse.created_at:type_name -> google.protobuf.Timestamp
-	5,  // 6: storeforge.user.v1.UserResponse.updated_at:type_name -> google.protobuf.Timestamp
-	5,  // 7: storeforge.user.v1.UserResponse.deleted_at:type_name -> google.protobuf.Timestamp
+	16, // 5: storeforge.user.v1.UserResponse.created_at:type_name -> google.protobuf.Timestamp
+	16, // 6: storeforge.user.v1.UserResponse.updated_at:type_name -> google.protobuf.Timestamp
+	16, // 7: storeforge.user.v1.UserResponse.deleted_at:type_name -> google.protobuf.Timestamp
 	3,  // 8: storeforge.user.v1.GetUserByIdResponse.user:type_name -> storeforge.user.v1.UserResponse
-	2,  // 9: storeforge.user.v1.UserService.GetUserById:input_type -> storeforge.user.v1.GetUserByIdRequest
-	4,  // 10: storeforge.user.v1.UserService.GetUserById:output_type -> storeforge.user.v1.GetUserByIdResponse
-	10, // [10:11] is the sub-list for method output_type
-	9,  // [9:10] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	3,  // 9: storeforge.user.v1.GetUserByEmailResponse.user:type_name -> storeforge.user.v1.UserResponse
+	3,  // 10: storeforge.user.v1.GetUserByPhoneResponse.user:type_name -> storeforge.user.v1.UserResponse
+	9,  // 11: storeforge.user.v1.GetAllUsersRequest.pagination:type_name -> storeforge.user.v1.Pagination
+	3,  // 12: storeforge.user.v1.GetAllUsersResponse.user:type_name -> storeforge.user.v1.UserResponse
+	3,  // 13: storeforge.user.v1.UpdateUserResponse.user:type_name -> storeforge.user.v1.UserResponse
+	2,  // 14: storeforge.user.v1.UserService.GetUserById:input_type -> storeforge.user.v1.GetUserByIdRequest
+	5,  // 15: storeforge.user.v1.UserService.GetUserByEmail:input_type -> storeforge.user.v1.GetUserByEmailRequest
+	7,  // 16: storeforge.user.v1.UserService.GetUserByPhone:input_type -> storeforge.user.v1.GetUserByPhoneRequest
+	10, // 17: storeforge.user.v1.UserService.GetAllUsers:input_type -> storeforge.user.v1.GetAllUsersRequest
+	12, // 18: storeforge.user.v1.UserService.UpdateUser:input_type -> storeforge.user.v1.UpdateUserRequest
+	14, // 19: storeforge.user.v1.UserService.DeleteUser:input_type -> storeforge.user.v1.DeleteUserRequest
+	4,  // 20: storeforge.user.v1.UserService.GetUserById:output_type -> storeforge.user.v1.GetUserByIdResponse
+	6,  // 21: storeforge.user.v1.UserService.GetUserByEmail:output_type -> storeforge.user.v1.GetUserByEmailResponse
+	8,  // 22: storeforge.user.v1.UserService.GetUserByPhone:output_type -> storeforge.user.v1.GetUserByPhoneResponse
+	11, // 23: storeforge.user.v1.UserService.GetAllUsers:output_type -> storeforge.user.v1.GetAllUsersResponse
+	13, // 24: storeforge.user.v1.UserService.UpdateUser:output_type -> storeforge.user.v1.UpdateUserResponse
+	15, // 25: storeforge.user.v1.UserService.DeleteUser:output_type -> storeforge.user.v1.DeleteUserResponse
+	20, // [20:26] is the sub-list for method output_type
+	14, // [14:20] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_proto_init() }
@@ -465,7 +1034,7 @@ func file_user_v1_user_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_user_v1_user_proto_rawDesc), len(file_user_v1_user_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

@@ -22,6 +22,17 @@ message User {
 service UserService{
   // GetUserById retrieves a user by their unique identifier.
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse) {};
+  // GetUserByEmail retrieves a user by their email address.
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse) {};
+  // GetUserByPhone retrieves a user by their phone number.
+  rpc GetUserByPhone(GetUserByPhoneRequest) returns (GetUserByPhoneResponse) {};
+  // GetAllUsers retrieves all users with pagination support.
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {};
+  // UpdateUser updates an existing user's profile information.
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {};
+  // DeleteUser soft deletes a user account.
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {};
+
 }
 
 // UserProfile contains mutable, non-authentication user data.
@@ -48,4 +59,51 @@ message UserResponse{
 
 message GetUserByIdResponse{
   UserResponse user = 1;
+}
+
+message GetUserByEmailRequest{
+  string email = 1;
+}
+
+message GetUserByEmailResponse {
+  UserResponse user = 1;
+}
+
+message GetUserByPhoneRequest{
+  string phone = 1;
+}
+
+message GetUserByPhoneResponse{
+  UserResponse user = 1;
+}
+
+message Pagination{
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+message GetAllUsersRequest{
+  Pagination pagination = 1;
+}
+
+message GetAllUsersResponse{
+  repeated UserResponse user = 1;
+}
+
+message UpdateUserRequest {
+  string id            = 1;
+  string business_name = 2;
+  string business_type = 3;
+}
+
+message UpdateUserResponse{
+  UserResponse user = 1;
+}
+
+message DeleteUserRequest{
+  string id = 1;
+}
+
+message DeleteUserResponse {
+  string message = 1;
 }
