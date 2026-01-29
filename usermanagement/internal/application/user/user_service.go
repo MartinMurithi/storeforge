@@ -31,6 +31,7 @@ type PatchUserInput struct {
 	BusinessType *string
 }
 
+// Admin role
 func (srv *UserService) FetchAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, dto.PaginationMeta, error) {
 	const op = "UserService.FetchAllUsers"
 
@@ -93,6 +94,7 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 	return updatedUser, nil
 }
 
+// Admin Role
 func (srv *UserService) SoftDeleteUser(ctx context.Context, id pgtype.UUID) error {
 	const op = "UserService.SoftDeleteUser"
 

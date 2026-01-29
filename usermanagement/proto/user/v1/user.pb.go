@@ -227,108 +227,16 @@ func (x *GetCurrentUserRequest) GetId() string {
 	return ""
 }
 
-type UserResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	IsVerified    bool                   `protobuf:"varint,3,opt,name=is_verified,json=isVerified,proto3" json:"is_verified,omitempty"`
-	Profile       *UserProfile           `protobuf:"bytes,4,opt,name=profile,proto3" json:"profile,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UserResponse) Reset() {
-	*x = UserResponse{}
-	mi := &file_user_v1_user_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UserResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UserResponse) ProtoMessage() {}
-
-func (x *UserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_user_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UserResponse.ProtoReflect.Descriptor instead.
-func (*UserResponse) Descriptor() ([]byte, []int) {
-	return file_user_v1_user_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *UserResponse) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *UserResponse) GetEmail() string {
-	if x != nil {
-		return x.Email
-	}
-	return ""
-}
-
-func (x *UserResponse) GetIsVerified() bool {
-	if x != nil {
-		return x.IsVerified
-	}
-	return false
-}
-
-func (x *UserResponse) GetProfile() *UserProfile {
-	if x != nil {
-		return x.Profile
-	}
-	return nil
-}
-
-func (x *UserResponse) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
-func (x *UserResponse) GetUpdatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdatedAt
-	}
-	return nil
-}
-
-func (x *UserResponse) GetDeletedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.DeletedAt
-	}
-	return nil
-}
-
 type GetCurrentUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *UserResponse          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetCurrentUserResponse) Reset() {
 	*x = GetCurrentUserResponse{}
-	mi := &file_user_v1_user_proto_msgTypes[4]
+	mi := &file_user_v1_user_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -340,7 +248,7 @@ func (x *GetCurrentUserResponse) String() string {
 func (*GetCurrentUserResponse) ProtoMessage() {}
 
 func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_user_proto_msgTypes[4]
+	mi := &file_user_v1_user_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -353,10 +261,10 @@ func (x *GetCurrentUserResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCurrentUserResponse.ProtoReflect.Descriptor instead.
 func (*GetCurrentUserResponse) Descriptor() ([]byte, []int) {
-	return file_user_v1_user_proto_rawDescGZIP(), []int{4}
+	return file_user_v1_user_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *GetCurrentUserResponse) GetUser() *UserResponse {
+func (x *GetCurrentUserResponse) GetUser() *User {
 	if x != nil {
 		return x.User
 	}
@@ -373,7 +281,7 @@ type Pagination struct {
 
 func (x *Pagination) Reset() {
 	*x = Pagination{}
-	mi := &file_user_v1_user_proto_msgTypes[5]
+	mi := &file_user_v1_user_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -385,7 +293,7 @@ func (x *Pagination) String() string {
 func (*Pagination) ProtoMessage() {}
 
 func (x *Pagination) ProtoReflect() protoreflect.Message {
-	mi := &file_user_v1_user_proto_msgTypes[5]
+	mi := &file_user_v1_user_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -398,7 +306,7 @@ func (x *Pagination) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Pagination.ProtoReflect.Descriptor instead.
 func (*Pagination) Descriptor() ([]byte, []int) {
-	return file_user_v1_user_proto_rawDescGZIP(), []int{5}
+	return file_user_v1_user_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Pagination) GetPage() int32 {
@@ -415,9 +323,95 @@ func (x *Pagination) GetLimit() int32 {
 	return 0
 }
 
+// Meta info for paginated response
+type PaginationMeta struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Total         int32                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"`
+	HasNext       bool                   `protobuf:"varint,5,opt,name=has_next,json=hasNext,proto3" json:"has_next,omitempty"`
+	HasPrev       bool                   `protobuf:"varint,6,opt,name=has_prev,json=hasPrev,proto3" json:"has_prev,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaginationMeta) Reset() {
+	*x = PaginationMeta{}
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaginationMeta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaginationMeta) ProtoMessage() {}
+
+func (x *PaginationMeta) ProtoReflect() protoreflect.Message {
+	mi := &file_user_v1_user_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaginationMeta.ProtoReflect.Descriptor instead.
+func (*PaginationMeta) Descriptor() ([]byte, []int) {
+	return file_user_v1_user_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *PaginationMeta) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetHasNext() bool {
+	if x != nil {
+		return x.HasNext
+	}
+	return false
+}
+
+func (x *PaginationMeta) GetHasPrev() bool {
+	if x != nil {
+		return x.HasPrev
+	}
+	return false
+}
+
 type GetAllUsersRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Pagination    *Pagination            `protobuf:"bytes,1,opt,name=pagination,proto3" json:"pagination,omitempty"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -452,16 +446,24 @@ func (*GetAllUsersRequest) Descriptor() ([]byte, []int) {
 	return file_user_v1_user_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *GetAllUsersRequest) GetPagination() *Pagination {
+func (x *GetAllUsersRequest) GetPage() int32 {
 	if x != nil {
-		return x.Pagination
+		return x.Page
 	}
-	return nil
+	return 0
+}
+
+func (x *GetAllUsersRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
 }
 
 type GetAllUsersResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          []*UserResponse        `protobuf:"bytes,1,rep,name=user,proto3" json:"user,omitempty"`
+	Users         []*User                `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	Meta          *PaginationMeta        `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -496,9 +498,16 @@ func (*GetAllUsersResponse) Descriptor() ([]byte, []int) {
 	return file_user_v1_user_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetAllUsersResponse) GetUser() []*UserResponse {
+func (x *GetAllUsersResponse) GetUsers() []*User {
 	if x != nil {
-		return x.User
+		return x.Users
+	}
+	return nil
+}
+
+func (x *GetAllUsersResponse) GetMeta() *PaginationMeta {
+	if x != nil {
+		return x.Meta
 	}
 	return nil
 }
@@ -506,8 +515,8 @@ func (x *GetAllUsersResponse) GetUser() []*UserResponse {
 type UpdateUserRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	BusinessName  string                 `protobuf:"bytes,2,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
-	BusinessType  string                 `protobuf:"bytes,3,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
+	BusinessName  *string                `protobuf:"bytes,2,opt,name=business_name,json=businessName,proto3,oneof" json:"business_name,omitempty"`
+	BusinessType  *string                `protobuf:"bytes,3,opt,name=business_type,json=businessType,proto3,oneof" json:"business_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -550,22 +559,22 @@ func (x *UpdateUserRequest) GetId() string {
 }
 
 func (x *UpdateUserRequest) GetBusinessName() string {
-	if x != nil {
-		return x.BusinessName
+	if x != nil && x.BusinessName != nil {
+		return *x.BusinessName
 	}
 	return ""
 }
 
 func (x *UpdateUserRequest) GetBusinessType() string {
-	if x != nil {
-		return x.BusinessType
+	if x != nil && x.BusinessType != nil {
+		return *x.BusinessType
 	}
 	return ""
 }
 
 type UpdateUserResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	User          *UserResponse          `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	User          *User                  `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -600,7 +609,7 @@ func (*UpdateUserResponse) Descriptor() ([]byte, []int) {
 	return file_user_v1_user_proto_rawDescGZIP(), []int{9}
 }
 
-func (x *UpdateUserResponse) GetUser() *UserResponse {
+func (x *UpdateUserResponse) GetUser() *User {
 	if x != nil {
 		return x.User
 	}
@@ -718,37 +727,35 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\rbusiness_name\x18\x03 \x01(\tR\fbusinessName\x12#\n" +
 	"\rbusiness_type\x18\x04 \x01(\tR\fbusinessType\"'\n" +
 	"\x15GetCurrentUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"\xc1\x02\n" +
-	"\fUserResponse\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
-	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1f\n" +
-	"\vis_verified\x18\x03 \x01(\bR\n" +
-	"isVerified\x129\n" +
-	"\aprofile\x18\x04 \x01(\v2\x1f.storeforge.user.v1.UserProfileR\aprofile\x129\n" +
-	"\n" +
-	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
-	"\n" +
-	"updated_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
-	"\n" +
-	"deleted_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"N\n" +
-	"\x16GetCurrentUserResponse\x124\n" +
-	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"6\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
+	"\x16GetCurrentUserResponse\x12,\n" +
+	"\x04user\x18\x01 \x01(\v2\x18.storeforge.user.v1.UserR\x04user\"6\n" +
 	"\n" +
 	"Pagination\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"T\n" +
-	"\x12GetAllUsersRequest\x12>\n" +
-	"\n" +
-	"pagination\x18\x01 \x01(\v2\x1e.storeforge.user.v1.PaginationR\n" +
-	"pagination\"K\n" +
-	"\x13GetAllUsersResponse\x124\n" +
-	"\x04user\x18\x01 \x03(\v2 .storeforge.user.v1.UserResponseR\x04user\"m\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\xa7\x01\n" +
+	"\x0ePaginationMeta\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\x12\x1f\n" +
+	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
+	"totalPages\x12\x19\n" +
+	"\bhas_next\x18\x05 \x01(\bR\ahasNext\x12\x19\n" +
+	"\bhas_prev\x18\x06 \x01(\bR\ahasPrev\">\n" +
+	"\x12GetAllUsersRequest\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"}\n" +
+	"\x13GetAllUsersResponse\x12.\n" +
+	"\x05users\x18\x01 \x03(\v2\x18.storeforge.user.v1.UserR\x05users\x126\n" +
+	"\x04meta\x18\x02 \x01(\v2\".storeforge.user.v1.PaginationMetaR\x04meta\"\x9b\x01\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12#\n" +
-	"\rbusiness_name\x18\x02 \x01(\tR\fbusinessName\x12#\n" +
-	"\rbusiness_type\x18\x03 \x01(\tR\fbusinessType\"J\n" +
-	"\x12UpdateUserResponse\x124\n" +
-	"\x04user\x18\x01 \x01(\v2 .storeforge.user.v1.UserResponseR\x04user\"#\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12(\n" +
+	"\rbusiness_name\x18\x02 \x01(\tH\x00R\fbusinessName\x88\x01\x01\x12(\n" +
+	"\rbusiness_type\x18\x03 \x01(\tH\x01R\fbusinessType\x88\x01\x01B\x10\n" +
+	"\x0e_business_nameB\x10\n" +
+	"\x0e_business_type\"B\n" +
+	"\x12UpdateUserResponse\x12,\n" +
+	"\x04user\x18\x01 \x01(\v2\x18.storeforge.user.v1.UserR\x04user\"#\n" +
 	"\x11DeleteUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\".\n" +
 	"\x12DeleteUserResponse\x12\x18\n" +
@@ -778,9 +785,9 @@ var file_user_v1_user_proto_goTypes = []any{
 	(*User)(nil),                   // 0: storeforge.user.v1.User
 	(*UserProfile)(nil),            // 1: storeforge.user.v1.UserProfile
 	(*GetCurrentUserRequest)(nil),  // 2: storeforge.user.v1.GetCurrentUserRequest
-	(*UserResponse)(nil),           // 3: storeforge.user.v1.UserResponse
-	(*GetCurrentUserResponse)(nil), // 4: storeforge.user.v1.GetCurrentUserResponse
-	(*Pagination)(nil),             // 5: storeforge.user.v1.Pagination
+	(*GetCurrentUserResponse)(nil), // 3: storeforge.user.v1.GetCurrentUserResponse
+	(*Pagination)(nil),             // 4: storeforge.user.v1.Pagination
+	(*PaginationMeta)(nil),         // 5: storeforge.user.v1.PaginationMeta
 	(*GetAllUsersRequest)(nil),     // 6: storeforge.user.v1.GetAllUsersRequest
 	(*GetAllUsersResponse)(nil),    // 7: storeforge.user.v1.GetAllUsersResponse
 	(*UpdateUserRequest)(nil),      // 8: storeforge.user.v1.UpdateUserRequest
@@ -794,27 +801,23 @@ var file_user_v1_user_proto_depIdxs = []int32{
 	12, // 1: storeforge.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
 	12, // 2: storeforge.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
 	12, // 3: storeforge.user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	1,  // 4: storeforge.user.v1.UserResponse.profile:type_name -> storeforge.user.v1.UserProfile
-	12, // 5: storeforge.user.v1.UserResponse.created_at:type_name -> google.protobuf.Timestamp
-	12, // 6: storeforge.user.v1.UserResponse.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 7: storeforge.user.v1.UserResponse.deleted_at:type_name -> google.protobuf.Timestamp
-	3,  // 8: storeforge.user.v1.GetCurrentUserResponse.user:type_name -> storeforge.user.v1.UserResponse
-	5,  // 9: storeforge.user.v1.GetAllUsersRequest.pagination:type_name -> storeforge.user.v1.Pagination
-	3,  // 10: storeforge.user.v1.GetAllUsersResponse.user:type_name -> storeforge.user.v1.UserResponse
-	3,  // 11: storeforge.user.v1.UpdateUserResponse.user:type_name -> storeforge.user.v1.UserResponse
-	2,  // 12: storeforge.user.v1.UserService.GetCurrentUser:input_type -> storeforge.user.v1.GetCurrentUserRequest
-	6,  // 13: storeforge.user.v1.UserService.GetAllUsers:input_type -> storeforge.user.v1.GetAllUsersRequest
-	8,  // 14: storeforge.user.v1.UserService.UpdateUser:input_type -> storeforge.user.v1.UpdateUserRequest
-	10, // 15: storeforge.user.v1.UserService.DeleteUser:input_type -> storeforge.user.v1.DeleteUserRequest
-	4,  // 16: storeforge.user.v1.UserService.GetCurrentUser:output_type -> storeforge.user.v1.GetCurrentUserResponse
-	7,  // 17: storeforge.user.v1.UserService.GetAllUsers:output_type -> storeforge.user.v1.GetAllUsersResponse
-	9,  // 18: storeforge.user.v1.UserService.UpdateUser:output_type -> storeforge.user.v1.UpdateUserResponse
-	11, // 19: storeforge.user.v1.UserService.DeleteUser:output_type -> storeforge.user.v1.DeleteUserResponse
-	16, // [16:20] is the sub-list for method output_type
-	12, // [12:16] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	0,  // 4: storeforge.user.v1.GetCurrentUserResponse.user:type_name -> storeforge.user.v1.User
+	0,  // 5: storeforge.user.v1.GetAllUsersResponse.users:type_name -> storeforge.user.v1.User
+	5,  // 6: storeforge.user.v1.GetAllUsersResponse.meta:type_name -> storeforge.user.v1.PaginationMeta
+	0,  // 7: storeforge.user.v1.UpdateUserResponse.user:type_name -> storeforge.user.v1.User
+	2,  // 8: storeforge.user.v1.UserService.GetCurrentUser:input_type -> storeforge.user.v1.GetCurrentUserRequest
+	6,  // 9: storeforge.user.v1.UserService.GetAllUsers:input_type -> storeforge.user.v1.GetAllUsersRequest
+	8,  // 10: storeforge.user.v1.UserService.UpdateUser:input_type -> storeforge.user.v1.UpdateUserRequest
+	10, // 11: storeforge.user.v1.UserService.DeleteUser:input_type -> storeforge.user.v1.DeleteUserRequest
+	3,  // 12: storeforge.user.v1.UserService.GetCurrentUser:output_type -> storeforge.user.v1.GetCurrentUserResponse
+	7,  // 13: storeforge.user.v1.UserService.GetAllUsers:output_type -> storeforge.user.v1.GetAllUsersResponse
+	9,  // 14: storeforge.user.v1.UserService.UpdateUser:output_type -> storeforge.user.v1.UpdateUserResponse
+	11, // 15: storeforge.user.v1.UserService.DeleteUser:output_type -> storeforge.user.v1.DeleteUserResponse
+	12, // [12:16] is the sub-list for method output_type
+	8,  // [8:12] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_user_v1_user_proto_init() }
@@ -822,6 +825,7 @@ func file_user_v1_user_proto_init() {
 	if File_user_v1_user_proto != nil {
 		return
 	}
+	file_user_v1_user_proto_msgTypes[8].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

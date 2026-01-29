@@ -104,25 +104,3 @@ func ToFetchUserResponse(user *entity.User) *dto.FetchUserResponseDTO {
 		},
 	}
 }
-
-// ===================   PROTO MAPPERS ==================
-func ToProtoRegisterResponse(user *entity.User) *dto.RegisterUserResponseDTO {
-	if user == nil {
-		return nil
-	}
-
-	return &dto.RegisterUserResponseDTO{
-		User: &dto.UserResponseDTO{
-			Id:           user.ID,
-			FullName:     user.FullName,
-			Email:        user.Email,
-			Phone:        user.Phone,
-			BusinessType: user.BusinessType,
-			BusinessName: user.BusinessName,
-			IsVerified:   user.IsVerified,
-			CreatedAt:    user.CreatedAt,
-		},
-		Message: "Registration successful. Please verify your email.",
-	}
-
-}
