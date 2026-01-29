@@ -13,11 +13,12 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/routes"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
 )
 
 type App struct {
@@ -28,6 +29,7 @@ type App struct {
 	Handler     *http.UserHandler
 	Router      *gin.Engine
 	JWTMaker    *token.JWTMaker
+	GRPCServer  *grpc.Server
 }
 
 func Init() (*App, error) {
@@ -100,7 +102,7 @@ func Init() (*App, error) {
 	userSrv := user.NewUserService(repo)
 	authSrv := auth.NewAuthService(repo, jwtMaker)
 	handler := http.NewUserHandler(userSrv, authSrv)
-	
+
 	// -------- ROUTER ---------
 	gin.SetMode(gin.ReleaseMode)
 
@@ -116,6 +118,17 @@ func Init() (*App, error) {
 
 	routes.RegisterUserRoutes(router, handler, authMiddleware)
 
+	// --------- GRPC SERVER ---------
+	grpcSrv, err := grpc.NewGRPCServer(
+		9090,
+		userSrv,
+		authSrv,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
+	}
+
 	return &App{
 		DB:          pool,
 		Repo:        repo,
@@ -124,5 +137,6 @@ func Init() (*App, error) {
 		Handler:     handler,
 		Router:      router,
 		JWTMaker:    jwtMaker,
+		GRPCServer:  grpcSrv,
 	}, err
 }

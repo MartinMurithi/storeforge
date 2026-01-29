@@ -35,10 +35,19 @@ func main() {
 
 	defer stop()
 
+	// Start HTTP server
 	go func() {
-		log.Println("[SERVER] listening on :8585")
+		log.Println("[HTTP] listening on :8585")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen error: %v", err)
+			log.Fatalf("HTTP server error: %v", err)
+		}
+	}()
+
+	// Start gRPC server
+	go func() {
+		log.Printf("[gRPC] listening on %s", app.GRPCServer.Listener.Addr())
+		if err := app.GRPCServer.Start(); err != nil {
+			log.Fatalf("gRPC server error: %v", err)
 		}
 	}()
 
@@ -46,6 +55,9 @@ func main() {
 
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
+
+	// Graceful shutdown gRPC
+	app.GRPCServer.Stop()
 
 	srv.Shutdown(shutdownCtx)
 

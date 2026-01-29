@@ -4,44 +4,57 @@ import (
 	"fmt"
 	"net"
 
+	authgrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
+	authapp "github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	authv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/auth/v1"
 
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	grpcServer *grpc.Server
-	listener   net.Listener
+	GRPCServer *grpc.Server
+	Listener   net.Listener
 }
 
-func NewGRPCServer(port int, userSvc user.UserService) (*Server, error) {
+// NewGRPCServer creates a gRPC server with all services and handlers registered.
+func NewGRPCServer(port int, userSvc *user.UserService, authSvc *authapp.AuthService) (*Server, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
 	if err != nil {
-		return nil, fmt.Errorf("an error occurred when creating a new gRPC server %s", err)
+		return nil, fmt.Errorf("failed to listen on port %d: %w", port, err)
 	}
 
-	s := grpc.NewServer()
+	// Create gRPC server
+	// Add interceptors later
+	grpcServer := grpc.NewServer(
+		// grpc.ChainUnaryInterceptor(recoveryUnaryInterceptor(), loggingUnaryInterceptor(), authUnaryInterceptor()),
+	)
 
-	// Register gRPC service
+	// Handlers
+	authHandler := authgrpc.NewAuthGrpcHandler(authSvc)
 
-	// pb.RegisterUserServiceServer(s, NewUserServer(userSvc))
+	// Register services
+	authv1.RegisterAuthServiceServer(grpcServer, authHandler)
 
 	return &Server{
-		grpcServer: s,
-		listener:   lis,
+		GRPCServer: grpcServer,
+		Listener: lis,
 	}, nil
 }
 
+// Start the gRPC server
 func (s *Server) Start() error {
-	fmt.Printf("gRPC server listening on %s\n", s.listener.Addr())
-	return s.grpcServer.Serve(s.listener)
+	fmt.Printf("gRPC server listening on %s\n", s.Listener.Addr())
+	return s.GRPCServer.Serve(s.Listener)
 }
 
+// Stop gracefully stops the server
 func (s *Server) Stop() {
 	fmt.Println("Stopping gRPC server")
-	s.grpcServer.GracefulStop()
+	s.GRPCServer.GracefulStop()
 }
+
 
 // func loggingInterceptor(
 //     ctx context.Context,

@@ -189,7 +189,7 @@ type RegisterRequest struct {
 	FullName      string                 `protobuf:"bytes,1,opt,name=full_name,json=fullName,proto3" json:"full_name,omitempty"`
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Phone         string                 `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
-	PasswordHash  string                 `protobuf:"bytes,4,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
 	BusinessName  string                 `protobuf:"bytes,5,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
 	BusinessType  string                 `protobuf:"bytes,6,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -247,9 +247,9 @@ func (x *RegisterRequest) GetPhone() string {
 	return ""
 }
 
-func (x *RegisterRequest) GetPasswordHash() string {
+func (x *RegisterRequest) GetPassword() string {
 	if x != nil {
-		return x.PasswordHash
+		return x.Password
 	}
 	return ""
 }
@@ -428,7 +428,7 @@ type Token struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	AccessToken   string                 `protobuf:"bytes,1,opt,name=access_token,json=accessToken,proto3" json:"access_token,omitempty"`
 	ExpiresAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
-	ExpiresIn     int32                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"` // seconds
+	ExpiresIn     int64                  `protobuf:"varint,3,opt,name=expires_in,json=expiresIn,proto3" json:"expires_in,omitempty"` // seconds
 	IssuedAt      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=issued_at,json=issuedAt,proto3" json:"issued_at,omitempty"`
 	TokenType     string                 `protobuf:"bytes,5,opt,name=token_type,json=tokenType,proto3" json:"token_type,omitempty"` // "Bearer"
 	unknownFields protoimpl.UnknownFields
@@ -479,7 +479,7 @@ func (x *Token) GetExpiresAt() *timestamppb.Timestamp {
 	return nil
 }
 
-func (x *Token) GetExpiresIn() int32 {
+func (x *Token) GetExpiresIn() int64 {
 	if x != nil {
 		return x.ExpiresIn
 	}
@@ -521,12 +521,12 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05phone\x18\x02 \x01(\tR\x05phone\x12#\n" +
 	"\rbusiness_name\x18\x03 \x01(\tR\fbusinessName\x12#\n" +
-	"\rbusiness_type\x18\x04 \x01(\tR\fbusinessType\"\xc9\x01\n" +
+	"\rbusiness_type\x18\x04 \x01(\tR\fbusinessType\"\xc0\x01\n" +
 	"\x0fRegisterRequest\x12\x1b\n" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
-	"\x05phone\x18\x03 \x01(\tR\x05phone\x12#\n" +
-	"\rpassword_hash\x18\x04 \x01(\tR\fpasswordHash\x12#\n" +
+	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x1a\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\x12#\n" +
 	"\rbusiness_name\x18\x05 \x01(\tR\fbusinessName\x12#\n" +
 	"\rbusiness_type\x18\x06 \x01(\tR\fbusinessType\"Z\n" +
 	"\x10RegisterResponse\x12,\n" +
@@ -543,7 +543,7 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
 	"expires_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\texpiresAt\x12\x1d\n" +
 	"\n" +
-	"expires_in\x18\x03 \x01(\x05R\texpiresIn\x127\n" +
+	"expires_in\x18\x03 \x01(\x03R\texpiresIn\x127\n" +
 	"\tissued_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\bissuedAt\x12\x1d\n" +
 	"\n" +
 	"token_type\x18\x05 \x01(\tR\ttokenType2\xb2\x01\n" +

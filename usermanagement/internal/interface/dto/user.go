@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -22,12 +22,12 @@ type UserResponseDTO struct {
 }
 
 type RegisterUserRequestDTO struct {
-	FullName     string `json:"fullName" binding:"required"`
-	Email        string `json:"email" binding:"required,email"`
-	Phone        string `json:"phone" binding:"required"`
-	Password     string `json:"password" binding:"required,min=8"`
-	BusinessType string `json:"businessType" binding:"required"`
-	BusinessName string `json:"businessName" binding:"required"`
+	FullName     string
+	Email        string
+	Phone        string
+	Password     string
+	BusinessType string
+	BusinessName string
 }
 
 type RegisterUserResponseDTO struct {
@@ -60,7 +60,7 @@ type LoginUserRequestDTO struct {
 
 type LoginUserResponseDTO struct {
 	User  *UserResponseDTO `json:"user"`
-	Token *token.Token     `json:"token"`
+	Token *entity.Token     `json:"token"`
 }
 
 type FetchAllUsersResponseDTO struct {

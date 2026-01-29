@@ -89,6 +89,8 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		return nil, apperrors.ErrUserAlreadyExists
 	}
 
+	
+
 	//hashpassword
 	hashedPassword, err := utils.Hashpassword(input.Password)
 
@@ -117,7 +119,7 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	return newUser, nil
 }
 
-func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*entity.User, *token.Token, error) {
+func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserRequestDTO) (*entity.User, *entity.Token, error) {
 	const op = "AuthService.LoginUser"
 
 	input.Normalize()

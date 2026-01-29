@@ -6,21 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type JWTMaker struct {
 	PrivateKey *rsa.PrivateKey
-}
-
-// Token response
-type Token struct {
-	AccessToken string    `json:"access_token"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	ExpiresIn   int64     `json:"expires_in"` // seconds
-	IssuedAt    time.Time `json:"issued_at"`
-	TokenType   string    `json:"token_type"` // "Bearer"
 }
 
 func NewJWTMaker(privateKey *rsa.PrivateKey) (*JWTMaker, error) {
@@ -32,7 +25,7 @@ func NewJWTMaker(privateKey *rsa.PrivateKey) (*JWTMaker, error) {
 	return &JWTMaker{PrivateKey: privateKey}, nil
 }
 
-func (maker *JWTMaker) CreateToken(id, tenantId pgtype.UUID, email, role string, duration time.Duration) (*Token, *UserClaims, error) {
+func (maker *JWTMaker) CreateToken(id, tenantId pgtype.UUID, email, role string, duration time.Duration) (*entity.Token, *UserClaims, error) {
 	const OP = "Token.CreateToken"
 
 	if maker == nil || maker.PrivateKey == nil {
@@ -53,7 +46,7 @@ func (maker *JWTMaker) CreateToken(id, tenantId pgtype.UUID, email, role string,
 		return nil, nil, fmt.Errorf("%s error signing token %w", OP, err)
 	}
 
-	return &Token{
+	return &entity.Token{
 		AccessToken: tokenStr,
 		IssuedAt:    claims.IssuedAt.Local(),
 		ExpiresAt:   claims.ExpiresAt.Local(),
