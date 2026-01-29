@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"net"
 
-	authgrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/auth"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	authapp "github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
+	authgrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/auth"
+	usergrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/user"
 	authv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/auth/v1"
+	userv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/user/v1"
 
 	"google.golang.org/grpc"
 )
@@ -33,9 +35,11 @@ func NewGRPCServer(port int, userSvc *user.UserService, authSvc *authapp.AuthSer
 
 	// Handlers
 	authHandler := authgrpc.NewAuthGrpcHandler(authSvc)
+	userHandler := usergrpc.NewUserGrpcHandler(userSvc)
 
 	// Register services
 	authv1.RegisterAuthServiceServer(grpcServer, authHandler)
+	userv1.RegisterUserServiceServer(grpcServer, userHandler)
 
 	return &Server{
 		GRPCServer: grpcServer,
