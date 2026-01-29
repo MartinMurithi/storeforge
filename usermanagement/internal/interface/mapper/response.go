@@ -1,9 +1,8 @@
 package mapper
 
 import (
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 )
 
 func ToUserResponse(user *entity.User) *dto.UserResponseDTO {
@@ -43,7 +42,7 @@ func ToRegisterUserResponse(user *entity.User) *dto.RegisterUserResponseDTO {
 
 }
 
-func ToLoginUserResponse(token *token.Token, user *entity.User) *dto.LoginUserResponseDTO {
+func ToLoginUserResponse(token *entity.Token, user *entity.User) *dto.LoginUserResponseDTO {
 	if user == nil {
 		return nil
 	}
@@ -104,4 +103,26 @@ func ToFetchUserResponse(user *entity.User) *dto.FetchUserResponseDTO {
 			IsVerified:   user.IsVerified,
 		},
 	}
+}
+
+// ===================   PROTO MAPPERS ==================
+func ToProtoRegisterResponse(user *entity.User) *dto.RegisterUserResponseDTO {
+	if user == nil {
+		return nil
+	}
+
+	return &dto.RegisterUserResponseDTO{
+		User: &dto.UserResponseDTO{
+			Id:           user.ID,
+			FullName:     user.FullName,
+			Email:        user.Email,
+			Phone:        user.Phone,
+			BusinessType: user.BusinessType,
+			BusinessName: user.BusinessName,
+			IsVerified:   user.IsVerified,
+			CreatedAt:    user.CreatedAt,
+		},
+		Message: "Registration successful. Please verify your email.",
+	}
+
 }
