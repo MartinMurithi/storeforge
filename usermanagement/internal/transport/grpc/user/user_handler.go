@@ -80,3 +80,24 @@ func (h *UserGrpcHandler) UpdateUser(
 
 	return ToProtoUpdateUserResponse(updatedUser), nil
 }
+
+// DeleteUser, allows an admin to soft delete a user
+func (h *UserGrpcHandler) DeleteUser(
+	ctx context.Context,
+	req *userv1.DeleteUserRequest,
+) (*userv1.DeleteUserResponse, error) {
+
+	uuid := pgtype.UUID{}
+	if err := uuid.Scan(req.Id); err != nil {
+		return nil, grpc_errors.MapGrpcError(err)
+	}
+
+	err := h.UserService.SoftDeleteUser(ctx, uuid)
+
+	if err != nil {
+		fmt.Printf("[UserGrpcHandler.SoftDeleteUser] failed: %v\n", err)
+		return nil, grpc_errors.MapGrpcError(err)
+	}
+
+	return ToProtoSoftDeleteUserResponse(), nil
+}

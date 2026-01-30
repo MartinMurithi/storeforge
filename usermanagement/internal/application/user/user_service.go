@@ -77,6 +77,7 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 
 	log.Printf("user id %v", input.Id.Valid)
 
+	
 	patch := &repository.UpdateUserInput{
 		BusinessName: input.BusinessName,
 		BusinessType: input.BusinessType,
