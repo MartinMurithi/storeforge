@@ -81,7 +81,6 @@ func ToProtoFetchAllUsersResponse(users []*entity.User, meta *dto.PaginationMeta
 	}
 }
 
-
 func ToProtoUpdateUserResponse(user *entity.User) *userv1.UpdateUserResponse {
 	if user == nil {
 		return nil
@@ -89,5 +88,12 @@ func ToProtoUpdateUserResponse(user *entity.User) *userv1.UpdateUserResponse {
 
 	return &userv1.UpdateUserResponse{
 		User: ToProtoUser(user),
+	}
+}
+
+func ToProtoSoftDeleteUserResponse() *userv1.DeleteUserResponse {
+
+	return &userv1.DeleteUserResponse{
+		Message: "User deleted successfully",
 	}
 }

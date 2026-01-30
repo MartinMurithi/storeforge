@@ -201,7 +201,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 
 	// --- Total Users Count ---
 	var totalUsers int
-	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&totalUsers); err != nil {
+	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE deleted_at IS NULL`).Scan(&totalUsers); err != nil {
 		return nil, 0, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
@@ -218,6 +218,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 	query := `
 		SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
 		FROM users
+		WHERE deleted_at IS NULL
 		ORDER BY created_at DESC
 		LIMIT $1 OFFSET $2
 	`
@@ -268,7 +269,7 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 			business_name = COALESCE($1, business_name),
 			business_type = COALESCE($2, business_type),
 			updated_at = NOW()
-		WHERE id = $3
+		WHERE deleted_at IS NULL OR id = $3
 		RETURNING
 			id,
 			full_name,
