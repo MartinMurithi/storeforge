@@ -4,9 +4,9 @@ import (
 	"net/mail"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
-	
 )
 
 var e164Regex = regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)
@@ -32,4 +32,13 @@ func ValidatePhone(phone string) (string, error) {
 		trimmed = trimmed[1:]
 	}
 	return trimmed, nil
+}
+
+
+func IsValidDate(format, dateString string) bool {
+	t, err := time.Parse(format, dateString)
+	if err != nil {
+		return false
+	}
+	return t.Format(format) == dateString
 }

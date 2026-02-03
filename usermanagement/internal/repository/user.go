@@ -22,9 +22,12 @@ type UserRepository struct {
 
 type IUserRepository interface {
 	CreateUser(ctx context.Context, user *entity.User) error
-	GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*entity.User, error)
-	GetUserByPhone(ctx context.Context, phone string) (*entity.User, error)
+	GetActiveUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error)
+	GetUserByIdIcludingDeleted(ctx context.Context, id pgtype.UUID) (*entity.User, error)
+	GetActiveUserByEmail(ctx context.Context, email string) (*entity.User, error)
+	GetUserByEmailIncludingDeleted(ctx context.Context, email string) (*entity.User, error)
+	GetActiveUserByPhone(ctx context.Context, phone string) (*entity.User, error)
+	GetUserByPhoneIncludingDeleted(ctx context.Context, phone string) (*entity.User, error)
 	GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error)
 	PatchUser(ctx context.Context, id pgtype.UUID, input *UpdateUserInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
@@ -38,6 +41,13 @@ type UpdateUserInput struct {
 	BusinessName *string
 	BusinessType *string
 }
+
+type userLookupMode int
+
+const (
+	onlyActive userLookupMode = iota
+	includeDeleted
+)
 
 func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) error {
 	const op = "UserRepository.CreateUser"
@@ -79,25 +89,35 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) e
 	return nil
 }
 
-func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
-	const op = "UserRepository.GetUserById"
+func (repo *UserRepository) getUser(
+	ctx context.Context,
+	where string,
+	arg any,
+	mode userLookupMode,
+) (*entity.User, error) {
 
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
+	query := `
+		SELECT id, full_name, email, phone, password_hash,
+		       business_type, business_name,
+		       created_at, updated_at, deleted_at, is_verified
+		FROM users
+		WHERE ` + where
+
+	if mode == onlyActive {
+		query += " AND deleted_at IS NULL"
+	}
+
 	user := &entity.User{}
 
-	query := `
-		SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
-		FROM users
-		WHERE id = $1
-	`
-
-	err := repo.DB.QueryRow(ctx, query, id).Scan(
+	err := repo.DB.QueryRow(ctx, query, arg).Scan(
 		&user.ID,
 		&user.FullName,
 		&user.Email,
 		&user.Phone,
+		&user.PasswordHash,
 		&user.BusinessType,
 		&user.BusinessName,
 		&user.CreatedAt,
@@ -110,87 +130,40 @@ func (repo *UserRepository) GetUserById(ctx context.Context, id pgtype.UUID) (*e
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperrors.ErrUserNotFound
 		}
-
 		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
 	}
 
 	return user, nil
 }
 
-func (repo *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entity.User, error) {
-	const op = "UserRepository.GetUserByEmail"
-
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
-
-	user := &entity.User{}
-
-	query := `
-		SELECT id, full_name, email, phone, password_hash, business_type, business_name, created_at, updated_at, is_verified
-		FROM users
-		WHERE email = $1
-	`
-
-	err := repo.DB.QueryRow(ctx, query, email).Scan(
-		&user.ID,
-		&user.FullName,
-		&user.Email,
-		&user.Phone,
-		&user.PasswordHash,
-		&user.BusinessType,
-		&user.BusinessName,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-		&user.IsVerified,
-	)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperrors.ErrUserNotFound
-		}
-
-		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
-	}
-
-	return user, nil
+func (repo *UserRepository) GetActiveUserById(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
+	const op = "UserRepository.GetActiveById"
+	return repo.getUser(ctx, "id=$1", id, onlyActive)
 }
 
-func (repo *UserRepository) GetUserByPhone(ctx context.Context, phone string) (*entity.User, error) {
-	const op = "UserRepository.GetUserByPhone"
+func (repo *UserRepository) GetUserByIdIcludingDeleted(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
+	const op = "UserRepository.GetByIdIcludingDeleted"
+	return repo.getUser(ctx, "id=$1", id, includeDeleted)
+}
 
-	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-	defer cancel()
+func (repo *UserRepository) GetActiveUserByEmail(ctx context.Context, email string) (*entity.User, error) {
+	const op = "UserRepository.GetActiveByEmail"
+	return repo.getUser(ctx, "email=$1", email, onlyActive)
+}
 
-	user := &entity.User{}
+func (repo *UserRepository) GetUserByEmailIncludingDeleted(ctx context.Context, email string) (*entity.User, error) {
+	const op = "UserRepository.GetByEmailIncludingDeleted"
+	return repo.getUser(ctx, "email=$1", email, includeDeleted)
+}
 
-	query := `
-		SELECT id, full_name, email, phone, password_hash, business_type, business_name, created_at, updated_at, is_verified
-		FROM users
-		WHERE phone = $1
-	`
+func (repo *UserRepository) GetActiveUserByPhone(ctx context.Context, phone string) (*entity.User, error) {
+	const op = "UserRepository.GetActiveByPhone"
+	return repo.getUser(ctx, "phone=$1", phone, onlyActive)
+}
 
-	err := repo.DB.QueryRow(ctx, query, phone).Scan(
-		&user.ID,
-		&user.FullName,
-		&user.Email,
-		&user.Phone,
-		&user.PasswordHash,
-		&user.BusinessType,
-		&user.BusinessName,
-		&user.CreatedAt,
-		&user.UpdatedAt,
-		&user.IsVerified,
-	)
-
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, apperrors.ErrUserNotFound
-		}
-
-		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
-	}
-
-	return user, nil
+func (repo *UserRepository) GetUserByPhoneIncludingDeleted(ctx context.Context, phone string) (*entity.User, error) {
+	const op = "UserRepository.GetByPhoneIncludingDeleted"
+	return repo.getUser(ctx, "phone=$1", phone, includeDeleted)
 }
 
 func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error) {
@@ -269,7 +242,7 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 			business_name = COALESCE($1, business_name),
 			business_type = COALESCE($2, business_type),
 			updated_at = NOW()
-		WHERE deleted_at IS NULL OR id = $3
+		WHERE deleted_at IS NULL AND id = $3
 		RETURNING
 			id,
 			full_name,
@@ -323,7 +296,7 @@ func (repo *UserRepository) DeleteUser(ctx context.Context, id pgtype.UUID) erro
 	query := `
 		UPDATE users
 		SET deleted_at = NOW()
-		WHERE id = $1
+		WHERE id = $1 AND deleted_at IS NULL
 		RETURNING id
 	`
 

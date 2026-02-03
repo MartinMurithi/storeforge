@@ -35,6 +35,10 @@ func MapGrpcError(err error) error {
 		return status.Error(codes.InvalidArgument, "invalid page number")
 	case errors.Is(err, apperrors.ErrInvalidLimitNumber):
 		return status.Error(codes.InvalidArgument, "invalid limit number")
+	case errors.Is(err, apperrors.ErrAccountDeactivated):
+		return status.Error(codes.PermissionDenied, "your account has been deactivated. please contact support")
+	case errors.Is(err, apperrors.ErrUserNotFound):
+		return status.Error(codes.NotFound, "user not found")
 	default:
 		return status.Error(codes.Internal, "internal server error")
 	}

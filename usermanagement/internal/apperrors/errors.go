@@ -32,6 +32,7 @@ var (
 var (
 	ErrUserAlreadyExists         = errors.New("user already exists")
 	ErrBusinessNameAlreadyExists = errors.New("business name already exists")
+	ErrAccountDeactivated = errors.New("your account has been deactivated. Please contact support.")
 )
 
 // Credentials rule errors

@@ -30,3 +30,8 @@ done
 
 echo -e "${GREEN}All tests passed for $SERVICE_NAME!${NC}"
 
+# Generate private key
+# openssl genpkey -algorithm RSA -out jwt_private.pem -pkeyopt rsa_keygen_bits:2048
+# Generate public key
+# openssl pkey -in jwt_private.pem -pubout -out jwt_public.pem
+
