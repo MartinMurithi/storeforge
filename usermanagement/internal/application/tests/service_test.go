@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
@@ -15,10 +16,12 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
+	"github.com/google/uuid"
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFetchAllUsers_Success(t *testing.T) {
@@ -174,6 +177,67 @@ func TestSoftDeleteUser_NotFound(t *testing.T) {
 	mockRepo.On("DeleteUser", ctx, id).Return(apperrors.ErrUserNotFound)
 	err := srv.SoftDeleteUser(ctx, id)
 	assert.ErrorIs(t, err, apperrors.ErrUserNotFound)
+}
+
+
+func TestGetUserByEmailIncludingDeleted(t *testing.T) {
+	mockRepo := new(MockRepository)
+	ctx := context.Background()
+	deletedUser := &entity.User{
+		ID:        pgtype.UUID{Bytes: uuid.New()},
+		Email:     "deleted@example.com",
+		DeletedAt: &time.Time{},
+	}
+
+	mockRepo.On("GetUserByEmailIncludingDeleted", ctx, "deleted@example.com").
+		Return(deletedUser, nil)
+
+	user, err := mockRepo.GetUserByEmailIncludingDeleted(ctx, "deleted@example.com")
+	require.NoError(t, err)
+	require.NotNil(t, user)
+	require.NotNil(t, user.DeletedAt)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestGetUserByIdIncludingDeleted(t *testing.T) {
+	mockRepo := new(MockRepository)
+	ctx := context.Background()
+	id := pgtype.UUID{Bytes: uuid.New()}
+	deletedUser := &entity.User{
+		ID:        id,
+		DeletedAt: &time.Time{},
+	}
+
+	mockRepo.On("GetUserByIdIncludingDeleted", ctx, id).
+		Return(deletedUser, nil)
+
+	user, err := mockRepo.GetUserByIdIncludingDeleted(ctx, id)
+	require.NoError(t, err)
+	require.NotNil(t, user)
+	require.NotNil(t, user.DeletedAt)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestGetUserByPhoneIncludingDeleted(t *testing.T) {
+	mockRepo := new(MockRepository)
+	ctx := context.Background()
+	phone := "+254700123456"
+	deletedUser := &entity.User{
+		Phone:     phone,
+		DeletedAt: &time.Time{},
+	}
+
+	mockRepo.On("GetUserByPhoneIncludingDeleted", ctx, phone).
+		Return(deletedUser, nil)
+
+	user, err := mockRepo.GetUserByPhoneIncludingDeleted(ctx, phone)
+	require.NoError(t, err)
+	require.NotNil(t, user)
+	require.NotNil(t, user.DeletedAt)
+
+	mockRepo.AssertExpectations(t)
 }
 
 // ====================== AUTH TESTS ===========================

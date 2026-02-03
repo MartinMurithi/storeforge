@@ -63,9 +63,14 @@ func (srv *UserService) GetCurrentUserById(ctx context.Context, id pgtype.UUID) 
 
 	log.Printf("user id %v", id.Valid)
 
-	user, err := srv.repo.GetUserById(ctx, id)
+	user, err := srv.repo.GetUserByIdIcludingDeleted(ctx, id)
 
 	if err != nil {
+		return nil, fmt.Errorf("%s: error fetching user %w", op, err)
+	}
+
+	if user.DeletedAt != nil {
+		log.Printf("user account has been deactivated \n")
 		return nil, fmt.Errorf("%s: error fetching user %w", op, err)
 	}
 
@@ -77,7 +82,6 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 
 	log.Printf("user id %v", input.Id.Valid)
 
-	
 	patch := &repository.UpdateUserInput{
 		BusinessName: input.BusinessName,
 		BusinessType: input.BusinessType,

@@ -74,7 +74,7 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	}
 
 	//check if user already exists by email
-	existingUser, err := srv.repo.GetUserByEmail(ctx, input.Email)
+	existingUser, err := srv.repo.GetActiveUserByEmail(ctx, input.Email)
 
 	if existingUser != nil {
 		log.Printf("[%s] user with email %s is already registered ", op, input.Email)
@@ -82,14 +82,12 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 	}
 
 	//check if phone already exists
-	existingPhone, err := srv.repo.GetUserByPhone(ctx, input.Phone)
+	existingPhone, err := srv.repo.GetActiveUserByPhone(ctx, input.Phone)
 
 	if existingPhone != nil {
 		log.Printf("[%s] user with phone number %s already exists ", op, input.Phone)
 		return nil, apperrors.ErrUserAlreadyExists
 	}
-
-	
 
 	//hashpassword
 	hashedPassword, err := utils.Hashpassword(input.Password)
@@ -134,7 +132,7 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	}
 
 	//check if user already exists
-	existingUser, err := srv.repo.GetUserByEmail(ctx, input.Email)
+	existingUser, err := srv.repo.GetUserByEmailIncludingDeleted(ctx, input.Email)
 
 	fmt.Println("exisiting user", existingUser)
 
@@ -145,6 +143,11 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		}
 		log.Printf("[%s] get user by email failed '%s': ", op, err)
 		return nil, nil, err
+	}
+
+	if existingUser.DeletedAt != nil {
+		log.Printf("your accoun has been deactivated. please contact support")
+		return nil, nil, apperrors.ErrAccountDeactivated
 	}
 
 	//verify password
