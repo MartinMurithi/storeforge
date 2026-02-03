@@ -3,9 +3,9 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"os"
 	"time"
 
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,36 +16,21 @@ type Pool struct {
 
 var dbPool *Pool
 
-func Connect(ctx context.Context) (*Pool, error) {
-
-	const maxConnections = 20
-	const minConnections = 4
-	const minIdleConnections = 3
-	const maxConnectionsLifeTime = 1 * time.Hour
-	const MaxConnIdleTime = 30 * time.Minute
-	const healthCheckPeriod = 1 * time.Minute
-	const connectionTimeout = 10 * time.Second //fail first on bad network
-
-	dsn := os.Getenv("DATABASE_URL")
-
-	if dsn == "" {
-		return nil, fmt.Errorf("Database_URL is required")
-	}
+func Connect(ctx context.Context, cfg *config.DBConfig) (*Pool, error) {
 
 	// Parse and configure a new connection pool
-	config, err := pgxpool.ParseConfig(dsn)
-
+	config, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
-		return nil, fmt.Errorf("invalid DATABASE_URL %s", err)
+		return nil, fmt.Errorf("invalid DATABASE_URL: %w", err)
 	}
 
-	config.MaxConns = maxConnections
-	config.MinConns = minConnections
-	config.MinIdleConns = minIdleConnections
-	config.MaxConnLifetime = maxConnectionsLifeTime
-	config.MaxConnIdleTime = MaxConnIdleTime
-	config.HealthCheckPeriod = healthCheckPeriod
-	config.ConnConfig.ConnectTimeout = connectionTimeout
+	config.MaxConns = cfg.MaxConns
+	config.MinConns = cfg.MinConns
+	config.MinIdleConns = cfg.MinIdleConns
+	config.MaxConnLifetime = cfg.MaxConnLifetime
+	config.MaxConnIdleTime = cfg.MaxConnIdleTime
+	config.HealthCheckPeriod = cfg.HealthCheckPeriod
+	config.ConnConfig.ConnectTimeout = cfg.ConnectTimeout
 
 	// Enforce TLS in production, revisit this later
 	// if os.Getenv("ENV") != "development" && os.Getenv("GO_ENV") != "development" {

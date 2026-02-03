@@ -4,6 +4,8 @@ import (
 	"context"
 	"os"
 	"testing"
+
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 )
 
 func TestConnect_Success(t *testing.T) {
@@ -11,7 +13,7 @@ func TestConnect_Success(t *testing.T) {
 
 	ctx := context.Background()
 
-	pool, err := Connect(ctx)
+	pool, err := Connect(ctx, &config.DBConfig{})
 
 	if err != nil {
 		t.Fatalf("expected connection to succeed, got error: %v", err)
@@ -31,7 +33,7 @@ func TestConnect_MissingDSN(t *testing.T) {
 
 	ctx := context.Background()
 
-	pool, err := Connect(ctx)
+	pool, err := Connect(ctx, &config.DBConfig{})
 
 	if err == nil {
 		t.Fatal("expected error due to missing DATABASE_URL, got nil")
@@ -46,7 +48,7 @@ func TestConnect_InvalidDSN(t *testing.T) {
 
 	ctx := context.Background()
 
-	pool, err := Connect(ctx)
+	pool, err := Connect(ctx, &config.DBConfig{})
 
 	if err == nil {
 		t.Fatal("expected error due to invalid DSN, got nil")
@@ -62,7 +64,7 @@ func TestConnect_Timeout(t *testing.T) {
 
 	ctx := context.Background()
 
-	pool, err := Connect(ctx)
+	pool, err := Connect(ctx, &config.DBConfig{})
 
 	if err == nil {
 		t.Fatal("expected error due to unreachable DB, got nil")

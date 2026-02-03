@@ -6,6 +6,8 @@ import (
 	"log"
 	"sync"
 
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
+	
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -13,7 +15,7 @@ import (
 
 var mu sync.Mutex
 
-func InitDB(ctx context.Context) error {
+func InitDB(ctx context.Context, cfg *config.DBConfig) error {
 	mu.Lock()
 	defer mu.Unlock()
 
@@ -21,7 +23,7 @@ func InitDB(ctx context.Context) error {
 		return nil
 	}
 
-	pool, err := Connect(ctx)
+	pool, err := Connect(ctx, &config.DBConfig{})
 
 	if err != nil {
 		return err
