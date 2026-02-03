@@ -75,8 +75,12 @@ func Load() (*Config, error) {
 		Env: "prod",
 	}
 
+	// Validate required fields
 	if cfg.DB.DSN == "" {
 		return nil, fmt.Errorf("DATABASE_URL is required")
+	}
+	if cfg.JWT.PrivateKeyPath == "" || cfg.JWT.PublicKeyPath == "" {
+		return nil, fmt.Errorf("JWT_PRIVATE_KEY_PATH and JWT_PUBLIC_KEY_PATH are required")
 	}
 
 	return cfg, nil

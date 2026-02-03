@@ -3,19 +3,13 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"log"
-	"os"
 	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/middleware"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/routes"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
@@ -27,104 +21,60 @@ type App struct {
 	UserService *user.UserService
 	AuthService *auth.AuthService
 	Handler     *http.UserHandler
-	Router      *gin.Engine
 	JWTMaker    *token.JWTMaker
 	GRPCServer  *grpc.Server
 }
 
-func Init() (*App, error) {
-
-	// --------- LOAD ENV CONFIGS ---------
-	err := godotenv.Load(".env")
-
+// Init initializes the application with full dependency injection
+func Init(cfg *config.Config) (*App, error) {
+	// -------------------------
+	// JWT setup
+	// -------------------------
+	privateKey, err := token.LoadPrivateKey(cfg.JWT.PrivateKeyPath)
 	if err != nil {
-		log.Printf("Warning: .env not loaded, relying on system env: %v", err)
+		return nil, fmt.Errorf("error loading JWT private key: %w", err)
 	}
 
-	jwtPrivateKeyPath := os.Getenv("JWT_PRIVATE_KEY_PATH")
-
-	if jwtPrivateKeyPath == "" {
-		return nil, fmt.Errorf("JWT_PRIVATE_KEY_PATH is not set")
-	}
-
-	// --------- LOAD PRIVATE KEY ---------
-	privateKey, err := token.LoadPrivateKey(jwtPrivateKeyPath)
-
-	if err != nil {
-		return nil, fmt.Errorf("error loading JWT_PRIVATE_KEY %w", err)
-	}
+	// publicKey, err := token.LoadPublicKey(cfg.JWT.PublicKeyPath)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error loading JWT public key: %w", err)
+	// }
 
 	jwtMaker, err := token.NewJWTMaker(privateKey)
-
 	if err != nil {
-		return nil, fmt.Errorf("error initializing JWT Maker %w", err)
+		return nil, fmt.Errorf("error initializing JWT maker: %w", err)
 	}
 
-	// --------- LOAD PUBLIC KEY ---------
-	jwtPublicKeyPath := os.Getenv("JWT_PUBLIC_KEY_PATH")
-
-	if jwtPublicKeyPath == "" {
-		return nil, fmt.Errorf("JWT_PUBLIC_KEY_PATH is not set")
-	}
-
-	publicKey, err := token.LoadPublicKey(jwtPublicKeyPath)
-
-	if err != nil {
-		return nil, fmt.Errorf("error loading JWT_PUBLIC_KEY %w", err)
-	}
-
-	// --------- AUTH MIDDLEWARE ---------
-	authMiddleware := middleware.AuthMiddleware(jwtMaker, publicKey, "storeforge-api", "auth.storeforge")
-
-	// --------- INITIALIZE DB ---------
+	// -------------------------
+	// Database setup
+	// -------------------------
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = postgres.InitDB(ctx)
+	pool, err := postgres.Connect(ctx, &cfg.DB)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to init db: %s", err)
+		return nil, fmt.Errorf("failed to connect to DB: %w", err)
 	}
 
-	// --------- RUN DB MIGRATIONS ---------
-
-	err = postgres.RunMigrations(os.Getenv("DATABASE_URL"))
-
-	if err != nil {
-		return nil, fmt.Errorf("failed to run migrations %w", err)
+	if err := postgres.RunMigrations(cfg.DB.DSN); err != nil {
+		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
 
-	// --------- DOMAIN ---------
-	pool := postgres.Get()                   // *postgres.Pool
-	pgxPool := pool.Pool                     // *pgxpool.Pool
-	db := postgres.NewAdapter(pgxPool)       // database.DB interface
-	repo := repository.NewUserRepository(db) // IUserRepository
+	dbAdapter := postgres.NewAdapter(pool.Pool)
+	repo := repository.NewUserRepository(dbAdapter)
+
+	// -------------------------
+	// Application services
+	// -------------------------
 	userSrv := user.NewUserService(repo)
 	authSrv := auth.NewAuthService(repo, jwtMaker)
 	handler := http.NewUserHandler(userSrv, authSrv)
 
-	// -------- ROUTER ---------
-	gin.SetMode(gin.ReleaseMode)
-
-	router := gin.Default()
-
-	if err := router.SetTrustedProxies([]string{}); err != nil {
-		log.Fatalf("failed to set trusted proxies%v", err)
-	}
-
-	router.GET("/", func(c *gin.Context) {
-		fmt.Printf("ClientIP: %s\n", c.ClientIP())
-	})
-
-	routes.RegisterUserRoutes(router, handler, authMiddleware)
-
-	// --------- GRPC SERVER ---------
-	grpcSrv, err := grpc.NewGRPCServer(
-		9090,
-		userSrv,
-		authSrv,
-	)
-
+	// -------------------------
+	// gRPC Server
+	// -------------------------
+	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
 	}
@@ -135,8 +85,7 @@ func Init() (*App, error) {
 		UserService: userSrv,
 		AuthService: authSrv,
 		Handler:     handler,
-		Router:      router,
 		JWTMaker:    jwtMaker,
 		GRPCServer:  grpcSrv,
-	}, err
+	}, nil
 }

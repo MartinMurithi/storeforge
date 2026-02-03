@@ -32,14 +32,6 @@ func Connect(ctx context.Context, cfg *config.DBConfig) (*Pool, error) {
 	config.HealthCheckPeriod = cfg.HealthCheckPeriod
 	config.ConnConfig.ConnectTimeout = cfg.ConnectTimeout
 
-	// const maxConnections = &cfg.MaxConns
-	// const minConnections = 4
-	// const minIdleConnections = 3
-	// const maxConnectionsLifeTime = 1 * time.Hour
-	// const MaxConnIdleTime = 30 * time.Minute
-	// const healthCheckPeriod = 1 * time.Minute
-	// const connectionTimeout = 10 * time.Second //fail first on bad network
-
 	// Enforce TLS in production, revisit this later
 	// if os.Getenv("ENV") != "development" && os.Getenv("GO_ENV") != "development" {
 	//     if config.ConnConfig.TLSConfig == nil {
