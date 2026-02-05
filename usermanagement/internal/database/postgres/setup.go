@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
-	
+
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -53,25 +53,23 @@ func Reset() {
 	dbPool = nil
 }
 
-func RunMigrations(databaseUrl string) error {
-	m, err := migrate.New("file://migrations", databaseUrl)
-
+func RunMigrations(databaseURL string) error {
+	m, err := migrate.New(
+		"file://migrations",
+		databaseURL,
+	)
 	if err != nil {
-		return fmt.Errorf("migrate init: %w", err)
+		return fmt.Errorf("init migrate: %w", err)
 	}
 
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
-		return fmt.Errorf("migrate up: %w", err)
+	if err := m.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("no new migrations to apply")
+			return nil
+		}
+		return fmt.Errorf("apply migrations: %w", err)
 	}
 
-	if err == migrate.ErrNoChange {
-		log.Println("No new migrations to apply")
-	} else {
-		log.Println("Migrations applied successfully")
-	}
-
-	log.Println("Migrations applied (if any)")
-
+	log.Println("migrations applied successfully")
 	return nil
 }
