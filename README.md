@@ -1,7 +1,7 @@
 
 # StoreForge
 
-**StoreForge** is a microservices-based Platform-as-a-Service (PaaS) that enables merchants to launch fully functional e-commerce stores in under **5 minutes**. Built with **Go, gRPC, event-driven architecture, and modular microservices**, it supports trial-first subscriptions, direct merchant payouts, and a plugin-friendly ecosystem for extensibility.
+**StoreForge** is a microservices-based Platform-as-a-Service (PaaS) that enables merchants to launch fully functional e-commerce stores in under **5 minutes**. Built with **Go, gRPC, envoy proxy event-driven architecture, and modular microservices**, it supports trial-first subscriptions, direct merchant payouts, and a plugin-friendly ecosystem for extensibility.
 
 This repository serves as the reference for the StoreForge system architecture, design patterns, and technical implementation.
 
@@ -68,7 +68,7 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 | -------------- | ----------------------------------- | ----------------------------------------------------------- |
 | gRPC (sync)    | Real-time requests between services | Gateway → OnboardingService, OrdersService → CatalogService |
 | Events (async) | Decoupled workflows                 | `StoreProvisioned`, `PaymentCompleted`, `OrderPaid`         |
-| HTTP / GraphQL | Client-facing API                   | Dashboard requests, API for merchant apps                   |
+| HTTP | Client-facing API                   | Dashboard requests, API for merchant apps                   |
 
 ---
 
@@ -93,7 +93,7 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 - Publishes inventory change events  
 
 ### Payments Service
-- Supports **M-Pesa, Stripe**, and other plugins  
+- Supports **M-Pesa**, and other plugins  
 - Differentiates between **sandbox (trial)** and **live accounts**  
 - Direct payouts to merchants, platform does not handle funds  
 - Publishes events: `PaymentCompleted`, `PaymentFailed`, `PaymentRefunded`  
@@ -114,7 +114,7 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 
 ### Extensions / Plugin Registry Service
 - Optional integrations like **Fleetbase delivery, advanced analytics**  
-- Plugins integrate **asynchronously via events**  
+- Plugins integrate **asynchronously via events**
 
 ---
 
@@ -149,7 +149,7 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 ## Security Considerations
 
 - JWT tokens for authentication  
-- Role-based access enforced at **gateway**  
+- Policy-based access enforced at **gateway**  
 - TLS/SSL termination at **NGINX edge**  
 - Sandbox accounts for trial merchants  
 - Secrets management for payments and plugins  
@@ -162,7 +162,7 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 1. DDD First: Bounded contexts with clear ownership  
 2. Event-Driven Workflows: Asynchronous orchestration  
 3. Microservices Isolation: Independent deployable units  
-4. Gateway Edge: Aggregation, auth, client-facing entry point  
+4. Gateway Edge(Envoy): Aggregation, auth, client-facing entry point  
 5. Zero-Touch Onboarding: Quick merchant setup  
 6. Plugin-Friendly Architecture: Extensions via events  
 7. Observability & Metrics: Centralized logging and monitoring  
@@ -185,14 +185,14 @@ StoreForge is designed for **rapid merchant onboarding**, **scalable microservic
 
 ### Prerequisites
 - Go 1.20+  
-- PostgreSQL / MongoDB  
-- Message broker: Kafka, NATS, or RabbitMQ  
-- Docker & Docker Compose (optional for local environment)  
+- PostgreSQL && MongoDB  
+- Message broker: NATS  
+- Docker & Docker Compose
 
 ### Running Locally
 1. Clone the repository  
    ```bash
-   git clone https://github.com/yourusername/storeforge.git
+   git clone https://github.com/MartinMurithi/storeforge.git
    cd storeforge
 Start databases and message broker
 
