@@ -3,6 +3,7 @@ syntax = "proto3";
 package storeforge.auth.v1;
 
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 option go_package = "github.com/storeforge/usermanagement/proto/auth/v1;authv1";
 
@@ -10,9 +11,19 @@ option go_package = "github.com/storeforge/usermanagement/proto/auth/v1;authv1";
 service AuthService {
 
   // Register creates a new user account with the provided credentials and business information.
-  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Register(RegisterRequest) returns (RegisterResponse){
+    option (google.api.http) = {
+      post: "/v1/auth/register"
+      body: "*"
+    };
+  };
   // Login authenticates a user and returns an access token.
-  rpc Login(LoginRequest) returns (LoginResponse);
+  rpc Login(LoginRequest) returns (LoginResponse){
+    option (google.api.http) = {
+      post: "/v1/auth/login"
+      body: "*"
+    };
+  };
 }
 
 // It is an identity-level entity

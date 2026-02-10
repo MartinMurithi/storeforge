@@ -41,7 +41,7 @@ func NewUserClaims(id pgtype.UUID, tenantId pgtype.UUID, email, role string, dur
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			ID:        pgUUID.String(),
 			Subject:   id.String(),
-			Issuer:    "auth.storeforge",
+			Issuer:    "usermanagement.auth.storeforge",
 			Audience:  []string{"storeforge-api"},
 		},
 	}, nil

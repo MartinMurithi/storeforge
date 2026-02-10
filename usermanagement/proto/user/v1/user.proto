@@ -5,17 +5,34 @@ package storeforge.user.v1;
 option go_package = "github.com/storeforge/usermanagement/proto/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
 
 // UserService provides operations for managing user accounts and profiles.
 service UserService{
   // GetCurrentUser retrieves a user by their unique identifier.
-  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {};
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  };
   // GetAllUsers retrieves all users with pagination support.
-  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {};
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/users"
+    };
+  };
   // UpdateUser updates an existing user's profile information.
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {};
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  };
   // DeleteUser soft deletes a user account.
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {};
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
+    option (google.api.http) = {
+      get: "/v1/users/{id}"
+    };
+  };
 
 }
 
@@ -57,7 +74,7 @@ message PaginationMeta {
   int32 total       = 3;
   int32 total_pages = 4;
   bool  has_next    = 5;
-  bool  has_prev     = 6;
+  bool  has_prev    = 6;
 }
 
 message GetAllUsersRequest{
@@ -66,12 +83,12 @@ message GetAllUsersRequest{
 }
 
 message GetAllUsersResponse{
-  repeated User users = 1;
-  PaginationMeta        meta = 2;
+  repeated User  users = 1;
+  PaginationMeta meta  = 2;
 }
 
 message UpdateUserRequest {
-  string id            = 1;
+  string          id            = 1;
   optional string business_name = 2;
   optional string business_type = 3;
 }
