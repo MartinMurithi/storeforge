@@ -52,7 +52,7 @@ func Load() (*Config, error) {
 	healthPeriod, _ := time.ParseDuration(getEnv("DB_HEALTH_PERIOD", "1m"))
 	connectTimeout, _ := time.ParseDuration(getEnv("DB_CONNECT_TIMEOUT", "10s"))
 
-	grpcPort, _ := strconv.Atoi(getEnv("GRPC_PORT", "9090"))
+	grpcPort, _ := strconv.Atoi(getEnv("GRPC_PORT", "50051"))
 
 	cfg := &Config{
 		DB: DBConfig{

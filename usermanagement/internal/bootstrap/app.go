@@ -9,6 +9,7 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/jwks"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc"
@@ -35,10 +36,11 @@ func Init(cfg *config.Config) (*App, error) {
 		return nil, fmt.Errorf("error loading JWT private key: %w", err)
 	}
 
-	// publicKey, err := token.LoadPublicKey(cfg.JWT.PublicKeyPath)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("error loading JWT public key: %w", err)
-	// }
+	publicKey, err := token.LoadPublicKey(cfg.JWT.PublicKeyPath)
+
+	if err != nil {
+		return nil, fmt.Errorf("error loading JWT public key: %w", err)
+	}
 
 	jwtMaker, err := token.NewJWTMaker(privateKey)
 	if err != nil {
@@ -78,6 +80,9 @@ func Init(cfg *config.Config) (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
 	}
+
+	// Expose JWKs for envoy JWT verification
+	go jwks.ServeJWKS(publicKey)
 
 	return &App{
 		DB:          pool,
