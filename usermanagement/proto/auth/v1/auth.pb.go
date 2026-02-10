@@ -7,6 +7,7 @@
 package authv1
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
@@ -504,7 +505,7 @@ var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\x12storeforge.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xb9\x02\n" +
+	"\x12auth/v1/auth.proto\x12\x12storeforge.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"\xb9\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1f\n" +
@@ -546,10 +547,10 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"expires_in\x18\x03 \x01(\x03R\texpiresIn\x127\n" +
 	"\tissued_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\bissuedAt\x12\x1d\n" +
 	"\n" +
-	"token_type\x18\x05 \x01(\tR\ttokenType2\xb2\x01\n" +
-	"\vAuthService\x12U\n" +
-	"\bRegister\x12#.storeforge.auth.v1.RegisterRequest\x1a$.storeforge.auth.v1.RegisterResponse\x12L\n" +
-	"\x05Login\x12 .storeforge.auth.v1.LoginRequest\x1a!.storeforge.auth.v1.LoginResponseB;Z9github.com/storeforge/usermanagement/proto/auth/v1;authv1b\x06proto3"
+	"token_type\x18\x05 \x01(\tR\ttokenType2\xeb\x01\n" +
+	"\vAuthService\x12s\n" +
+	"\bRegister\x12#.storeforge.auth.v1.RegisterRequest\x1a$.storeforge.auth.v1.RegisterResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12g\n" +
+	"\x05Login\x12 .storeforge.auth.v1.LoginRequest\x1a!.storeforge.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/loginB;Z9github.com/storeforge/usermanagement/proto/auth/v1;authv1b\x06proto3"
 
 var (
 	file_auth_v1_auth_proto_rawDescOnce sync.Once
