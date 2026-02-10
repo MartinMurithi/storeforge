@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package storeforge.user.v1;
+package api.user.v1;
 
-option go_package = "github.com/storeforge/usermanagement/proto/user/v1;userv1";
+option go_package = "github.com/storeforge/api/protos/user/v1;userv1";
 
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
@@ -37,19 +37,19 @@ service UserService{
 }
 
 message User {
-  string                    id          = 1;
-  string                    email       = 2;
-  bool                      is_verified = 3;
-  UserProfile               profile     = 4;
-  google.protobuf.Timestamp created_at  = 5;
-  google.protobuf.Timestamp updated_at  = 6;
-  google.protobuf.Timestamp deleted_at  = 7;
+  string id = 1;
+  string email = 2;
+  bool is_verified = 3;
+  UserProfile profile = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+  google.protobuf.Timestamp deleted_at = 7;
 }
 
 // UserProfile contains mutable, non-authentication user data.
 message UserProfile {
-  string full_name     = 1;
-  string phone         = 2;
+  string full_name = 1;
+  string phone = 2;
   string business_name = 3;
   string business_type = 4;
 }
@@ -63,32 +63,32 @@ message GetCurrentUserResponse{
 }
 
 message Pagination{
-  int32 page  = 1;
+  int32 page = 1;
   int32 limit = 2;
 }
 
 // Meta info for paginated response
 message PaginationMeta {
-  int32 page        = 1;
-  int32 limit       = 2;
-  int32 total       = 3;
+  int32 page = 1;
+  int32 limit = 2;
+  int32 total = 3;
   int32 total_pages = 4;
-  bool  has_next    = 5;
-  bool  has_prev    = 6;
+  bool has_next = 5;
+  bool has_prev = 6;
 }
 
 message GetAllUsersRequest{
-  int32 page  = 1;
+  int32 page = 1;
   int32 limit = 2;
 }
 
 message GetAllUsersResponse{
-  repeated User  users = 1;
-  PaginationMeta meta  = 2;
+  repeated User users = 1;
+  PaginationMeta meta = 2;
 }
 
 message UpdateUserRequest {
-  string          id            = 1;
+  string id = 1;
   optional string business_name = 2;
   optional string business_type = 3;
 }

@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
-	authv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/auth/v1"
+	authv1 "github.com/MartinMurithi/storeforge/usermanagement/protos/auth/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

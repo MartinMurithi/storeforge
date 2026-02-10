@@ -709,13 +709,13 @@ var File_user_v1_user_proto protoreflect.FileDescriptor
 
 const file_user_v1_user_proto_rawDesc = "" +
 	"\n" +
-	"\x12user/v1/user.proto\x12\x12storeforge.user.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"\xb9\x02\n" +
+	"\x12user/v1/user.proto\x12\vapi.user.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"\xb2\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1f\n" +
 	"\vis_verified\x18\x03 \x01(\bR\n" +
-	"isVerified\x129\n" +
-	"\aprofile\x18\x04 \x01(\v2\x1f.storeforge.user.v1.UserProfileR\aprofile\x129\n" +
+	"isVerified\x122\n" +
+	"\aprofile\x18\x04 \x01(\v2\x18.api.user.v1.UserProfileR\aprofile\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -728,9 +728,9 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\rbusiness_name\x18\x03 \x01(\tR\fbusinessName\x12#\n" +
 	"\rbusiness_type\x18\x04 \x01(\tR\fbusinessType\"'\n" +
 	"\x15GetCurrentUserRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"F\n" +
-	"\x16GetCurrentUserResponse\x12,\n" +
-	"\x04user\x18\x01 \x01(\v2\x18.storeforge.user.v1.UserR\x04user\"6\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"?\n" +
+	"\x16GetCurrentUserResponse\x12%\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.api.user.v1.UserR\x04user\"6\n" +
 	"\n" +
 	"Pagination\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
@@ -745,29 +745,29 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\bhas_prev\x18\x06 \x01(\bR\ahasPrev\">\n" +
 	"\x12GetAllUsersRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
-	"\x05limit\x18\x02 \x01(\x05R\x05limit\"}\n" +
-	"\x13GetAllUsersResponse\x12.\n" +
-	"\x05users\x18\x01 \x03(\v2\x18.storeforge.user.v1.UserR\x05users\x126\n" +
-	"\x04meta\x18\x02 \x01(\v2\".storeforge.user.v1.PaginationMetaR\x04meta\"\x9b\x01\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"o\n" +
+	"\x13GetAllUsersResponse\x12'\n" +
+	"\x05users\x18\x01 \x03(\v2\x11.api.user.v1.UserR\x05users\x12/\n" +
+	"\x04meta\x18\x02 \x01(\v2\x1b.api.user.v1.PaginationMetaR\x04meta\"\x9b\x01\n" +
 	"\x11UpdateUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12(\n" +
 	"\rbusiness_name\x18\x02 \x01(\tH\x00R\fbusinessName\x88\x01\x01\x12(\n" +
 	"\rbusiness_type\x18\x03 \x01(\tH\x01R\fbusinessType\x88\x01\x01B\x10\n" +
 	"\x0e_business_nameB\x10\n" +
-	"\x0e_business_type\"B\n" +
-	"\x12UpdateUserResponse\x12,\n" +
-	"\x04user\x18\x01 \x01(\v2\x18.storeforge.user.v1.UserR\x04user\"#\n" +
+	"\x0e_business_type\";\n" +
+	"\x12UpdateUserResponse\x12%\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.api.user.v1.UserR\x04user\"#\n" +
 	"\x11DeleteUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\".\n" +
 	"\x12DeleteUserResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xeb\x03\n" +
-	"\vUserService\x12\x7f\n" +
-	"\x0eGetCurrentUser\x12).storeforge.user.v1.GetCurrentUserRequest\x1a*.storeforge.user.v1.GetCurrentUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12q\n" +
-	"\vGetAllUsers\x12&.storeforge.user.v1.GetAllUsersRequest\x1a'.storeforge.user.v1.GetAllUsersResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/users\x12s\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xb3\x03\n" +
+	"\vUserService\x12q\n" +
+	"\x0eGetCurrentUser\x12\".api.user.v1.GetCurrentUserRequest\x1a#.api.user.v1.GetCurrentUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12c\n" +
+	"\vGetAllUsers\x12\x1f.api.user.v1.GetAllUsersRequest\x1a .api.user.v1.GetAllUsersResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/users\x12e\n" +
 	"\n" +
-	"UpdateUser\x12%.storeforge.user.v1.UpdateUserRequest\x1a&.storeforge.user.v1.UpdateUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12s\n" +
+	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12e\n" +
 	"\n" +
-	"DeleteUser\x12%.storeforge.user.v1.DeleteUserRequest\x1a&.storeforge.user.v1.DeleteUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}B;Z9github.com/storeforge/usermanagement/proto/user/v1;userv1b\x06proto3"
+	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}B1Z/github.com/storeforge/api/protos/user/v1;userv1b\x06proto3"
 
 var (
 	file_user_v1_user_proto_rawDescOnce sync.Once
@@ -783,37 +783,37 @@ func file_user_v1_user_proto_rawDescGZIP() []byte {
 
 var file_user_v1_user_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_user_v1_user_proto_goTypes = []any{
-	(*User)(nil),                   // 0: storeforge.user.v1.User
-	(*UserProfile)(nil),            // 1: storeforge.user.v1.UserProfile
-	(*GetCurrentUserRequest)(nil),  // 2: storeforge.user.v1.GetCurrentUserRequest
-	(*GetCurrentUserResponse)(nil), // 3: storeforge.user.v1.GetCurrentUserResponse
-	(*Pagination)(nil),             // 4: storeforge.user.v1.Pagination
-	(*PaginationMeta)(nil),         // 5: storeforge.user.v1.PaginationMeta
-	(*GetAllUsersRequest)(nil),     // 6: storeforge.user.v1.GetAllUsersRequest
-	(*GetAllUsersResponse)(nil),    // 7: storeforge.user.v1.GetAllUsersResponse
-	(*UpdateUserRequest)(nil),      // 8: storeforge.user.v1.UpdateUserRequest
-	(*UpdateUserResponse)(nil),     // 9: storeforge.user.v1.UpdateUserResponse
-	(*DeleteUserRequest)(nil),      // 10: storeforge.user.v1.DeleteUserRequest
-	(*DeleteUserResponse)(nil),     // 11: storeforge.user.v1.DeleteUserResponse
+	(*User)(nil),                   // 0: api.user.v1.User
+	(*UserProfile)(nil),            // 1: api.user.v1.UserProfile
+	(*GetCurrentUserRequest)(nil),  // 2: api.user.v1.GetCurrentUserRequest
+	(*GetCurrentUserResponse)(nil), // 3: api.user.v1.GetCurrentUserResponse
+	(*Pagination)(nil),             // 4: api.user.v1.Pagination
+	(*PaginationMeta)(nil),         // 5: api.user.v1.PaginationMeta
+	(*GetAllUsersRequest)(nil),     // 6: api.user.v1.GetAllUsersRequest
+	(*GetAllUsersResponse)(nil),    // 7: api.user.v1.GetAllUsersResponse
+	(*UpdateUserRequest)(nil),      // 8: api.user.v1.UpdateUserRequest
+	(*UpdateUserResponse)(nil),     // 9: api.user.v1.UpdateUserResponse
+	(*DeleteUserRequest)(nil),      // 10: api.user.v1.DeleteUserRequest
+	(*DeleteUserResponse)(nil),     // 11: api.user.v1.DeleteUserResponse
 	(*timestamppb.Timestamp)(nil),  // 12: google.protobuf.Timestamp
 }
 var file_user_v1_user_proto_depIdxs = []int32{
-	1,  // 0: storeforge.user.v1.User.profile:type_name -> storeforge.user.v1.UserProfile
-	12, // 1: storeforge.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	12, // 2: storeforge.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	12, // 3: storeforge.user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	0,  // 4: storeforge.user.v1.GetCurrentUserResponse.user:type_name -> storeforge.user.v1.User
-	0,  // 5: storeforge.user.v1.GetAllUsersResponse.users:type_name -> storeforge.user.v1.User
-	5,  // 6: storeforge.user.v1.GetAllUsersResponse.meta:type_name -> storeforge.user.v1.PaginationMeta
-	0,  // 7: storeforge.user.v1.UpdateUserResponse.user:type_name -> storeforge.user.v1.User
-	2,  // 8: storeforge.user.v1.UserService.GetCurrentUser:input_type -> storeforge.user.v1.GetCurrentUserRequest
-	6,  // 9: storeforge.user.v1.UserService.GetAllUsers:input_type -> storeforge.user.v1.GetAllUsersRequest
-	8,  // 10: storeforge.user.v1.UserService.UpdateUser:input_type -> storeforge.user.v1.UpdateUserRequest
-	10, // 11: storeforge.user.v1.UserService.DeleteUser:input_type -> storeforge.user.v1.DeleteUserRequest
-	3,  // 12: storeforge.user.v1.UserService.GetCurrentUser:output_type -> storeforge.user.v1.GetCurrentUserResponse
-	7,  // 13: storeforge.user.v1.UserService.GetAllUsers:output_type -> storeforge.user.v1.GetAllUsersResponse
-	9,  // 14: storeforge.user.v1.UserService.UpdateUser:output_type -> storeforge.user.v1.UpdateUserResponse
-	11, // 15: storeforge.user.v1.UserService.DeleteUser:output_type -> storeforge.user.v1.DeleteUserResponse
+	1,  // 0: api.user.v1.User.profile:type_name -> api.user.v1.UserProfile
+	12, // 1: api.user.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	12, // 2: api.user.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 3: api.user.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 4: api.user.v1.GetCurrentUserResponse.user:type_name -> api.user.v1.User
+	0,  // 5: api.user.v1.GetAllUsersResponse.users:type_name -> api.user.v1.User
+	5,  // 6: api.user.v1.GetAllUsersResponse.meta:type_name -> api.user.v1.PaginationMeta
+	0,  // 7: api.user.v1.UpdateUserResponse.user:type_name -> api.user.v1.User
+	2,  // 8: api.user.v1.UserService.GetCurrentUser:input_type -> api.user.v1.GetCurrentUserRequest
+	6,  // 9: api.user.v1.UserService.GetAllUsers:input_type -> api.user.v1.GetAllUsersRequest
+	8,  // 10: api.user.v1.UserService.UpdateUser:input_type -> api.user.v1.UpdateUserRequest
+	10, // 11: api.user.v1.UserService.DeleteUser:input_type -> api.user.v1.DeleteUserRequest
+	3,  // 12: api.user.v1.UserService.GetCurrentUser:output_type -> api.user.v1.GetCurrentUserResponse
+	7,  // 13: api.user.v1.UserService.GetAllUsers:output_type -> api.user.v1.GetAllUsersResponse
+	9,  // 14: api.user.v1.UserService.UpdateUser:output_type -> api.user.v1.UpdateUserResponse
+	11, // 15: api.user.v1.UserService.DeleteUser:output_type -> api.user.v1.DeleteUserResponse
 	12, // [12:16] is the sub-list for method output_type
 	8,  // [8:12] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name

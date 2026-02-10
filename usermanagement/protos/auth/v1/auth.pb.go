@@ -505,13 +505,13 @@ var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\x12storeforge.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"\xb9\x02\n" +
+	"\x12auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\"\xb2\x02\n" +
 	"\x04User\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1f\n" +
 	"\vis_verified\x18\x03 \x01(\bR\n" +
-	"isVerified\x129\n" +
-	"\aprofile\x18\x04 \x01(\v2\x1f.storeforge.auth.v1.UserProfileR\aprofile\x129\n" +
+	"isVerified\x122\n" +
+	"\aprofile\x18\x04 \x01(\v2\x18.api.auth.v1.UserProfileR\aprofile\x129\n" +
 	"\n" +
 	"created_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -529,16 +529,16 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x1a\n" +
 	"\bpassword\x18\x04 \x01(\tR\bpassword\x12#\n" +
 	"\rbusiness_name\x18\x05 \x01(\tR\fbusinessName\x12#\n" +
-	"\rbusiness_type\x18\x06 \x01(\tR\fbusinessType\"Z\n" +
-	"\x10RegisterResponse\x12,\n" +
-	"\x04user\x18\x01 \x01(\v2\x18.storeforge.auth.v1.UserR\x04user\x12\x18\n" +
+	"\rbusiness_type\x18\x06 \x01(\tR\fbusinessType\"S\n" +
+	"\x10RegisterResponse\x12%\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.api.auth.v1.UserR\x04user\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"n\n" +
-	"\rLoginResponse\x12,\n" +
-	"\x04user\x18\x01 \x01(\v2\x18.storeforge.auth.v1.UserR\x04user\x12/\n" +
-	"\x05token\x18\x02 \x01(\v2\x19.storeforge.auth.v1.TokenR\x05token\"\xdc\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"`\n" +
+	"\rLoginResponse\x12%\n" +
+	"\x04user\x18\x01 \x01(\v2\x11.api.auth.v1.UserR\x04user\x12(\n" +
+	"\x05token\x18\x02 \x01(\v2\x12.api.auth.v1.TokenR\x05token\"\xdc\x01\n" +
 	"\x05Token\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x129\n" +
 	"\n" +
@@ -547,10 +547,10 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"expires_in\x18\x03 \x01(\x03R\texpiresIn\x127\n" +
 	"\tissued_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\bissuedAt\x12\x1d\n" +
 	"\n" +
-	"token_type\x18\x05 \x01(\tR\ttokenType2\xeb\x01\n" +
-	"\vAuthService\x12s\n" +
-	"\bRegister\x12#.storeforge.auth.v1.RegisterRequest\x1a$.storeforge.auth.v1.RegisterResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12g\n" +
-	"\x05Login\x12 .storeforge.auth.v1.LoginRequest\x1a!.storeforge.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/loginB;Z9github.com/storeforge/usermanagement/proto/auth/v1;authv1b\x06proto3"
+	"token_type\x18\x05 \x01(\tR\ttokenType2\xcf\x01\n" +
+	"\vAuthService\x12e\n" +
+	"\bRegister\x12\x1c.api.auth.v1.RegisterRequest\x1a\x1d.api.auth.v1.RegisterResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12Y\n" +
+	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/loginB1Z/github.com/storeforge/api/protos/auth/v1;authv1b\x06proto3"
 
 var (
 	file_auth_v1_auth_proto_rawDescOnce sync.Once
@@ -566,29 +566,29 @@ func file_auth_v1_auth_proto_rawDescGZIP() []byte {
 
 var file_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
 var file_auth_v1_auth_proto_goTypes = []any{
-	(*User)(nil),                  // 0: storeforge.auth.v1.User
-	(*UserProfile)(nil),           // 1: storeforge.auth.v1.UserProfile
-	(*RegisterRequest)(nil),       // 2: storeforge.auth.v1.RegisterRequest
-	(*RegisterResponse)(nil),      // 3: storeforge.auth.v1.RegisterResponse
-	(*LoginRequest)(nil),          // 4: storeforge.auth.v1.LoginRequest
-	(*LoginResponse)(nil),         // 5: storeforge.auth.v1.LoginResponse
-	(*Token)(nil),                 // 6: storeforge.auth.v1.Token
+	(*User)(nil),                  // 0: api.auth.v1.User
+	(*UserProfile)(nil),           // 1: api.auth.v1.UserProfile
+	(*RegisterRequest)(nil),       // 2: api.auth.v1.RegisterRequest
+	(*RegisterResponse)(nil),      // 3: api.auth.v1.RegisterResponse
+	(*LoginRequest)(nil),          // 4: api.auth.v1.LoginRequest
+	(*LoginResponse)(nil),         // 5: api.auth.v1.LoginResponse
+	(*Token)(nil),                 // 6: api.auth.v1.Token
 	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
 }
 var file_auth_v1_auth_proto_depIdxs = []int32{
-	1,  // 0: storeforge.auth.v1.User.profile:type_name -> storeforge.auth.v1.UserProfile
-	7,  // 1: storeforge.auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 2: storeforge.auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
-	7,  // 3: storeforge.auth.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
-	0,  // 4: storeforge.auth.v1.RegisterResponse.user:type_name -> storeforge.auth.v1.User
-	0,  // 5: storeforge.auth.v1.LoginResponse.user:type_name -> storeforge.auth.v1.User
-	6,  // 6: storeforge.auth.v1.LoginResponse.token:type_name -> storeforge.auth.v1.Token
-	7,  // 7: storeforge.auth.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
-	7,  // 8: storeforge.auth.v1.Token.issued_at:type_name -> google.protobuf.Timestamp
-	2,  // 9: storeforge.auth.v1.AuthService.Register:input_type -> storeforge.auth.v1.RegisterRequest
-	4,  // 10: storeforge.auth.v1.AuthService.Login:input_type -> storeforge.auth.v1.LoginRequest
-	3,  // 11: storeforge.auth.v1.AuthService.Register:output_type -> storeforge.auth.v1.RegisterResponse
-	5,  // 12: storeforge.auth.v1.AuthService.Login:output_type -> storeforge.auth.v1.LoginResponse
+	1,  // 0: api.auth.v1.User.profile:type_name -> api.auth.v1.UserProfile
+	7,  // 1: api.auth.v1.User.created_at:type_name -> google.protobuf.Timestamp
+	7,  // 2: api.auth.v1.User.updated_at:type_name -> google.protobuf.Timestamp
+	7,  // 3: api.auth.v1.User.deleted_at:type_name -> google.protobuf.Timestamp
+	0,  // 4: api.auth.v1.RegisterResponse.user:type_name -> api.auth.v1.User
+	0,  // 5: api.auth.v1.LoginResponse.user:type_name -> api.auth.v1.User
+	6,  // 6: api.auth.v1.LoginResponse.token:type_name -> api.auth.v1.Token
+	7,  // 7: api.auth.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
+	7,  // 8: api.auth.v1.Token.issued_at:type_name -> google.protobuf.Timestamp
+	2,  // 9: api.auth.v1.AuthService.Register:input_type -> api.auth.v1.RegisterRequest
+	4,  // 10: api.auth.v1.AuthService.Login:input_type -> api.auth.v1.LoginRequest
+	3,  // 11: api.auth.v1.AuthService.Register:output_type -> api.auth.v1.RegisterResponse
+	5,  // 12: api.auth.v1.AuthService.Login:output_type -> api.auth.v1.LoginResponse
 	11, // [11:13] is the sub-list for method output_type
 	9,  // [9:11] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
