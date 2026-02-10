@@ -8,8 +8,8 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	authgrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/auth"
 	usergrpc "github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/user"
-	authv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/auth/v1"
-	userv1 "github.com/MartinMurithi/storeforge/usermanagement/proto/user/v1"
+	authv1 "github.com/MartinMurithi/storeforge/usermanagement/protos/auth/v1"
+	userv1 "github.com/MartinMurithi/storeforge/usermanagement/protos/user/v1"
 
 	"google.golang.org/grpc"
 )
