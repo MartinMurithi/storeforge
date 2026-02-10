@@ -5,7 +5,7 @@ PROTO_DIR := protos
 GO_OUT := ../usermanagement/protos
 
 # Where the Envoy descriptor should be generated
-DESC_OUT := api.pb
+DESC_OUT := ../gateway/protos/api.pb
 
 # Google APIs for annotations, etc.
 GOOGLEAPIS_DIR := ../usermanagement/third_party/googleapis
