@@ -1,0 +1,153 @@
+static_resources:
+  # ===============================
+  # LISTENERS (ENTRY POINT)
+  # ===============================
+  listeners:
+    - name: listener_0
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 8080
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: ingress_http
+                codec_type: AUTO
+
+                # -------------------------------
+                # HTTP FILTERS (MIDDLEWARE)
+                # -------------------------------
+                http_filters:
+                  # JWT Authentication
+                  - name: envoy.filters.http.jwt_authn
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.jwt_authn.v3.JwtAuthentication
+                      providers:
+                        auth_provider:
+                          issuer: "https://auth.yourdomain.com"
+                          jwks_uri: "https://auth.yourdomain.com/.well-known/jwks.json"
+                      rules:
+                        - match:
+                            prefix: "/"
+                          requires:
+                            provider_name: auth_provider
+                        - match:
+                            prefix: "/auth/login"  # PUBLIC: no JWT needed here
+                            requires: {}
+
+                  # 2️⃣ RBAC filter (coarse-grained authorization)
+                  - name: envoy.filters.http.rbac
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.rbac.v3.RBAC
+                      rules:
+                        action: ALLOW
+                        policies:
+                          allow_users:
+                            permissions:
+                              - any: true  # allow everything for now
+                            principals:
+                              - authenticated:
+                                  provider_name: auth_provider
+
+                  # 3️⃣ REST → gRPC transcoding
+                  - name: envoy.filters.http.grpc_json_transcoder
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
+                      proto_descriptor: "/etc/envoy/api.pb"
+                      services:
+                        - user.UserService
+                        - payment.PaymentService
+                      print_options:
+                        add_whitespace: true
+                        always_print_primitive_fields: true
+                      convert_grpc_status: true
+                      match_incoming_request_route: true
+
+                  # 4️⃣ Router (final forward to upstream cluster)
+                  - name: envoy.filters.http.router
+
+                # -------------------------------
+                # ROUTES
+                # -------------------------------
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: backend
+                      domains: ["*"]
+                      routes:
+                        - match:
+                            prefix: "/auth/login"
+                          route:
+                            cluster: auth_service_cluster
+                        - match:
+                            prefix: "/v1/users"
+                          route:
+                            cluster: user_service_cluster
+                        - match:
+                            prefix: "/v1/payments"
+                          route:
+                            cluster: payment_service_cluster
+
+  # ===============================
+  # CLUSTERS (UPSTREAM SERVICES)
+  # ===============================
+  clusters:
+    # Auth Service (JWT issuance)
+    - name: auth_service_cluster
+      connect_timeout: 5s
+      type: strict_dns
+      lb_policy: round_robin
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: auth_service_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: auth-service
+                      port_value: 5000
+
+    # User Service
+    - name: user_service_cluster
+      connect_timeout: 5s
+      type: strict_dns
+      lb_policy: round_robin
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: user_service_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: user-service
+                      port_value: 50051
+
+    # Payment Service
+    - name: payment_service_cluster
+      connect_timeout: 5s
+      type: strict_dns
+      lb_policy: round_robin
+      http2_protocol_options: {}
+      load_assignment:
+        cluster_name: payment_service_cluster
+        endpoints:
+          - lb_endpoints:
+              - endpoint:
+                  address:
+                    socket_address:
+                      address: payment-service
+                      port_value: 50051
+
+# ===============================
+# ADMIN (Envoy admin interface)
+# ===============================
+admin:
+  access_log_path: /tmp/admin.log
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901
