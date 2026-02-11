@@ -24,13 +24,15 @@ service UserService{
   // UpdateUser updates an existing user's profile information.
   rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
     option (google.api.http) = {
-      get: "/v1/users/{id}"
+      patch: "/v1/users/{id}"
+      body: "*"
     };
   };
   // DeleteUser soft deletes a user account.
   rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
     option (google.api.http) = {
-      get: "/v1/users/{id}"
+      delete: "/v1/users/{id}"
+      body: "*"
     };
   };
 

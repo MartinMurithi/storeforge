@@ -12,81 +12,76 @@ static_resources:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: ingress_http
                 codec_type: AUTO
+
+                # Silences the internal_address warning
+                internal_address_config:
+                  cidr_ranges:
+                    - address_prefix: 10.0.0.0
+                      prefix_len: 8
+                    - address_prefix: 192.168.0.0
+                      prefix_len: 16
+
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+
                 route_config:
                   name: local_route
                   virtual_hosts:
                     - name: backend
                       domains: ["*"]
                       routes:
+                        # MATCH EVERYTHING: Catches /v1/auth, /v1/users, and the internal gRPC paths
                         - match:
-                            prefix: "/v1/auth"
+                            prefix: "/"
                           route:
-                            cluster: auth_service
-                        - match:
-                            prefix: "/v1/users"
-                          route:
-                            cluster: user_service
+                            cluster: grpc_backend_cluster
+                            timeout: 30s
+
                 http_filters:
                   - name: envoy.filters.http.grpc_json_transcoder
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.grpc_json_transcoder.v3.GrpcJsonTranscoder
                       proto_descriptor: "/etc/envoy/api.pb"
+                      # IMPORTANT: Both services must be listed here
                       services:
                         - "api.auth.v1.AuthService"
                         - "api.user.v1.UserService"
+                      convert_grpc_status: true
                       print_options:
                         add_whitespace: true
                         preserve_proto_field_names: true
+                        always_print_primitive_fields: true
+
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
 
   clusters:
-    - name: auth_service
+    - name: grpc_backend_cluster
       connect_timeout: 0.25s
       type: strict_dns
-      http2_protocol_options: {}
+      # Modern way to enable HTTP/2 for gRPC
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config:
+            http2_protocol_options: {}
       load_assignment:
-        cluster_name: auth_service
+        cluster_name: grpc_backend_cluster
         endpoints:
           - lb_endpoints:
               - endpoint:
                   address:
                     socket_address:
-                      address: host.docker.internal
-                      port_value: 50051
-    - name: user_service
-      connect_timeout: 0.25s
-      type: strict_dns
-      http2_protocol_options: {}
-      load_assignment:
-        cluster_name: user_service
-        endpoints:
-          - lb_endpoints:
-              - endpoint:
-                  address:
-                    socket_address:
+                      # If your gRPC server is on the HOST machine, use: host.docker.internal
+                      # If it's in the SAME container, use: 127.0.0.1
                       address: host.docker.internal
                       port_value: 50051
 
 admin:
-  access_log_path: "/tmp/admin_access.log"
   address:
     socket_address:
       address: 0.0.0.0
       port_value: 9901
-# Optional: access logs for requests
-# access_log:
-#   - name: envoy.access_loggers.stdout
-#     typed_config:
-#       "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
-
-# internal_address_config:
-#   # explicitly define your internal addresses (RFC1918)
-#   cidr_ranges:
-#     - address_prefix: 10.0.0.0
-#       prefix_len: 8
-#     - address_prefix: 172.16.0.0
-#       prefix_len: 12
-#     - address_prefix: 192.168.0.0
-#       prefix_len: 16
