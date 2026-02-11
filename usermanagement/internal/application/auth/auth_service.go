@@ -78,7 +78,7 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 
 	if existingUser != nil {
 		log.Printf("[%s] user with email %s is already registered ", op, input.Email)
-		return nil, apperrors.ErrUserAlreadyExists
+		return nil, apperrors.ErrUserEmailAlreadyExists
 	}
 
 	//check if phone already exists
@@ -86,7 +86,7 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 
 	if existingPhone != nil {
 		log.Printf("[%s] user with phone number %s already exists ", op, input.Phone)
-		return nil, apperrors.ErrUserAlreadyExists
+		return nil, apperrors.ErrUserMobileExists
 	}
 
 	//hashpassword
