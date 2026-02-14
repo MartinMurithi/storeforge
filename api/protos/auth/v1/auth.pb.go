@@ -550,7 +550,7 @@ const file_auth_v1_auth_proto_rawDesc = "" +
 	"token_type\x18\x05 \x01(\tR\ttokenType2\xcf\x01\n" +
 	"\vAuthService\x12e\n" +
 	"\bRegister\x12\x1c.api.auth.v1.RegisterRequest\x1a\x1d.api.auth.v1.RegisterResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12Y\n" +
-	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/loginB1Z/github.com/storeforge/api/protos/auth/v1;authv1b\x06proto3"
+	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/loginB?Z=github.com/MartinMurithi/storeforge/api/protos/auth/v1;authv1b\x06proto3"
 
 var (
 	file_auth_v1_auth_proto_rawDescOnce sync.Once

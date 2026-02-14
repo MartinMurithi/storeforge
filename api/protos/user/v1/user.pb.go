@@ -767,7 +767,7 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\n" +
 	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*2\x0e/v1/users/{id}\x12h\n" +
 	"\n" +
-	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01**\x0e/v1/users/{id}B1Z/github.com/storeforge/api/protos/user/v1;userv1b\x06proto3"
+	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01**\x0e/v1/users/{id}B?Z=github.com/MartinMurithi/storeforge/api/protos/user/v1;userv1b\x06proto3"
 
 var (
 	file_user_v1_user_proto_rawDescOnce sync.Once
