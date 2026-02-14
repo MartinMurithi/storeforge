@@ -1,6 +1,6 @@
 package user
 
-import "github.com/MartinMurithi/storeforge/usermanagement/internal/dto/shared"
+import "github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 
 type UserResponseDTO struct {
     Id           string  `json:"id"`
