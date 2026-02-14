@@ -19,6 +19,7 @@ func main() {
 
 	// Initialize application
 	app, err := bootstrap.Init(cfg)
+	
 	if err != nil {
 		log.Fatalf("failed to initialize app: %v", err)
 	}

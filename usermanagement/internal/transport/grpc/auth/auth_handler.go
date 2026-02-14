@@ -3,10 +3,10 @@ package auth
 import (
 	"context"
 
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/grpc_errors"
-	authv1 "github.com/MartinMurithi/storeforge/usermanagement/protos/auth/v1"
 )
 
 type AuthGrpcHandler struct {

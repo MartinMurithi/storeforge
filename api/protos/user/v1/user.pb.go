@@ -760,14 +760,14 @@ const file_user_v1_user_proto_rawDesc = "" +
 	"\x11DeleteUserRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\".\n" +
 	"\x12DeleteUserResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xb3\x03\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage2\xb9\x03\n" +
 	"\vUserService\x12q\n" +
 	"\x0eGetCurrentUser\x12\".api.user.v1.GetCurrentUserRequest\x1a#.api.user.v1.GetCurrentUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12c\n" +
-	"\vGetAllUsers\x12\x1f.api.user.v1.GetAllUsersRequest\x1a .api.user.v1.GetAllUsersResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/users\x12e\n" +
+	"\vGetAllUsers\x12\x1f.api.user.v1.GetAllUsersRequest\x1a .api.user.v1.GetAllUsersResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/users\x12h\n" +
 	"\n" +
-	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}\x12e\n" +
+	"UpdateUser\x12\x1e.api.user.v1.UpdateUserRequest\x1a\x1f.api.user.v1.UpdateUserResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*2\x0e/v1/users/{id}\x12h\n" +
 	"\n" +
-	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/users/{id}B1Z/github.com/storeforge/api/protos/user/v1;userv1b\x06proto3"
+	"DeleteUser\x12\x1e.api.user.v1.DeleteUserRequest\x1a\x1f.api.user.v1.DeleteUserResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01**\x0e/v1/users/{id}B1Z/github.com/storeforge/api/protos/user/v1;userv1b\x06proto3"
 
 var (
 	file_user_v1_user_proto_rawDescOnce sync.Once
