@@ -1,11 +1,11 @@
 # Where proto files live
-PROTO_DIR := protos
+PROTO_DIR := ../api/protos
 
 # Where Go code should be generated (usermanagement service)
-GO_OUT := ../usermanagement/protos
+GO_OUT := ../api/protos
 
 # Where the Envoy descriptor should be generated
-DESC_OUT := ../gateway/protos/api.pb
+DESC_OUT := ../envoy/protos/api.pb
 
 # Google APIs for annotations, etc.
 GOOGLEAPIS_DIR := ../usermanagement/third_party/googleapis

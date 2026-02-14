@@ -7,8 +7,9 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/grpc_errors"
-	"github.com/MartinMurithi/storeforge/usermanagement/protos/user/v1"
+	
 
 	"github.com/jackc/pgx/v5/pgtype"
 )

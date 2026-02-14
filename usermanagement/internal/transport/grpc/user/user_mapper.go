@@ -5,7 +5,7 @@ import (
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
-	userv1 "github.com/MartinMurithi/storeforge/usermanagement/protos/user/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
