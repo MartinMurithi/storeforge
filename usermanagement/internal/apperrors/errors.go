@@ -2,53 +2,37 @@ package apperrors
 
 import "errors"
 
-// Transport / JSON errors
+// Validation Errors
 var (
-	ErrMalformedJSON = errors.New("malformed JSON")
+    ErrMalformedJSON        = errors.New("malformed JSON")
+    ErrInvalidInput         = errors.New("invalid input")
+    ErrFullNameRequired     = errors.New("full name is required")
+    ErrEmailRequired        = errors.New("email is required")
+    ErrPhoneRequired        = errors.New("phone number is required")
+    ErrPasswordRequired     = errors.New("password is required")
+    ErrBusinessTypeRequired = errors.New("business type is required")
+    ErrBusinessNameRequired = errors.New("business name is required")
+    ErrIdIsRequired         = errors.New("id is required")
+    ErrRoleIsRequired       = errors.New("role is required")
+    ErrInvalidEmailFormat   = errors.New("invalid email format")
+    ErrInvalidPhoneNumber   = errors.New("invalid phone number")
+    ErrInvalidUUIDFormat    = errors.New("invalid UUID format")
+    ErrInvalidUserIdFormat  = errors.New("invalid user id format")
+    ErrInvalidPageNumber    = errors.New("invalid page")
+    ErrInvalidLimitNumber   = errors.New("invalid limit")
 )
 
-// Required field errors
+// Database & Resource State Errors
 var (
-	ErrFullNameRequired     = errors.New("full name is required")
-	ErrEmailRequired        = errors.New("email is required")
-	ErrPhoneRequired        = errors.New("phone number is required")
-	ErrPasswordRequired     = errors.New("password is required")
-	ErrBusinessTypeRequired = errors.New("business type is required")
-	ErrBusinessNameRequired = errors.New("business name is required")
-	ErrIdIsRequired         = errors.New("id is required")
-	ErrRoleIsRequired       = errors.New("role is required")
-	ErrInvalidInput         = errors.New("invalid input")
+    ErrUserNotFound              = errors.New("user not found")
+    ErrUserAlreadyExists         = errors.New("user already exists")
+    ErrUserEmailAlreadyExists    = errors.New("user with that email already exists")
+    ErrUserMobileExists          = errors.New("user with that mobile already exists")
+    ErrBusinessNameAlreadyExists = errors.New("business name already exists")
 )
 
-// Format/validation errors
+// Security & Credentials Errors
 var (
-	ErrInvalidEmailFormat  = errors.New("invalid email format")
-	ErrInvalidPhoneNumber  = errors.New("invalid phone number")
-	ErrInvalidUUIDFormat   = errors.New("invalid UUID format")
-	ErrInvalidUserIdFormat = errors.New("invalid user id format")
-)
-
-// Business rule errors
-var (
-	ErrUserAlreadyExists         = errors.New("user already exists")
-	ErrUserEmailAlreadyExists    = errors.New("user with that email already exists")
-	ErrUserMobileExists          = errors.New("user with that mobile already exists")
-	ErrBusinessNameAlreadyExists = errors.New("business name already exists")
-	ErrAccountDeactivated        = errors.New("your account has been deactivated. Please contact support.")
-)
-
-// Credentials rule errors
-var (
-	ErrInvalidCredentials = errors.New("invalid credentials")
-)
-
-// Database errors
-var (
-	ErrUserNotFound = errors.New("user not found")
-)
-
-// Pagination errors
-var (
-	ErrInvalidPageNumber  = errors.New("invalid page")
-	ErrInvalidLimitNumber = errors.New("invalid limit")
+    ErrInvalidCredentials = errors.New("invalid credentials")
+    ErrAccountDeactivated = errors.New("your account has been deactivated. Please contact support.")
 )
