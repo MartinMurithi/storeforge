@@ -24,17 +24,8 @@ type UserProfileDTO struct {
 	BusinessType string `json:"business_type"`
 }
 
-type GetCurrentUserRequest struct {
-	ID string `json:"id"`
-}
-
 type GetCurrentUserResponse struct {
 	User UserResponse `json:"user"`
-}
-
-type GetAllUsersRequest struct {
-	Page  int32 `json:"page"`
-	Limit int32 `json:"limit"`
 }
 
 type GetAllUsersResponse struct {

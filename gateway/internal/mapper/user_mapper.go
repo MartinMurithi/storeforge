@@ -5,35 +5,52 @@ import (
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto/user"
 )
 
-func ProtoUserToDTO(u *userv1.User) *user.UserResponse {
-	if u == nil {
-		return nil
-	}
-	return &user.UserResponse{
-		ID:         u.Id,
-		Email:      u.Email,
-		IsVerified: u.IsVerified,
-		Profile: user.UserProfileDTO{
-			FullName:     u.Profile.FullName,
-			Phone:        u.Profile.Phone,
-			BusinessName: u.Profile.BusinessName,
-			BusinessType: u.Profile.BusinessType,
-		},
-		CreatedAt: u.CreatedAt.AsTime(),
-		UpdatedAt: u.UpdatedAt.AsTime(),
-	}
+// MapUserProtoToDTO transforms a gRPC User message into a public UserResponse DTO.
+// This is used to present user data to the frontend in a clean JSON format.
+func MapUserProtoToDTO(u *userv1.User) *user.UserResponse {
+    if u == nil {
+        return nil
+    }
+
+    dto := &user.UserResponse{
+        ID:         u.Id,
+        Email:      u.Email,
+        IsVerified: u.IsVerified,
+        CreatedAt:  u.CreatedAt.AsTime(),
+        UpdatedAt:  u.UpdatedAt.AsTime(),
+    }
+
+    if u.Profile != nil {
+        dto.Profile = user.UserProfileDTO{
+            FullName:     u.Profile.FullName,
+            Phone:        u.Profile.Phone,
+            BusinessName: u.Profile.BusinessName,
+            BusinessType: u.Profile.BusinessType,
+        }
+    }
+
+    // Handle optional DeletedAt from Proto if it exists
+    if u.DeletedAt != nil {
+        t := u.DeletedAt.AsTime()
+        dto.DeletedAt = &t
+    }
+
+    return dto
 }
 
-func ProtoUsersToDTO(users []*userv1.User) []user.UserResponse {
-	out := make([]user.UserResponse, 0, len(users))
-
-	for _, u := range users {
-		dtoUser := ProtoUserToDTO(u)
-
-		if dtoUser != nil {
-			out = append(out, *dtoUser)
-		}
-	}
-
-	return out
+// MapUserProtosToDTOs converts a slice of gRPC User messages into a slice of UserResponse DTOs.
+// Useful for list endpoints like GetAllUsers.
+func MapUserProtosToDTOs(users []*userv1.User) []user.UserResponse {
+    if users == nil {
+        return []user.UserResponse{}
+    }
+    
+    out := make([]user.UserResponse, 0, len(users))
+	
+    for _, u := range users {
+        if dtoUser := MapUserProtoToDTO(u); dtoUser != nil {
+            out = append(out, *dtoUser)
+        }
+    }
+    return out
 }
