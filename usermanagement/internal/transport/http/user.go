@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/MartinMurithi/storeforge/pkg/errors"
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"

@@ -7,7 +7,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/pkg/errors"
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
