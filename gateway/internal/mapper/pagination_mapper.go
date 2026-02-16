@@ -12,10 +12,10 @@ func MapPaginationMetaProtoToDTO(pb *userv1.PaginationMeta) *shared.PaginationMe
 	}
 
 	return &shared.PaginationMetaDTO{
-		Page:       int(pb.Page),
-		Limit:      int(pb.Limit),
-		Total:      int(pb.Total),
-		TotalPages: int(pb.TotalPages),
+		Page:       int32(pb.Page),
+		Limit:      int32(pb.Limit),
+		Total:      int64(pb.Total),
+		TotalPages: int32(pb.TotalPages),
 		HasNext:    pb.HasNext,
 		HasPrev:    pb.HasPrev,
 	}

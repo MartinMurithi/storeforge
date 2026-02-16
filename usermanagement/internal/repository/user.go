@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/pkg/errors"
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"

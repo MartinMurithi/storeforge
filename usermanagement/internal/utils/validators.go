@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/pkg/errors"
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 )
 
 var e164Regex = regexp.MustCompile(`^\+?[1-9]\d{1,14}$`)
