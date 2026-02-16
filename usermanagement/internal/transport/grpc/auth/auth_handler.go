@@ -34,7 +34,7 @@ func (h *AuthGrpcHandler) Register(ctx context.Context, req *authv1.RegisterRequ
 	user, err := h.AuthService.RegisterUser(ctx, dtoReq)
 
 	if err != nil {
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	return ToProtoRegisterResponse(user), nil
@@ -51,7 +51,7 @@ func (a *AuthGrpcHandler) Login(ctx context.Context, req *authv1.LoginRequest) (
 	user, token, err := a.AuthService.LoginUser(ctx, dtoReq)
 
 	if err != nil {
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	return ToProtoLoginResponse(user, token), nil

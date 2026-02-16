@@ -36,7 +36,7 @@ func (h *UserGrpcHandler) GetAllUsers(ctx context.Context, req *userv1.GetAllUse
 
 	if err != nil {
 		fmt.Printf("[USERGRPCHANDLER]: failed to fetch users %s\n", err)
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	// map service layer users → proto Users
@@ -57,7 +57,7 @@ func (h *UserGrpcHandler) UpdateUser(
 
 	uuid := pgtype.UUID{}
 	if err := uuid.Scan(req.Id); err != nil {
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	input := &user.PatchUserInput{
@@ -76,7 +76,7 @@ func (h *UserGrpcHandler) UpdateUser(
 
 	if err != nil {
 		fmt.Printf("[UserGrpcHandler.UpdateUser] failed: %v\n", err)
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	return ToProtoUpdateUserResponse(updatedUser), nil
@@ -90,14 +90,14 @@ func (h *UserGrpcHandler) DeleteUser(
 
 	uuid := pgtype.UUID{}
 	if err := uuid.Scan(req.Id); err != nil {
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	err := h.UserService.SoftDeleteUser(ctx, uuid)
 
 	if err != nil {
 		fmt.Printf("[UserGrpcHandler.SoftDeleteUser] failed: %v\n", err)
-		return nil, grpc_errors.MapGrpcError(err)
+		return nil, grpc_errors.MapAppErrorToGrpc(err)
 	}
 
 	return ToProtoSoftDeleteUserResponse(), nil
