@@ -4,9 +4,9 @@ import (
 	"context"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/grpc_errors"
 )
 
 type AuthGrpcHandler struct {
@@ -34,7 +34,7 @@ func (h *AuthGrpcHandler) Register(ctx context.Context, req *authv1.RegisterRequ
 	user, err := h.AuthService.RegisterUser(ctx, dtoReq)
 
 	if err != nil {
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	return ToProtoRegisterResponse(user), nil
@@ -51,7 +51,7 @@ func (a *AuthGrpcHandler) Login(ctx context.Context, req *authv1.LoginRequest) (
 	user, token, err := a.AuthService.LoginUser(ctx, dtoReq)
 
 	if err != nil {
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	return ToProtoLoginResponse(user, token), nil

@@ -1,20 +1,11 @@
-package token
+package auth
 
 import (
 	"crypto/rsa"
-	"errors"
 	"fmt"
 
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/golang-jwt/jwt/v5"
-)
-
-// Token-specific errors
-var (
-	ErrInvalidToken  = errors.New("invalid token")
-	ErrExpiredToken  = errors.New("token expired")
-	ErrNotValidYet   = errors.New("token not valid yet")
-	ErrWrongIssuer   = errors.New("wrong issuer")
-	ErrWrongAudience = errors.New("wrong audience")
 )
 
 func VerifyToken(pubKey *rsa.PublicKey, tokenStr, expectedAudience, expectedIssuer string) (*UserClaims, error) {
@@ -24,7 +15,7 @@ func VerifyToken(pubKey *rsa.PublicKey, tokenStr, expectedAudience, expectedIssu
 		_, ok := t.Method.(*jwt.SigningMethodRSA)
 
 		if !ok {
-			return nil, fmt.Errorf("an error occurreed: %w", ErrInvalidToken)
+			return nil, fmt.Errorf("an error occurreed: %w", apperrors.ErrInvalidToken)
 		}
 		return pubKey, nil
 	})
@@ -35,9 +26,9 @@ func VerifyToken(pubKey *rsa.PublicKey, tokenStr, expectedAudience, expectedIssu
 
 	// Extract claims from token
 	claims, ok := token.Claims.(*UserClaims)
-	
+
 	if !ok || !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, apperrors.ErrInvalidToken
 	}
 
 	return claims, nil

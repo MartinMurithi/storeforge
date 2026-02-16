@@ -4,12 +4,11 @@ import (
 	"context"
 	"fmt"
 
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc/grpc_errors"
-	
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
@@ -36,7 +35,7 @@ func (h *UserGrpcHandler) GetAllUsers(ctx context.Context, req *userv1.GetAllUse
 
 	if err != nil {
 		fmt.Printf("[USERGRPCHANDLER]: failed to fetch users %s\n", err)
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	// map service layer users → proto Users
@@ -57,7 +56,7 @@ func (h *UserGrpcHandler) UpdateUser(
 
 	uuid := pgtype.UUID{}
 	if err := uuid.Scan(req.Id); err != nil {
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	input := &user.PatchUserInput{
@@ -76,7 +75,7 @@ func (h *UserGrpcHandler) UpdateUser(
 
 	if err != nil {
 		fmt.Printf("[UserGrpcHandler.UpdateUser] failed: %v\n", err)
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	return ToProtoUpdateUserResponse(updatedUser), nil
@@ -90,14 +89,14 @@ func (h *UserGrpcHandler) DeleteUser(
 
 	uuid := pgtype.UUID{}
 	if err := uuid.Scan(req.Id); err != nil {
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	err := h.UserService.SoftDeleteUser(ctx, uuid)
 
 	if err != nil {
 		fmt.Printf("[UserGrpcHandler.SoftDeleteUser] failed: %v\n", err)
-		return nil, grpc_errors.MapAppErrorToGrpc(err)
+		return nil, errconv.ToGrpcError(err)
 	}
 
 	return ToProtoSoftDeleteUserResponse(), nil
