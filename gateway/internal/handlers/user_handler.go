@@ -5,6 +5,7 @@ import (
 
 	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/client"
+	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/request"
@@ -43,17 +44,14 @@ func (h *UserHandler) GetMe(c *gin.Context) {
 }
 
 func (h *UserHandler) FetchAll(c *gin.Context) {
-
 	pagination, err := shared.ParsePagination(c)
 	if err != nil {
-		code, slug, msg := errconv.(err)
-		response.Error(c, code, slug, msg)
+		response.Error(c, http.StatusBadRequest, "INVALID_PAGINATION", err.Error())
 		return
 	}
 
-	// 2. Access the fields from the struct for the gRPC call
+	// Access the fields from the struct for the gRPC call
 	res, err := h.UserClient.GetAllUsers(c.Request.Context(), &userv1.GetAllUsersRequest{
-		// Access via pagination.Page and pagination.Limit
 		Page:  int32(pagination.Page),
 		Limit: int32(pagination.Limit),
 	})
@@ -64,24 +62,26 @@ func (h *UserHandler) FetchAll(c *gin.Context) {
 		return
 	}
 
+	resp := mapper.MapUserProtosToDTOs(res.Users)
+
 	// Map a slice of Protos to a slice of DTOs
-	response.JSON(c, http.StatusOK, mapper.MapUserProtoListToDTO(res.Users, res.Meta))
+	response.JSON(c, http.StatusOK, resp)
 }
 
 func (h *UserHandler) UpdateMe(c *gin.Context) {
 	var reqDTO dto.UpdateUserRequestDTO
+
 	if err := c.ShouldBindJSON(&reqDTO); err != nil {
 		response.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "Invalid request body")
 		return
 	}
 
-	userID, _ := dto.GetUserId(c)
+	userID, _ := request.GetUserId(c)
 
 	res, err := h.UserClient.UpdateUser(c.Request.Context(), &userv1.UpdateUserRequest{
 		Id:           userID,
-		FullName:     reqDTO.FullName,
 		BusinessName: reqDTO.BusinessName,
-		// ... other fields
+		BusinessType: reqDTO.BusinessType,
 	})
 
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 }
 
 func (h *UserHandler) DeleteMe(c *gin.Context) {
-	userID, _ := dto.GetUserId(c)
+	userID, _ := request.GetUserId(c)
 
 	_, err := h.UserClient.DeleteUser(c.Request.Context(), &userv1.DeleteUserRequest{
 		Id: userID,
