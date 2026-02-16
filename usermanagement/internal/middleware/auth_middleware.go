@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 
 	"github.com/gin-gonic/gin"
@@ -41,7 +42,7 @@ func AuthMiddleware(jwtMaker *token.JWTMaker, pubKey *rsa.PublicKey, expectedAud
 
 		tokenStr := parts[1]
 
-		claims, err := token.VerifyToken(pubKey, tokenStr, expectedAudience, expectedIssuer)
+		claims, err := auth.VerifyToken(pubKey, tokenStr, expectedAudience, expectedIssuer)
 
 		if err != nil {
 			c.Header("WWW-Authenticate", fmt.Sprintf(
@@ -57,7 +58,7 @@ func AuthMiddleware(jwtMaker *token.JWTMaker, pubKey *rsa.PublicKey, expectedAud
 		c.Set("tenantId", claims.TenantId)
 		c.Set("role", claims.Role)
 		c.Set("email", claims.Email)
-		c.Set("realm", fmt.Sprintf("%s/%s", serviceName, claims.TenantId.String()))
+		c.Set("realm", fmt.Sprintf("%s/%s", serviceName, claims.TenantId))
 
 		c.Next()
 

@@ -1,8 +1,8 @@
-package user
+package dto
 
 import "time"
 
-type RegisterRequest struct {
+type RegisterRequestDTO struct {
 	FullName     string `json:"full_name"`
 	Email        string `json:"email"`
 	Phone        string `json:"phone"`
@@ -11,18 +11,18 @@ type RegisterRequest struct {
 	BusinessType string `json:"business_type"`
 }
 
-type RegisterResponse struct {
-	User    UserResponse `json:"user"`
+type RegisterResponseDTO struct {
+	User    UserResponseDTO `json:"user"`
 	Message string       `json:"message"`
 }
 
-type LoginRequest struct {
+type LoginRequestDTO struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type LoginResponse struct {
-	User  UserResponse `json:"user"`
+type LoginResponseDTO struct {
+	User  UserResponseDTO `json:"user"`
 	Token TokenDTO     `json:"token"`
 }
 

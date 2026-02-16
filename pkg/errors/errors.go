@@ -36,3 +36,12 @@ var (
     ErrInvalidCredentials = errors.New("invalid credentials")
     ErrAccountDeactivated = errors.New("your account has been deactivated. Please contact support.")
 )
+
+// Token-specific errors
+var (
+	ErrInvalidToken  = errors.New("invalid token")
+	ErrExpiredToken  = errors.New("token expired")
+	ErrNotValidYet   = errors.New("token not valid yet")
+	ErrWrongIssuer   = errors.New("wrong issuer")
+	ErrWrongAudience = errors.New("wrong audience")
+)

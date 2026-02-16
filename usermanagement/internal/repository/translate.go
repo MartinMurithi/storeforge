@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/apperrors"
+	"github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 )
 

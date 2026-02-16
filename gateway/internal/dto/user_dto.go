@@ -1,4 +1,4 @@
-package user
+package dto
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 
-type UserResponse struct {
+type UserResponseDTO struct {
 	ID         string         `json:"id"`
 	Email      string         `json:"email"`
 	IsVerified bool           `json:"is_verified"`
@@ -24,25 +24,25 @@ type UserProfileDTO struct {
 	BusinessType string `json:"business_type"`
 }
 
-type GetCurrentUserResponse struct {
-	User UserResponse `json:"user"`
+type GetCurrentUserResponseDTO struct {
+	User UserResponseDTO `json:"user"`
 }
 
-type GetAllUsersResponse struct {
-	Users []UserResponse   `json:"users"`
+type GetAllUsersResponseDTO struct {
+	Users []UserResponseDTO   `json:"users"`
 	Meta  shared.PaginationMetaDTO `json:"meta"`
 }
 
-type UpdateUserRequest struct {
+type UpdateUserRequestDTO struct {
 	BusinessName *string `json:"business_name,omitempty"`
 	BusinessType *string `json:"business_type,omitempty"`
 }
 
-type UpdateUserResponse struct {
-	User UserResponse `json:"user"`
+type UpdateUserResponseDTO struct {
+	User UserResponseDTO `json:"user"`
     Message string `json:"message"`
 }
 
-type DeleteUserResponse struct {
+type DeleteUserResponseDTO struct {
 	Message string `json:"message"`
 }
