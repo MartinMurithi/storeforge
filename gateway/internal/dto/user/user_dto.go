@@ -1,24 +1,48 @@
 package user
 
-import "github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
+import (
+	"time"
 
-type UserResponseDTO struct {
-    Id           string  `json:"id"`
-    FullName     string  `json:"fullName"`
-    Email        string  `json:"email"`
-    Phone        string  `json:"phone"`
-    BusinessType string  `json:"businessType"`
-    BusinessName string  `json:"businessName"`
-    CreatedAt    string  `json:"createdAt"`
-    UpdatedAt    *string `json:"updatedAt,omitempty"`
-    IsVerified   bool    `json:"isVerified"`
+	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
+)
+
+
+type UserResponse struct {
+	ID         string         `json:"id"`
+	Email      string         `json:"email"`
+	IsVerified bool           `json:"is_verified"`
+	Profile    UserProfileDTO `json:"profile"`
+	CreatedAt  time.Time      `json:"created_at"`
+	UpdatedAt  time.Time      `json:"updated_at"`
+	DeletedAt  *time.Time     `json:"deleted_at,omitempty"`
 }
 
-type FetchUserResponseDTO struct {
-    User *UserResponseDTO `json:"user"`
+type UserProfileDTO struct {
+	FullName     string `json:"full_name"`
+	Phone        string `json:"phone"`
+	BusinessName string `json:"business_name"`
+	BusinessType string `json:"business_type"`
 }
 
-type FetchAllUsersResponseDTO struct {
-    Users      []UserResponseDTO `json:"users"`
-    Pagination shared.PaginationMeta `json:"pagination"`
+type GetCurrentUserResponse struct {
+	User UserResponse `json:"user"`
+}
+
+type GetAllUsersResponse struct {
+	Users []UserResponse   `json:"users"`
+	Meta  shared.PaginationMetaDTO `json:"meta"`
+}
+
+type UpdateUserRequest struct {
+	BusinessName *string `json:"business_name,omitempty"`
+	BusinessType *string `json:"business_type,omitempty"`
+}
+
+type UpdateUserResponse struct {
+	User UserResponse `json:"user"`
+    Message string `json:"message"`
+}
+
+type DeleteUserResponse struct {
+	Message string `json:"message"`
 }

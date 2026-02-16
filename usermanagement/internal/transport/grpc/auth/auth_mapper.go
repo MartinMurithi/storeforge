@@ -3,8 +3,9 @@ package auth
 import (
 	"time"
 
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -16,16 +17,16 @@ import (
 // to the AuthService gRPC contract.
 //
 // Returns nil if the input user is nil.
-func ToProtoUser(u *entity.User) *authv1.User {
+func ToProtoUser(u *entity.User) *userv1.User {
 	if u == nil {
 		return nil
 	}
 
-	return &authv1.User{
+	return &userv1.User{
 		Id:         u.ID.String(),
 		Email:      u.Email,
 		IsVerified: u.IsVerified,
-		Profile: &authv1.UserProfile{
+		Profile: &userv1.UserProfile{
 			FullName:     u.FullName,
 			Phone:        u.Phone,
 			BusinessName: u.BusinessName,

@@ -1,30 +1,35 @@
 package user
 
-type RegisterUserRequestDTO struct {
-    FullName     string `json:"fullName"`
-    Email        string `json:"email"`
-    Phone        string `json:"phone"`
-    Password     string `json:"password"`
-    BusinessType string `json:"businessType"`
-    BusinessName string `json:"businessName"`
+import "time"
+
+type RegisterRequest struct {
+	FullName     string `json:"full_name"`
+	Email        string `json:"email"`
+	Phone        string `json:"phone"`
+	Password     string `json:"password"`
+	BusinessName string `json:"business_name"`
+	BusinessType string `json:"business_type"`
 }
 
-type RegisterUserResponseDTO struct {
-    User    *UserResponseDTO `json:"user"`
-    Message string           `json:"message"`
+type RegisterResponse struct {
+	User    UserResponse `json:"user"`
+	Message string       `json:"message"`
 }
 
-type LoginUserRequestDTO struct {
-    Email    string `json:"email"`
-    Password string `json:"password"`
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-type LoginUserResponseDTO struct {
-    User  *UserResponseDTO `json:"user"`
-    Token string           `json:"token"` // string for JSON-friendly token
+type LoginResponse struct {
+	User  UserResponse `json:"user"`
+	Token TokenDTO     `json:"token"`
 }
 
-type PatchUserRequestDTO struct {
-    BusinessName *string `json:"businessName,omitempty"`
-    BusinessType *string `json:"businessType,omitempty"`
+type TokenDTO struct {
+	AccessToken string    `json:"access_token"`
+	ExpiresAt   time.Time `json:"expires_at"`
+	ExpiresIn   int64     `json:"expires_in"`
+	IssuedAt    time.Time `json:"issued_at"`
+	TokenType   string    `json:"token_type"`
 }

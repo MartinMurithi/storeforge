@@ -1,18 +1,10 @@
 package shared
-
-import (
-	// "errors"
-	// "strconv"
-
-	// "github.com/gin-gonic/gin"
-)
-
-type Pagination struct {
+type PaginationDTO struct {
 	Page       int  `json:"page"`
 	Limit      int  `json:"limit"`
 }
 
-type PaginationMeta struct {
+type PaginationMetaDTO struct {
 	Page       int  `json:"page"`
 	Limit      int  `json:"limit"`
 	Total      int  `json:"total"`

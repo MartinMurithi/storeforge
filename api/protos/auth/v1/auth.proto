@@ -5,6 +5,8 @@ package api.auth.v1;
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 
+import "user/v1/user.proto";
+
 option go_package = "github.com/MartinMurithi/storeforge/api/protos/auth/v1;authv1";
 
 // AuthService provides operations for managing user authentication and authorization.
@@ -27,23 +29,23 @@ service AuthService {
 }
 
 // It is an identity-level entity
-message User {
-  string                    id          = 1;
-  string                    email       = 2;
-  bool                      is_verified = 3;
-  UserProfile               profile     = 4;
-  google.protobuf.Timestamp created_at  = 5;
-  google.protobuf.Timestamp updated_at  = 6;
-  google.protobuf.Timestamp deleted_at  = 7;
-}
+// message User {
+//   string                    id          = 1;
+//   string                    email       = 2;
+//   bool                      is_verified = 3;
+//   UserProfile               profile     = 4;
+//   google.protobuf.Timestamp created_at  = 5;
+//   google.protobuf.Timestamp updated_at  = 6;
+//   google.protobuf.Timestamp deleted_at  = 7;
+// }
 
-// UserProfile contains mutable, non-authentication user data.
-message UserProfile {
-  string full_name     = 1;
-  string phone         = 2;
-  string business_name = 3;
-  string business_type = 4;
-}
+// // UserProfile contains mutable, non-authentication user data.
+// message UserProfile {
+//   string full_name     = 1;
+//   string phone         = 2;
+//   string business_name = 3;
+//   string business_type = 4;
+// }
 
 message RegisterRequest {
   string full_name     = 1;
@@ -55,8 +57,8 @@ message RegisterRequest {
 }
 
 message RegisterResponse {
-  User   user    = 1;
-  string message = 2;
+  user.v1.User user    = 1;
+  string       message = 2;
 }
 
 message LoginRequest {
@@ -65,8 +67,8 @@ message LoginRequest {
 }
 
 message LoginResponse {
-  User  user  = 1;
-  Token token = 2;
+  user.v1.User user  = 1;
+  Token        token = 2;
 }
 
 message Token {
