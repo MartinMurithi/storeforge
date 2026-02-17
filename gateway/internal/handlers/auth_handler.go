@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
-	"github.com/MartinMurithi/storeforge/gateway/internal/client"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
@@ -14,7 +13,7 @@ import (
 )
 
 type AuthHandler struct {
-	AuthClient *client.AuthClient
+	AuthClient authv1.AuthServiceClient
 }
 
 func (h *AuthHandler) RegisterUser(c *gin.Context) {

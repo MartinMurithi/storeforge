@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
-	"os"
 	"strconv"
 	"time"
+
+	"github.com/MartinMurithi/storeforge/pkg/env"
 )
 
 type DBConfig struct {
@@ -34,29 +35,21 @@ type Config struct {
 	Env  string
 }
 
-// getEnv returns the value of the environment variable `key`
-// or `fallback` if the variable is not set.
-func getEnv(key, fallback string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return fallback
-}
 
 func Load() (*Config, error) {
-	maxConns, _ := strconv.Atoi(getEnv("DB_MAX_CONNS", "20"))
-	minConns, _ := strconv.Atoi(getEnv("DB_MIN_CONNS", "4"))
-	minIdle, _ := strconv.Atoi(getEnv("DB_MIN_IDLE", "3"))
-	maxLife, _ := time.ParseDuration(getEnv("DB_MAX_LIFETIME", "1h"))
-	maxIdle, _ := time.ParseDuration(getEnv("DB_MAX_IDLE_TIME", "30m"))
-	healthPeriod, _ := time.ParseDuration(getEnv("DB_HEALTH_PERIOD", "1m"))
-	connectTimeout, _ := time.ParseDuration(getEnv("DB_CONNECT_TIMEOUT", "10s"))
+	maxConns, _ := strconv.Atoi(env.GetEnv("DB_MAX_CONNS", "20"))
+	minConns, _ := strconv.Atoi(env.GetEnv("DB_MIN_CONNS", "4"))
+	minIdle, _ := strconv.Atoi(env.GetEnv("DB_MIN_IDLE", "3"))
+	maxLife, _ := time.ParseDuration(env.GetEnv("DB_MAX_LIFETIME", "1h"))
+	maxIdle, _ := time.ParseDuration(env.GetEnv("DB_MAX_IDLE_TIME", "30m"))
+	healthPeriod, _ := time.ParseDuration(env.GetEnv("DB_HEALTH_PERIOD", "1m"))
+	connectTimeout, _ := time.ParseDuration(env.GetEnv("DB_CONNECT_TIMEOUT", "10s"))
 
-	grpcPort, _ := strconv.Atoi(getEnv("GRPC_PORT", "50051"))
+	grpcPort, _ := strconv.Atoi(env.GetEnv("GRPC_PORT", "50051"))
 
 	cfg := &Config{
 		DB: DBConfig{
-			DSN:               getEnv("DATABASE_URL", "postgres://postgres:martin321!@localhost:5432/storeforge?sslmode=disable"),
+			DSN:               env.GetEnv("DATABASE_URL", "postgres://postgres:martin321!@localhost:5432/storeforge?sslmode=disable"),
 			MaxConns:          int32(maxConns),
 			MinConns:          int32(minConns),
 			MinIdleConns:      int32(minIdle),
@@ -69,8 +62,8 @@ func Load() (*Config, error) {
 			Port: grpcPort,
 		},
 		JWT: JWTConfig{
-			PrivateKeyPath: getEnv("JWT_PRIVATE_KEY_PATH", "/home/martin-wachira/Martin/storeforge/usermanagement/internal/keys/jwt_private.pem"),
-			PublicKeyPath:  getEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/usermanagement/internal/keys/jwt_public.pem"),
+			PrivateKeyPath: env.GetEnv("JWT_PRIVATE_KEY_PATH", "/home/martin-wachira/Martin/storeforge/usermanagement/internal/keys/jwt_private.pem"),
+			PublicKeyPath:  env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/usermanagement/internal/keys/jwt_public.pem"),
 		},
 		Env: "prod",
 	}

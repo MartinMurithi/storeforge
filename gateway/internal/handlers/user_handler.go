@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
-	"github.com/MartinMurithi/storeforge/gateway/internal/client"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
@@ -16,7 +15,7 @@ import (
 )
 
 type UserHandler struct {
-	UserClient *client.UserClient
+	UserClient userv1.UserServiceClient
 }
 
 func (h *UserHandler) GetMe(c *gin.Context) {
