@@ -49,6 +49,26 @@ func (h *UserGrpcHandler) GetAllUsers(ctx context.Context, req *userv1.GetAllUse
 
 }
 
+func (h *UserGrpcHandler) GetCurrentUser(ctx context.Context, req *userv1.GetCurrentUserRequest) (*userv1.GetCurrentUserResponse, error) {
+
+	uuid := pgtype.UUID{}
+	if err := uuid.Scan(req.Id); err != nil {
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	user, err := h.UserService.GetCurrentUserById(ctx, uuid)
+
+	if err != nil {
+		fmt.Printf("[USERGRPCHANDLER]: failed to fetch user %s\n", err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &userv1.GetCurrentUserResponse{
+		User: ToProtoUser(user),
+	}, nil
+
+}
+
 func (h *UserGrpcHandler) UpdateUser(
 	ctx context.Context,
 	req *userv1.UpdateUserRequest,

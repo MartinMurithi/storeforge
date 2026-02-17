@@ -26,7 +26,7 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 		user := api.Group("/users")
 		user.Use(authMiddleware)
 		{
-			user.GET("/me", userHandler.GetMe)  // Get logged-in user profile
+			user.GET("/me", userHandler.GetCurrentUser)  // Get logged-in user profile
 			user.GET("/", userHandler.FetchAll) // Admin or listing (paginated)
 			// user.GET("/:id", userHandler.FetchByID)
 			user.PATCH("/me", userHandler.UpdateMe)

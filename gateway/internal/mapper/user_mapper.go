@@ -42,9 +42,10 @@ func MapUserProtoToDTO(u *userv1.User) *dto.UserResponseDTO {
 // Useful for list endpoints like GetAllUsers.
 func MapUserProtosToDTOs(users []*userv1.User) []dto.UserResponseDTO {
 	if users == nil {
-		return []dto.UserResponseDTO{}
+		return []dto.UserResponseDTO{} // Returns empty slice of users
 	}
 
+	// Ensure 'out' matches the return signature type exactly
 	out := make([]dto.UserResponseDTO, 0, len(users))
 
 	for _, u := range users {
