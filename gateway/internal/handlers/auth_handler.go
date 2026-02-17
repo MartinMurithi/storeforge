@@ -62,16 +62,12 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	grpcRequest := &authv1.RegisterRequest{
-		FullName:     reqDTO.FullName,
-		Email:        reqDTO.Email,
-		Phone:        reqDTO.Phone,
-		Password:     reqDTO.Password,
-		BusinessName: reqDTO.BusinessName,
-		BusinessType: reqDTO.BusinessType,
+	grpcRequest := &authv1.LoginRequest{
+		Email: reqDTO.Email,
+		Password: reqDTO.Password,
 	}
 
-	res, err := h.AuthClient.Register(c.Request.Context(), grpcRequest)
+	res, err := h.AuthClient.Login(c.Request.Context(), grpcRequest)
 
 	if err != nil {
 		code, slug, msg := errconv.FromGrpcToHttp(err)
@@ -79,6 +75,6 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 		return
 	}
 
-	resp := mapper.MapRegisterResponseProtoToDTO(res)
-	response.JSON(c, http.StatusCreated, resp)
+	resp := mapper.MapLoginResponseProtoToDTO(res)
+	response.JSON(c, http.StatusOK, resp)
 }

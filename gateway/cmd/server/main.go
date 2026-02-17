@@ -1,21 +1,35 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
 	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	"github.com/MartinMurithi/storeforge/gateway/internal/config"
 	"github.com/MartinMurithi/storeforge/gateway/internal/handlers"
 	"github.com/MartinMurithi/storeforge/gateway/internal/jwt"
 	"github.com/MartinMurithi/storeforge/gateway/internal/middleware"
 	"github.com/MartinMurithi/storeforge/gateway/internal/router"
-	"github.com/MartinMurithi/storeforge/pkg/env"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
-	conn, err := grpc.NewClient("0.0.0.0:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	cfg, err := config.Load()
+
+	log.Printf("configs loaded: %v", cfg)
+
+	if err != nil {
+		log.Fatalf("an error occurred when lading config variables%v", err)
+		return
+	}
+
+	serverAddr := fmt.Sprintf("0.0.0.0:%s", cfg.GrpcPort)
+
+	conn, err := grpc.NewClient(serverAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		log.Fatalf("did not connect to the usermanagement service %v", err)
@@ -33,8 +47,7 @@ func main() {
 	authHandler := &handlers.AuthHandler{AuthClient: authClient}
 
 	// Load the pub rsa key
-	publicKeyPath := env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/gateway/internal/certs/jwt_public.pem")
-	publicKey, err := jwt.LoadPublicKey(publicKeyPath)
+	publicKey, err := jwt.LoadPublicKey(cfg.PublicKeyPath)
 
 	if err != nil {
 		log.Printf("error loading JWT public key: %v\n", err)
