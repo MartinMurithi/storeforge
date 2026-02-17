@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
@@ -25,9 +24,9 @@ func main() {
 
 	defer conn.Close()
 
-	// Initialize grpc clients
-	var userClient userv1.UserServiceClient
-	var authClient authv1.AuthServiceClient
+	// Initialize gRPC clients USING the connection
+	userClient := userv1.NewUserServiceClient(conn)
+	authClient := authv1.NewAuthServiceClient(conn)
 
 	// Initialize user & auth handlers
 	userHandler := &handlers.UserHandler{UserClient: userClient}
@@ -38,7 +37,7 @@ func main() {
 	publicKey, err := jwt.LoadPublicKey(publicKeyPath)
 
 	if err != nil {
-		fmt.Errorf("error loading JWT public key: %w", err)
+		log.Printf("error loading JWT public key: %v\n", err)
 		return
 	}
 	authMiddleware := middleware.AuthMiddleware(publicKey, "storeforge-client", "storeforge-api")
@@ -46,9 +45,9 @@ func main() {
 	// setup router
 	r := router.SetupRouter(userHandler, authHandler, authMiddleware)
 
-	log.Printf("Gateway running on port 8080\n")
+	log.Printf("Gateway running on port 9095\n")
 
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":9095"); err != nil {
 		log.Printf("an error when starting gateway server%v\n", err)
 	}
 }

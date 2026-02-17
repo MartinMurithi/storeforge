@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
@@ -17,6 +18,12 @@ type AuthHandler struct {
 }
 
 func (h *AuthHandler) RegisterUser(c *gin.Context) {
+	if h.AuthClient == nil {
+		log.Println("Internal Error: AuthClient not initialized in AuthHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Auth service unavailable")
+		return
+	}
+	
 	var reqDTO dto.RegisterRequestDTO
 
 	// 1. Validate JSON Input
