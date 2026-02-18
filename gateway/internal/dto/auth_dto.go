@@ -3,27 +3,27 @@ package dto
 import "time"
 
 type RegisterRequestDTO struct {
-	FullName     string `json:"full_name"`
-	Email        string `json:"email"`
-	Phone        string `json:"phone"`
-	Password     string `json:"password"`
-	BusinessName string `json:"business_name"`
-	BusinessType string `json:"business_type"`
+	FullName     string `json:"full_name" binding:"required"`
+	Email        string `json:"email" binding:"required"`
+	Phone        string `json:"phone" binding:"required"`
+	Password     string `json:"password" binding:"required"`
+	BusinessName string `json:"business_name" binding:"required"`
+	BusinessType string `json:"business_type" binding:"required"`
 }
 
 type RegisterResponseDTO struct {
 	User    UserResponseDTO `json:"user"`
-	Message string       `json:"message"`
+	Message string          `json:"message"`
 }
 
 type LoginRequestDTO struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }
 
 type LoginResponseDTO struct {
 	User  UserResponseDTO `json:"user"`
-	Token TokenDTO     `json:"token"`
+	Token TokenDTO        `json:"token"`
 }
 
 type TokenDTO struct {
