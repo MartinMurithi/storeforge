@@ -34,8 +34,8 @@ type GetAllUsersResponseDTO struct {
 }
 
 type UpdateUserRequestDTO struct {
-	BusinessName *string `json:"business_name,omitempty"`
-	BusinessType *string `json:"business_type,omitempty"`
+	BusinessName *string `json:"business_name,omitempty" binding:"required"`
+	BusinessType *string `json:"business_type,omitempty" binding:"required"`
 }
 
 type UpdateUserResponseDTO struct {

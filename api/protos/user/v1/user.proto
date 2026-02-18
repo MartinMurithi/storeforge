@@ -9,33 +9,10 @@ import "google/api/annotations.proto";
 
 // UserService provides operations for managing user accounts and profiles.
 service UserService{
-  // GetCurrentUser retrieves a user by their unique identifier.
-  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {
-    option (google.api.http) = {
-      get: "/v1/users/{id}"
-    };
-  };
-  // GetAllUsers retrieves all users with pagination support.
-  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {
-    option (google.api.http) = {
-      get: "/v1/users"
-    };
-  };
-  // UpdateUser updates an existing user's profile information.
-  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {
-    option (google.api.http) = {
-      patch: "/v1/users/{id}"
-      body : "*"
-    };
-  };
-  // DeleteUser soft deletes a user account.
-  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {
-    option (google.api.http) = {
-      delete: "/v1/users/{id}"
-      body  : "*"
-    };
-  };
-
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {};
+  rpc GetAllUsers(GetAllUsersRequest) returns (GetAllUsersResponse) {};
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse) {};
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse) {};
 }
 
 message User {

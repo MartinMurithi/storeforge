@@ -87,6 +87,10 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 		BusinessType: input.BusinessType,
 	}
 
+	if (patch.BusinessName == nil || *patch.BusinessName == "") && (patch.BusinessType == nil || *patch.BusinessType == "") {
+		return nil, fmt.Errorf("%s: no valid fields provided for update", op)
+	}
+
 	updatedUser, err := srv.repo.PatchUser(ctx, input.Id, patch)
 
 	if err != nil {

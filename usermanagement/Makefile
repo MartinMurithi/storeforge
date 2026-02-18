@@ -53,7 +53,7 @@ GO_OUT := ../api/protos
 DESC_OUT := envoy/protos/api.pb
 
 # Google APIs for annotations, etc.
-GOOGLEAPIS_DIR := usermanagement/third_party/googleapis
+GOOGLEAPIS_DIR :=  third_party/googleapis
 
 # All proto files
 PROTO_FILES := $(shell find $(PROTO_DIR) -name "*.proto")
