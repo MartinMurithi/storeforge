@@ -17,7 +17,6 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
 
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/assert"
@@ -180,7 +179,6 @@ func TestSoftDeleteUser_NotFound(t *testing.T) {
 	assert.ErrorIs(t, err, apperrors.ErrUserNotFound)
 }
 
-
 func TestGetUserByEmailIncludingDeleted(t *testing.T) {
 	mockRepo := new(MockRepository)
 	ctx := context.Background()
@@ -245,7 +243,7 @@ func TestGetUserByPhoneIncludingDeleted(t *testing.T) {
 func TestRegisterUser_Success(t *testing.T) {
 	repo := new(MockRepository)
 	jwtMaker := &token.JWTMaker{}
-	srv := auth.NewAuthService(repo, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
 
 	ctx := context.Background()
 	input := &dto.RegisterUserRequestDTO{
@@ -271,7 +269,7 @@ func TestRegisterUser_Success(t *testing.T) {
 
 func TestRegisterUser_EmailAlreadyExists(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(repo, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
 
 	ctx := context.Background()
 
@@ -295,7 +293,7 @@ func TestRegisterUser_EmailAlreadyExists(t *testing.T) {
 
 func TestRegisterUser_PhoneAlreadyExists(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(repo, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
 
 	ctx := context.Background()
 
@@ -320,7 +318,7 @@ func TestRegisterUser_PhoneAlreadyExists(t *testing.T) {
 
 func TestRegisterUser_MissingEmail(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(repo, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
 
 	input := &dto.RegisterUserRequestDTO{
 		FullName:     "Alice Doe",
@@ -330,6 +328,9 @@ func TestRegisterUser_MissingEmail(t *testing.T) {
 		BusinessType: "Retail",
 		BusinessName: "Alice Shop",
 	}
+
+	repo.On("GetUserByEmail", mock.Anything, input.Email).
+		Return(input, nil)
 
 	user, err := srv.RegisterUser(context.Background(), input)
 
@@ -341,7 +342,7 @@ func TestLoginUser_Success(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(repo, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
 
 	password := "password123"
 	hashed, _ := utils.Hashpassword(password)
@@ -371,7 +372,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(repo, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
 
 	hashed, _ := utils.Hashpassword("correct-password")
 
@@ -399,7 +400,7 @@ func TestLoginUser_UserNotFound(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(repo, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
 
 	repo.On("GetUserByEmail", mock.Anything, "missing@example.com").
 		Return(nil, apperrors.ErrUserNotFound)

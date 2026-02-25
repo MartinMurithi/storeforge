@@ -64,6 +64,7 @@ func toProtoToken(t *entity.Token) *authv1.Token {
 
 	return &authv1.Token{
 		AccessToken: t.AccessToken,
+		RefreshToken: t.RefreshToken,
 		TokenType:   "Bearer",
 		ExpiresIn:   t.ExpiresIn,
 		IssuedAt:    timestamppb.New(t.IssuedAt),

@@ -13,6 +13,7 @@ func MapTokenProtoToDTO(t *authv1.Token) *dto.TokenDTO {
 
 	return &dto.TokenDTO{
 		AccessToken: t.AccessToken,
+		RefreshToken: t.RefreshToken,
 		TokenType:   t.TokenType,
 		ExpiresIn:   t.ExpiresIn,
 		IssuedAt:    t.IssuedAt.AsTime(),

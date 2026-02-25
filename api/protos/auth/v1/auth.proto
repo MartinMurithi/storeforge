@@ -26,6 +26,13 @@ service AuthService {
       body: "*"
     };
   };
+  // RefreshToken refreshes user access token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse){
+    option (google.api.http) = {
+      post: "/v1/auth/refresh_token"
+      body: "*"
+    };
+  };
 }
 
 message RegisterRequest {
