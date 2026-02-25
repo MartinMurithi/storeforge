@@ -54,7 +54,7 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 }
 
 func (h *AuthHandler) LoginUser(c *gin.Context) {
-	var reqDTO dto.RegisterRequestDTO
+	var reqDTO dto.LoginRequestDTO
 
 	// 1. Validate JSON Input
 	if err := c.ShouldBindJSON(&reqDTO); err != nil {
