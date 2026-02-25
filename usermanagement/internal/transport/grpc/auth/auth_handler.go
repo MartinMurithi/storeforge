@@ -83,3 +83,21 @@ func (a *AuthGrpcHandler) RefreshToken(ctx context.Context, req *authv1.RefreshT
 		},
 	}, nil
 }
+
+func (a *AuthGrpcHandler) Logout(ctx context.Context, req *authv1.LogoutRequest) (*authv1.LogoutResponse, error) {
+	const op = "AuthGrpcHandler.Logout"
+
+	if req.RefreshToken == "" {
+		return nil, errconv.ToGrpcError(fmt.Errorf("%s: refresh token is required", op))
+	}
+
+	err := a.AuthService.Logout(ctx, req.RefreshToken)
+	
+	if err != nil {
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &authv1.LogoutResponse{
+		Success: true,
+	}, nil
+}

@@ -13,7 +13,6 @@ func MapTokenProtoToDTO(t *authv1.Token) *dto.TokenDTO {
 
 	return &dto.TokenDTO{
 		AccessToken: t.AccessToken,
-		RefreshToken: t.RefreshToken,
 		TokenType:   t.TokenType,
 		ExpiresIn:   t.ExpiresIn,
 		IssuedAt:    t.IssuedAt.AsTime(),
@@ -44,4 +43,22 @@ func MapLoginResponseProtoToDTO(pb *authv1.LoginResponse) *dto.LoginResponseDTO 
 		User:  *MapUserProtoToDTO(pb.User),
 		Token: *MapTokenProtoToDTO(pb.Token),
 	}
+}
+
+// MapRefreshTokenResponseProtoToSafeDTO adapts the gRPC refresh result for the frontend.
+// It explicitly excludes the RefreshToken string since that will be handled via HttpOnly cookies.
+func MapRefreshTokenResponseProtoToSafeDTO(pb *authv1.RefreshTokenResponse) *dto.RefreshTokenResponseDTO {
+    if pb == nil || pb.Token == nil {
+        return nil
+    }
+
+    return &dto.RefreshTokenResponseDTO{
+        Token: dto.TokenDTO{
+            AccessToken: pb.Token.AccessToken,
+            ExpiresIn:   pb.Token.ExpiresIn,
+			ExpiresAt: pb.Token.ExpiresAt.AsTime(),
+			IssuedAt: pb.Token.IssuedAt.AsTime(),
+            TokenType:   "Bearer",
+        },
+    }
 }
