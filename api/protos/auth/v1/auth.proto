@@ -33,6 +33,13 @@ service AuthService {
       body: "*"
     };
   };
+  // Logout revokes refresh token in DB
+  rpc Logout(LogoutRequest) returns (LogoutResponse){
+    option (google.api.http) = {
+      post: "/v1/auth/logout"
+      body: "*"
+    };
+  };
 }
 
 message RegisterRequest {
@@ -74,4 +81,12 @@ message Token {
   int64                     expires_in    = 4; // seconds
   google.protobuf.Timestamp issued_at     = 5;
   string                    token_type    = 6; // "Bearer"
+}
+
+message LogoutRequest{
+  string refresh_token = 1;
+}
+
+message LogoutResponse{
+  bool success = 2;
 }

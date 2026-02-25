@@ -19,6 +19,8 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 		{
 			auth.POST("/register", authHandler.RegisterUser)
 			auth.POST("/login", authHandler.LoginUser)
+			auth.POST("/refresh-token", authHandler.RefreshToken)
+			auth.POST("/logout", authHandler.Logout)
 		}
 
 		// --- PROTECTED ROUTES ---

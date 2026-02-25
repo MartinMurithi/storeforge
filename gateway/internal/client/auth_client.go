@@ -67,3 +67,17 @@ func (c *AuthClient) RefreshToken(ctx context.Context, req *authv1.RefreshTokenR
 
 	return res, nil
 }
+
+func (c *AuthClient) Logout(ctx context.Context, req *authv1.LogoutRequest) (*authv1.LogoutResponse, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	res, err := c.Service.Logout(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

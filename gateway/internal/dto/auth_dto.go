@@ -31,14 +31,17 @@ type RefreshTokenRequestDTO struct{
 }
 
 type RefreshTokenResponseDTO struct {
-	Token  TokenDTO `json:"token"`
+	 Token TokenDTO `json:"token"`
 }
 
 type TokenDTO struct {
 	AccessToken  string    `json:"access_token"`
-	RefreshToken string    `json:"refresh_token"`
 	ExpiresAt    time.Time `json:"expires_at"`
 	ExpiresIn    int64     `json:"expires_in"`
 	IssuedAt     time.Time `json:"issued_at"`
 	TokenType    string    `json:"token_type"`
+}
+
+type LogoutResponseDTO struct{
+	success bool
 }

@@ -163,7 +163,7 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	}
 
 	// Generate JWT access token
-	accessToken, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 25 *time.Minute)
+	accessToken, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 25*time.Minute)
 	if err != nil {
 		log.Printf("[%s] failed to create JWT: %v", op, err)
 		return nil, nil, fmt.Errorf("%s: failed to issue access token: %w", op, err)
@@ -192,9 +192,9 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 	token := &entity.Token{
 		AccessToken:  accessToken.AccessToken,
 		RefreshToken: newRefreshToken,
-		ExpiresAt:    time.Now().Add(25 * time.Minute),
+		ExpiresAt:    time.Now().Local().Add(25 * time.Minute),
 		ExpiresIn:    int64((25 * time.Minute)),
-		IssuedAt:     time.Now(),
+		IssuedAt:     time.Now().Local(),
 		TokenType:    "Bearer",
 	}
 
@@ -262,15 +262,12 @@ func (srv *AuthService) RefreshToken(ctx context.Context, incomingRefresh string
 		return nil, err
 	}
 
-	loc, _ := time.LoadLocation("Africa/Nairobi")
-	now := time.Now().In(loc)
-
 	return &entity.Token{
 		AccessToken:  accessToken.AccessToken,
 		RefreshToken: newRefreshToken, // raw token to client
-		ExpiresAt:    now.Add(30 * time.Minute),
+		ExpiresAt:    time.Now().Local().Add(30 * time.Minute),
 		ExpiresIn:    int64((30 * time.Minute).Seconds()),
-		IssuedAt:     now,
+		IssuedAt:     time.Now().Local(),
 		TokenType:    "Bearer",
 	}, nil
 }
@@ -285,4 +282,31 @@ func GenerateRefreshToken() (string, error) {
 
 	// base64 URL-safe encoding
 	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+// Logout revokes the refresh token stored in the DB
+func (srv *AuthService) Logout(ctx context.Context, refreshToken string) error {
+	const op = "AuthService.Logout"
+
+	if refreshToken == "" {
+		return apperrors.ErrInvalidRefreshToken
+	}
+
+	log.Printf("[%s] incoming refresh token: %v", op, refreshToken)
+
+	// Hash incoming token to compare with DB
+	hash := auth.HashToken(refreshToken)
+	log.Printf("[%s] hashed refresh token: %v", op, hash)
+
+
+	log.Printf("[%s] hashed refresh token from DB: %v", op, hash)
+
+	// Revoke old token
+	_, err := srv.authRepo.RevokeRefreshTokenByHash(ctx, hash)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
