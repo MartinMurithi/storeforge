@@ -78,3 +78,27 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	resp := mapper.MapLoginResponseProtoToDTO(res)
 	response.JSON(c, http.StatusOK, resp)
 }
+
+func (h *AuthHandler) RefreshToken(c *gin.Context) {
+	var reqDTO dto.RefreshTokenRequestDTO
+
+	// 1. Validate JSON Input
+	if err := c.ShouldBindJSON(&reqDTO); err != nil {
+		response.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "kindly check your request body")
+		return
+	}
+
+	grpcRequest := &authv1.RefreshTokenRequest{
+		RefreshToken: reqDTO.RefreshToken,
+	}
+
+	res, err := h.AuthClient.RefreshToken(c.Request.Context(), grpcRequest)
+
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusOK, res)
+}

@@ -26,6 +26,14 @@ type LoginResponseDTO struct {
 	Token TokenDTO        `json:"token"`
 }
 
+type RefreshTokenRequestDTO struct{
+	RefreshToken string `json:"refresh_token" binding:"required"`
+}
+
+type RefreshTokenResponseDTO struct {
+	Token  TokenDTO `json:"token"`
+}
+
 type TokenDTO struct {
 	AccessToken  string    `json:"access_token"`
 	RefreshToken string    `json:"refresh_token"`
