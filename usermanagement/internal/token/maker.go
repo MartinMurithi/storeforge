@@ -27,34 +27,29 @@ func NewJWTMaker(privateKey *rsa.PrivateKey) (*JWTMaker, error) {
 	return &JWTMaker{PrivateKey: privateKey}, nil
 }
 
-func NewUserClaims(id pgtype.UUID, tenantId pgtype.UUID, email, role string, duration time.Duration) (*auth.UserClaims, error) {
+func NewUserClaims(
+    id pgtype.UUID,
+    tenantId pgtype.UUID,
+    email, role string,
+    duration time.Duration,
+) (*auth.UserClaims, error) {
 
-	googleUUID, err := uuid.NewRandom()
+    now := time.Now().UTC()
 
-	if err != nil {
-		return nil, fmt.Errorf("error generating google id %w", err)
-	}
-
-	// Convert the Google UUID to pgtypeUUID for compatibility
-	pgUUID := pgtype.UUID{
-		Bytes: googleUUID,
-		Valid: true,
-	}
-
-	return &auth.UserClaims{
-		Id:       id.String(), //Id of the store owner
-		Role:     role,
-		Email:    email,
-		TenantId: tenantId.String(), //Id of the tenant(actual store)
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-			ID:        pgUUID.String(),
-			Subject:   id.String(),
-			Issuer:    "usermanagement.auth.storeforge",
-			Audience:  []string{"storeforge-api"},
-		},
-	}, nil
+    return &auth.UserClaims{
+        Id:       id.String(),
+        Role:     role,
+        Email:    email,
+        TenantId: tenantId.String(),
+        RegisteredClaims: jwt.RegisteredClaims{
+            ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
+            IssuedAt:  jwt.NewNumericDate(now),
+            ID:        uuid.NewString(),
+            Subject:   id.String(),
+            Issuer:    "usermanagement.auth.storeforge",
+            Audience:  []string{"storeforge-api"},
+        },
+    }, nil
 }
 
 func (maker *JWTMaker) CreateToken(id, tenantId pgtype.UUID, email, role string, duration time.Duration) (*entity.Token, *auth.UserClaims, error) {

@@ -31,13 +31,9 @@ const (
 //
 // UserService provides operations for managing user accounts and profiles.
 type UserServiceClient interface {
-	// GetCurrentUser retrieves a user by their unique identifier.
 	GetCurrentUser(ctx context.Context, in *GetCurrentUserRequest, opts ...grpc.CallOption) (*GetCurrentUserResponse, error)
-	// GetAllUsers retrieves all users with pagination support.
 	GetAllUsers(ctx context.Context, in *GetAllUsersRequest, opts ...grpc.CallOption) (*GetAllUsersResponse, error)
-	// UpdateUser updates an existing user's profile information.
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
-	// DeleteUser soft deletes a user account.
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*DeleteUserResponse, error)
 }
 
@@ -95,13 +91,9 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 //
 // UserService provides operations for managing user accounts and profiles.
 type UserServiceServer interface {
-	// GetCurrentUser retrieves a user by their unique identifier.
 	GetCurrentUser(context.Context, *GetCurrentUserRequest) (*GetCurrentUserResponse, error)
-	// GetAllUsers retrieves all users with pagination support.
 	GetAllUsers(context.Context, *GetAllUsersRequest) (*GetAllUsersResponse, error)
-	// UpdateUser updates an existing user's profile information.
 	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
-	// DeleteUser soft deletes a user account.
 	DeleteUser(context.Context, *DeleteUserRequest) (*DeleteUserResponse, error)
 	mustEmbedUnimplementedUserServiceServer()
 }

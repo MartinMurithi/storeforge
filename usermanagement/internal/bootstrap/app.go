@@ -17,7 +17,8 @@ import (
 
 type App struct {
 	DB          *postgres.Pool
-	Repo        repository.IUserRepository
+	UserRepo    repository.IUserRepository
+	AuthRepo    repository.IAuthRepository
 	UserService *user.UserService
 	AuthService *auth.AuthService
 	Handler     *http.UserHandler
@@ -63,13 +64,18 @@ func Init(cfg *config.Config) (*App, error) {
 	}
 
 	dbAdapter := postgres.NewAdapter(pool.Pool)
-	repo := repository.NewUserRepository(dbAdapter)
+
+	// -------------------------
+	// Repository
+	// --------------------------
+	userRepo := repository.NewUserRepository(dbAdapter)
+	authRepo := repository.NewUAuthRepository(dbAdapter)
 
 	// -------------------------
 	// Application services
 	// -------------------------
-	userSrv := user.NewUserService(repo)
-	authSrv := auth.NewAuthService(repo, jwtMaker)
+	userSrv := user.NewUserService(userRepo)
+	authSrv := auth.NewAuthService(userRepo, authRepo, jwtMaker)
 	handler := http.NewUserHandler(userSrv, authSrv)
 
 	// -------------------------
@@ -85,7 +91,8 @@ func Init(cfg *config.Config) (*App, error) {
 
 	return &App{
 		DB:          pool,
-		Repo:        repo,
+		UserRepo:    userRepo,
+		AuthRepo:    authRepo,
 		UserService: userSrv,
 		AuthService: authSrv,
 		Handler:     handler,

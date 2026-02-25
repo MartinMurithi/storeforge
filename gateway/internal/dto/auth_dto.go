@@ -27,9 +27,10 @@ type LoginResponseDTO struct {
 }
 
 type TokenDTO struct {
-	AccessToken string    `json:"access_token"`
-	ExpiresAt   time.Time `json:"expires_at"`
-	ExpiresIn   int64     `json:"expires_in"`
-	IssuedAt    time.Time `json:"issued_at"`
-	TokenType   string    `json:"token_type"`
+	AccessToken  string    `json:"access_token"`
+	RefreshToken string    `json:"refresh_token"`
+	ExpiresAt    time.Time `json:"expires_at"`
+	ExpiresIn    int64     `json:"expires_in"`
+	IssuedAt     time.Time `json:"issued_at"`
+	TokenType    string    `json:"token_type"`
 }

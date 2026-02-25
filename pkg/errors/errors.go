@@ -44,4 +44,5 @@ var (
 	ErrNotValidYet   = errors.New("token not valid yet")
 	ErrWrongIssuer   = errors.New("wrong issuer")
 	ErrWrongAudience = errors.New("wrong audience")
+    ErrInvalidRefreshToken  = errors.New("invalid refresh token")
 )

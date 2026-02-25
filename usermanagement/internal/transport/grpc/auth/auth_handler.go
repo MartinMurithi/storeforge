@@ -2,11 +2,13 @@ package auth
 
 import (
 	"context"
+	"fmt"
 
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AuthGrpcHandler struct {
@@ -56,4 +58,28 @@ func (a *AuthGrpcHandler) Login(ctx context.Context, req *authv1.LoginRequest) (
 
 	return ToProtoLoginResponse(user, token), nil
 
+}
+
+func (a *AuthGrpcHandler) RefreshToken(ctx context.Context, req *authv1.RefreshTokenRequest) (*authv1.RefreshTokenResponse, error) {
+	const op = "AuthGrpcHandler.RefreshToken"
+
+	if req.RefreshToken == "" {
+		return nil, errconv.ToGrpcError(fmt.Errorf("%s: refresh token is required", op))
+	}
+
+	token, err := a.AuthService.RefreshToken(ctx, req.RefreshToken)
+	if err != nil {
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &authv1.RefreshTokenResponse{
+		Token: &authv1.Token{
+			AccessToken:  token.AccessToken,
+			RefreshToken: token.RefreshToken,
+			ExpiresAt:    timestamppb.New(token.ExpiresAt),
+			ExpiresIn:    token.ExpiresIn,
+			IssuedAt:     timestamppb.New(token.IssuedAt),
+			TokenType:    token.TokenType,
+		},
+	}, nil
 }
