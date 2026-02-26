@@ -137,8 +137,6 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 			RefreshToken: refreshToken,
 		}
 
-		// Call the gRPC Logout. Even if this fails (e.g., token already expired),
-		// Proceed to clear the cookie anyway to ensure the UI logs out.
 		_, _ = h.AuthClient.Logout(c.Request.Context(), grpcRequest)
 	}
 
@@ -153,7 +151,6 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		true,  // HttpOnly
 	)
 
-	// Return success
 	response.JSON(c, http.StatusOK, map[string]string{
 		"message": "Logged out successfully",
 	})

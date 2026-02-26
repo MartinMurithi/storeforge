@@ -20,8 +20,6 @@ func Load() (*Config, error) {
 		PublicKeyPath: env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/gateway/internal/certs/jwt_public.pem"),
 	}
 
-	// Validate required fields
-
 	if cfg.GrpcPort == "" {
 		return nil, fmt.Errorf("grpc port is required")
 	}
