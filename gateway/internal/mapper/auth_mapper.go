@@ -46,7 +46,7 @@ func MapLoginResponseProtoToDTO(pb *authv1.LoginResponse) *dto.LoginResponseDTO 
 }
 
 // MapRefreshTokenResponseProtoToSafeDTO adapts the gRPC refresh result for the frontend.
-// It explicitly excludes the RefreshToken string since that will be handled via HttpOnly cookies.
+// It explicitly excludes the RefreshToken string since it will be handled via HttpOnly cookies.
 func MapRefreshTokenResponseProtoToSafeDTO(pb *authv1.RefreshTokenResponse) *dto.RefreshTokenResponseDTO {
     if pb == nil || pb.Token == nil {
         return nil
