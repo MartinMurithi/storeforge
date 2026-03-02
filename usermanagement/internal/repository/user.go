@@ -38,8 +38,8 @@ func NewUserRepository(db database.DB) IUserRepository {
 }
 
 type UpdateUserInput struct {
-	BusinessName *string
-	BusinessType *string
+	Email *string
+	Phone *string
 }
 
 type userLookupMode int
@@ -58,9 +58,9 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) e
 
 	query := `
 		INSERT INTO users (
-			full_name, email, phone, password_hash, business_type, business_name
+			full_name, email, phone, password_hash
 		) 
-		VALUES ($1, $2, $3, $4, $5, $6)
+		VALUES ($1, $2, $3, $4)
 		RETURNING id, created_at
 	`
 
@@ -72,8 +72,6 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *entity.User) e
 		user.Email,
 		user.Phone,
 		user.PasswordHash,
-		user.BusinessType,
-		user.BusinessName,
 	).Scan(&user.ID, &user.CreatedAt)
 
 	if err != nil {
@@ -101,7 +99,6 @@ func (repo *UserRepository) getUser(
 
 	query := `
 		SELECT id, full_name, email, phone, password_hash,
-		       business_type, business_name,
 		       created_at, updated_at, deleted_at, is_verified
 		FROM users
 		WHERE ` + where
@@ -118,8 +115,6 @@ func (repo *UserRepository) getUser(
 		&user.Email,
 		&user.Phone,
 		&user.PasswordHash,
-		&user.BusinessType,
-		&user.BusinessName,
 		&user.CreatedAt,
 		&user.UpdatedAt,
 		&user.DeletedAt,
@@ -189,7 +184,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 	offset := (p.Page - 1) * p.Limit
 
 	query := `
-		SELECT id, full_name, email, phone, business_type, business_name, created_at, updated_at, deleted_at, is_verified
+		SELECT id, full_name, email, phone, created_at, updated_at, deleted_at, is_verified
 		FROM users
 		WHERE deleted_at IS NULL
 		ORDER BY created_at DESC
@@ -210,8 +205,6 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 			&user.FullName,
 			&user.Email,
 			&user.Phone,
-			&user.BusinessType,
-			&user.BusinessName,
 			&user.CreatedAt,
 			&user.UpdatedAt,
 			&user.DeletedAt,
@@ -239,8 +232,8 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 	query := `
 		UPDATE users
 		SET
-			business_name = COALESCE($1, business_name),
-			business_type = COALESCE($2, business_type),
+			email = COALESCE($1, email),
+			phone = COALESCE($2, phone),
 			updated_at = NOW()
 		WHERE deleted_at IS NULL AND id = $3
 		RETURNING
@@ -248,8 +241,6 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 			full_name,
 			email,
 			phone,
-			business_type,
-			business_name,
 			is_verified,
 			created_at,
 			updated_at
@@ -260,16 +251,14 @@ func (repo *UserRepository) PatchUser(ctx context.Context, id pgtype.UUID, input
 	err := repo.DB.QueryRow(
 		ctx,
 		query,
-		input.BusinessName,
-		input.BusinessType,
+		input.Email,
+		input.Phone,
 		id,
 	).Scan(
 		&user.ID,
 		&user.FullName,
 		&user.Email,
 		&user.Phone,
-		&user.BusinessType,
-		&user.BusinessName,
 		&user.IsVerified,
 		&user.CreatedAt,
 		&user.UpdatedAt,

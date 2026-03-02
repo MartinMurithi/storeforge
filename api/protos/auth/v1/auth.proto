@@ -47,8 +47,6 @@ message RegisterRequest {
   string email         = 2;
   string phone         = 3;
   string password      = 4;
-  string business_name = 5;
-  string business_type = 6;
 }
 
 message RegisterResponse {

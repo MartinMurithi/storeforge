@@ -14,8 +14,6 @@ type UserResponseDTO struct {
 	FullName     string      `json:"fullName"`
 	Email        string      `json:"email"`
 	Phone        string      `json:"phone"`
-	BusinessType string      `json:"businessType"`
-	BusinessName string      `json:"businessName"`
 	CreatedAt    time.Time   `json:"createdAt"`
 	UpdatedAt    *time.Time  `json:"updatedAt"`
 	IsVerified   bool        `json:"isVerified"`
@@ -26,8 +24,6 @@ type RegisterUserRequestDTO struct {
 	Email        string
 	Phone        string
 	Password     string
-	BusinessType string
-	BusinessName string
 }
 
 type RegisterUserResponseDTO struct {
@@ -42,8 +38,6 @@ func (regInput *RegisterUserRequestDTO) Normalize() {
 	regInput.Email = strings.TrimSpace(regInput.Email)
 	regInput.Phone = strings.TrimSpace(regInput.Phone)
 	regInput.Password = strings.TrimSpace(regInput.Password)
-	regInput.BusinessType = strings.TrimSpace(regInput.BusinessType)
-	regInput.BusinessName = strings.TrimSpace(regInput.BusinessName)
 }
 
 // Normalize Login user input
@@ -73,6 +67,6 @@ type FetchUserResponseDTO struct {
 }
 
 type PatchUserRequestDTO struct {
-	BusinessName *string `json:"businessName"`
-	BusinessType *string `json:"businessType"`
+	Email *string `json:"email"`
+	Phone *string `json:"phone"`
 }

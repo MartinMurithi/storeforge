@@ -10,8 +10,8 @@ import (
 func ToPatchUserRequest(id pgtype.UUID, req *dto.PatchUserRequestDTO) *user.PatchUserInput {
 	return &user.PatchUserInput{
 		Id:           id,
-		BusinessName: req.BusinessName,
-		BusinessType: req.BusinessType,
+		Email: req.Email,
+		Phone: req.Phone,
 	}
 
 }

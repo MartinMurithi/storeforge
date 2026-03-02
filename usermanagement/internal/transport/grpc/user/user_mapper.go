@@ -29,8 +29,6 @@ func ToProtoUser(u *entity.User) *userv1.User {
 		Profile: &userv1.UserProfile{
 			FullName:     u.FullName,
 			Phone:        u.Phone,
-			BusinessName: u.BusinessName,
-			BusinessType: u.BusinessType,
 		},
 		CreatedAt: timestamppb.New(u.CreatedAt),
 		UpdatedAt: toProtoTimestamp(u.UpdatedAt),

@@ -26,9 +26,9 @@ func NewUserService(repo repository.IUserRepository) *UserService {
 }
 
 type PatchUserInput struct {
-	Id           pgtype.UUID
-	BusinessName *string
-	BusinessType *string
+	Id    pgtype.UUID
+	Email *string
+	Phone *string
 }
 
 // Admin role
@@ -83,11 +83,11 @@ func (srv *UserService) UpdateCurrentUser(ctx context.Context, input *PatchUserI
 	log.Printf("user id %v", input.Id.Valid)
 
 	patch := &repository.UpdateUserInput{
-		BusinessName: input.BusinessName,
-		BusinessType: input.BusinessType,
+		Email: input.Email,
+		Phone: input.Phone,
 	}
 
-	if (patch.BusinessName == nil || *patch.BusinessName == "") && (patch.BusinessType == nil || *patch.BusinessType == "") {
+	if (patch.Email == nil || *patch.Email == "") && (patch.Phone == nil || *patch.Phone == "") {
 		return nil, fmt.Errorf("%s: no valid fields provided for update", op)
 	}
 

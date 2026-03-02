@@ -37,8 +37,6 @@ func (h *AuthHandler) RegisterUser(c *gin.Context) {
 		Email:        reqDTO.Email,
 		Phone:        reqDTO.Phone,
 		Password:     reqDTO.Password,
-		BusinessName: reqDTO.BusinessName,
-		BusinessType: reqDTO.BusinessType,
 	}
 
 	res, err := h.AuthClient.Register(c.Request.Context(), grpcRequest)

@@ -29,8 +29,6 @@ func (h *AuthGrpcHandler) Register(ctx context.Context, req *authv1.RegisterRequ
 		Email:        req.Email,
 		Phone:        req.Phone,
 		Password:     req.Password,
-		BusinessType: req.BusinessType,
-		BusinessName: req.BusinessName,
 	}
 
 	user, err := h.AuthService.RegisterUser(ctx, dtoReq)

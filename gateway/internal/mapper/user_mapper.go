@@ -24,8 +24,6 @@ func MapUserProtoToDTO(u *userv1.User) *dto.UserResponseDTO {
 		res.Profile = dto.UserProfileDTO{
 			FullName:     u.Profile.FullName,
 			Phone:        u.Profile.Phone,
-			BusinessName: u.Profile.BusinessName,
-			BusinessType: u.Profile.BusinessType,
 		}
 	}
 

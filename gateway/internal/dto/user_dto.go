@@ -20,8 +20,6 @@ type UserResponseDTO struct {
 type UserProfileDTO struct {
 	FullName     string `json:"full_name"`
 	Phone        string `json:"phone"`
-	BusinessName string `json:"business_name"`
-	BusinessType string `json:"business_type"`
 }
 
 type GetCurrentUserResponseDTO struct {
@@ -34,8 +32,8 @@ type GetAllUsersResponseDTO struct {
 }
 
 type UpdateUserRequestDTO struct {
-	BusinessName *string `json:"business_name,omitempty" binding:"required"`
-	BusinessType *string `json:"business_type,omitempty" binding:"required"`
+	Email *string `json:"email,omitempty" binding:"required"`
+	Phone *string `json:"phone,omitempty" binding:"required"`
 }
 
 type UpdateUserResponseDTO struct {
