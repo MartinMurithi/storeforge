@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package tenant.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/storeforge/tenant-service/api/proto/tenant/v1;tenantv1";
+
+service TenantService {
+    // Identity & Onboarding
+  rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+  rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
+
+    // UI State (The Settings/BSON logic)
+  rpc GetSettings(GetSettingsRequest) returns (GetSettingsResponse);
+  rpc UpdateSettings(UpdateSettingsRequest) returns (UpdateSettingsResponse);
+}
+
+message Tenant {
+  string id = 1;
+  string store_name = 2;
+  string slug = 3;
+  string sub_domain = 4;
+  string business_type = 5;
+  string status = 6;
+  google.protobuf.Timestamp created_at = 7;
+}
+
+message CreateTenantRequest {
+  string name = 1;
+  string slug = 2;
+  string business_type = 3;
+}
+
+message CreateTenantResponse {
+  Tenant tenant = 1;
+}
+
+message GetTenantRequest {
+  oneof identifier {
+    string id = 1;
+    string slug = 2;
+  }
+}
+
+message GetTenantResponse {
+  Tenant tenant = 1;
+}
+
+message GetSettingsRequest {
+  string tenant_id = 1;
+}
+
+message GetSettingsResponse {
+  string theme_id = 1;
+    // google.protobuf.Struct is the Proto equivalent of map[string]any
+  google.protobuf.Struct config = 2;
+  int32 version = 3;
+}
+
+message UpdateSettingsRequest {
+  string tenant_id = 1;
+  string theme_id = 2;
+  google.protobuf.Struct config_overrides = 3;
+}
+
+message UpdateSettingsResponse {
+  bool success = 1;
+  int32 new_version = 2;
+}
