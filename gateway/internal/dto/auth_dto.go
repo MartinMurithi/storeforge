@@ -7,8 +7,6 @@ type RegisterRequestDTO struct {
 	Email        string `json:"email" binding:"required"`
 	Phone        string `json:"phone" binding:"required"`
 	Password     string `json:"password" binding:"required"`
-	BusinessName string `json:"business_name" binding:"required"`
-	BusinessType string `json:"business_type" binding:"required"`
 }
 
 type RegisterResponseDTO struct {

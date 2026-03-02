@@ -30,8 +30,6 @@ type RegisterRequest struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Phone         string                 `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
 	Password      string                 `protobuf:"bytes,4,opt,name=password,proto3" json:"password,omitempty"`
-	BusinessName  string                 `protobuf:"bytes,5,opt,name=business_name,json=businessName,proto3" json:"business_name,omitempty"`
-	BusinessType  string                 `protobuf:"bytes,6,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -90,20 +88,6 @@ func (x *RegisterRequest) GetPhone() string {
 func (x *RegisterRequest) GetPassword() string {
 	if x != nil {
 		return x.Password
-	}
-	return ""
-}
-
-func (x *RegisterRequest) GetBusinessName() string {
-	if x != nil {
-		return x.BusinessName
-	}
-	return ""
-}
-
-func (x *RegisterRequest) GetBusinessType() string {
-	if x != nil {
-		return x.BusinessType
 	}
 	return ""
 }
@@ -528,14 +512,12 @@ var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x12user/v1/user.proto\"\xc0\x01\n" +
+	"\x12auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto\x1a\x12user/v1/user.proto\"v\n" +
 	"\x0fRegisterRequest\x12\x1b\n" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
 	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x1a\n" +
-	"\bpassword\x18\x04 \x01(\tR\bpassword\x12#\n" +
-	"\rbusiness_name\x18\x05 \x01(\tR\fbusinessName\x12#\n" +
-	"\rbusiness_type\x18\x06 \x01(\tR\fbusinessType\"S\n" +
+	"\bpassword\x18\x04 \x01(\tR\bpassword\"S\n" +
 	"\x10RegisterResponse\x12%\n" +
 	"\x04user\x18\x01 \x01(\v2\x11.api.user.v1.UserR\x04user\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"@\n" +

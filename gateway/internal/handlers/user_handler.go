@@ -105,8 +105,8 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 
 	res, err := h.UserClient.UpdateUser(c.Request.Context(), &userv1.UpdateUserRequest{
 		Id:           userID,
-		BusinessName: reqDTO.BusinessName,
-		BusinessType: reqDTO.BusinessType,
+		Email: reqDTO.Email,
+		Phone: reqDTO.Phone,
 	})
 
 	if err != nil {

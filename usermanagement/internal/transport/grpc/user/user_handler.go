@@ -83,12 +83,12 @@ func (h *UserGrpcHandler) UpdateUser(
 		Id: uuid,
 	}
 
-	if req.BusinessName != nil {
-		input.BusinessName = req.BusinessName
+	if req.Email != nil {
+		input.Email = req.Email
 	}
 
-	if req.BusinessType != nil {
-		input.BusinessType = req.BusinessType
+	if req.Phone != nil {
+		input.Phone = req.Phone
 	}
 
 	updatedUser, err := h.UserService.UpdateCurrentUser(ctx, input)

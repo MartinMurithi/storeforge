@@ -57,8 +57,6 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		{"Email", input.Email, apperrors.ErrEmailRequired},
 		{"Phone", input.Phone, apperrors.ErrPhoneRequired},
 		{"Password", input.Password, apperrors.ErrPasswordRequired},
-		{"BusinessType", input.BusinessType, apperrors.ErrBusinessTypeRequired},
-		{"BusinessName", input.BusinessName, apperrors.ErrBusinessNameRequired},
 	}
 
 	for _, check := range checks {
@@ -109,8 +107,6 @@ func (srv *AuthService) RegisterUser(ctx context.Context, input *dto.RegisterUse
 		Email:        input.Email,
 		Phone:        input.Phone,
 		PasswordHash: hashedPassword,
-		BusinessType: input.BusinessType,
-		BusinessName: input.BusinessName,
 	}
 
 	//save user to db
