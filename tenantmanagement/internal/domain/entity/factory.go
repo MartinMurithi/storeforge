@@ -10,17 +10,27 @@ import (
 )
 
 // NewTenant is a Domain Factory that ensures business rules are met upon creation.
-func NewTenant(name, slug, business_type string) (*Tenant, error) {
+func NewTenant(name, slug, business_type string, defaultThemeConfig map[string]any) (*Tenant, error) {
 	if name == "" {
 		return nil, apperrors.ErrBusinessNameRequired
 	}
+
+	tenantId := value_object.NewTenantIDFromUUID(uuid.New())
+	themeId := value_object.NewThemeIDFromUUID(uuid.New())
+
 	return &Tenant{
-		// We use a random UUID for a brand new Tenant
-		ID:           value_object.NewTenantIDFromUUID(uuid.New()),
+		ID:           tenantId,
 		StoreName:    name,
 		SubDomain:    slug + ".storeforge.com",
 		BusinessType: business_type,
 		Status:       "provisioning",
 		CreatedAt:    time.Now(),
+		Settings: &Settings{
+			TenantID:  tenantId,
+			ThemeID:   themeId,
+			Config:    defaultThemeConfig,
+			Version:   1,
+			UpdatedAt: time.Now(),
+		},
 	}, nil
 }

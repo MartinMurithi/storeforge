@@ -11,9 +11,9 @@ import (
 type ThemeConfig map[string]any
 
 type Settings struct {
-	TenantID  value_object.TenantID
 	ThemeID   value_object.ThemeID
-	Config    ThemeConfig // Updated to use the type alias
+	TenantID  value_object.TenantID
+	Config    ThemeConfig
 	Version   int         // For Optimistic Concurrency
 	UpdatedAt time.Time
 }

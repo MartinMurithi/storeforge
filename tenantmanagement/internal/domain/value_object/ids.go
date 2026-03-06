@@ -39,3 +39,7 @@ func (t ThemeID) String() string  { return t.value.String() }
 func NewTenantIDFromUUID(u uuid.UUID) TenantID {
 	return TenantID{value: u}
 }
+
+func NewThemeIDFromUUID(u uuid.UUID) ThemeID {
+	return ThemeID{value: u}
+}
