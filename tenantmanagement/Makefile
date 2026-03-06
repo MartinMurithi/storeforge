@@ -4,6 +4,9 @@ PROTO_DIR := ../api/protos
 # Where Go code should be generated (all services share the API folder)
 GO_OUT := ../api/protos
 
+# Where the Envoy descriptor should be generated
+DESC_OUT := envoy/protos/api.pb
+
 # Google APIs for annotations, etc.
 GOOGLEAPIS_DIR :=  third_party/googleapis
 
@@ -30,9 +33,9 @@ protos:
 	  --include_source_info \
 	  $(PROTO_FILES)
 
-	@echo "Protos generated"
+	@echo "Protos and descriptor generated"
 
 clean:
-	@echo "Cleaning generated Go files..."
+	@echo "Cleaning generated Go files and descriptor..."
 	find $(GO_OUT) -name "*.pb.go" -delete
 	rm -f $(DESC_OUT)

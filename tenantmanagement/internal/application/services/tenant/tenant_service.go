@@ -68,6 +68,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 
 	resp := mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
 		Tenant:         newTenant,
+		Theme:          theme,
 		TenantSettings: newTenant.Settings,
 	})
 
