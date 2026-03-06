@@ -18,19 +18,30 @@ service TenantService {
 }
 
 message Tenant {
-  string id = 1;
-  string store_name = 2;
-  string slug = 3;
-  string sub_domain = 4;
-  string business_type = 5;
-  string status = 6;
-  google.protobuf.Timestamp created_at = 7;
+  string                    id            = 1;
+  string                    store_name    = 2;
+  string                    slug          = 3;
+  string                    sub_domain    = 4;
+  string                    business_type = 5;
+  string                    status        = 6;
+  google.protobuf.Timestamp created_at    = 7;
+  google.protobuf.Timestamp updated_at    = 8;
+  google.protobuf.Timestamp deleted_at    = 9;
+}
+
+message TenantSettings{
+  string                    tenant_id    = 1;
+  string                    theme_id     = 2;
+  google.protobuf.Struct    theme_config = 3;
+  int32                     version      = 4;
+  google.protobuf.Timestamp updated      = 5;
 }
 
 message CreateTenantRequest {
-  string name = 1;
-  string slug = 2;
-  string business_type = 3;
+  string         store_name      = 1;
+  string         slug            = 2;
+  string         business_type   = 3;
+  TenantSettings tenant_settings = 4;
 }
 
 message CreateTenantResponse {
@@ -39,7 +50,7 @@ message CreateTenantResponse {
 
 message GetTenantRequest {
   oneof identifier {
-    string id = 1;
+    string id   = 1;
     string slug = 2;
   }
 }
@@ -55,17 +66,17 @@ message GetSettingsRequest {
 message GetSettingsResponse {
   string theme_id = 1;
     // google.protobuf.Struct is the Proto equivalent of map[string]any
-  google.protobuf.Struct config = 2;
-  int32 version = 3;
+  google.protobuf.Struct config  = 2;
+  int32                  version = 3;
 }
 
 message UpdateSettingsRequest {
-  string tenant_id = 1;
-  string theme_id = 2;
+  string                 tenant_id        = 1;
+  string                 theme_id         = 2;
   google.protobuf.Struct config_overrides = 3;
 }
 
 message UpdateSettingsResponse {
-  bool success = 1;
+  bool  success     = 1;
   int32 new_version = 2;
 }
