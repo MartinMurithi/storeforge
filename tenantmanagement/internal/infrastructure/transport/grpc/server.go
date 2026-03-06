@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"net"
 
-
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
-
+	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc/handlers"
 	"google.golang.org/grpc"
 )
 
@@ -17,7 +16,7 @@ type Server struct {
 }
 
 // NewGRPCServer creates a gRPC server with all services and handlers registered.
-func NewGRPCServer(port int, userSvc *user.UserService, authSvc *authapp.AuthService) (*Server, error) {
+func NewGRPCServer(port int, tenantSrv *tenant.TenantService) (*Server, error) {
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
 	if err != nil {
@@ -27,20 +26,18 @@ func NewGRPCServer(port int, userSvc *user.UserService, authSvc *authapp.AuthSer
 	// Create gRPC server
 	// Add interceptors later
 	grpcServer := grpc.NewServer(
-		// grpc.ChainUnaryInterceptor(recoveryUnaryInterceptor(), loggingUnaryInterceptor(), authUnaryInterceptor()),
+	// grpc.ChainUnaryInterceptor(recoveryUnaryInterceptor(), loggingUnaryInterceptor(), authUnaryInterceptor()),
 	)
 
 	// Handlers
-	authHandler := authgrpc.NewAuthGrpcHandler(authSvc)
-	userHandler := usergrpc.NewUserGrpcHandler(userSvc)
+	tenantHandler := handlers.NewTenantGrpcHandler(tenantSrv)
 
 	// Register services
-	authv1.RegisterAuthServiceServer(grpcServer, authHandler)
-	userv1.RegisterUserServiceServer(grpcServer, userHandler)
+	tenantv1.RegisterTenantServiceServer(grpcServer, tenantHandler)
 
 	return &Server{
 		GRPCServer: grpcServer,
-		Listener: lis,
+		Listener:   lis,
 	}, nil
 }
 
@@ -55,7 +52,6 @@ func (s *Server) Stop() {
 	fmt.Println("Stopping gRPC server")
 	s.GRPCServer.GracefulStop()
 }
-
 
 // func loggingInterceptor(
 //     ctx context.Context,

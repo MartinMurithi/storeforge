@@ -7,6 +7,7 @@
 package tenantv1
 
 import (
+	v1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/theme/v1"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
@@ -286,7 +287,8 @@ func (x *CreateTenantRequest) GetThemeId() string {
 type CreateTenantResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tenant        *Tenant                `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
-	Settings      *TenantSettings        `protobuf:"bytes,2,opt,name=settings,proto3" json:"settings,omitempty"`
+	Theme         *v1.Theme              `protobuf:"bytes,2,opt,name=theme,proto3" json:"theme,omitempty"`
+	Settings      *TenantSettings        `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -324,6 +326,13 @@ func (*CreateTenantResponse) Descriptor() ([]byte, []int) {
 func (x *CreateTenantResponse) GetTenant() *Tenant {
 	if x != nil {
 		return x.Tenant
+	}
+	return nil
+}
+
+func (x *CreateTenantResponse) GetTheme() *v1.Theme {
+	if x != nil {
+		return x.Theme
 	}
 	return nil
 }
@@ -465,7 +474,7 @@ var File_tenantmanagement_tenant_v1_tenant_proto protoreflect.FileDescriptor
 
 const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\n" +
-	"'tenantmanagement/tenant/v1/tenant.proto\x12\ttenant.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xd8\x02\n" +
+	"'tenantmanagement/tenant/v1/tenant.proto\x12\ttenant.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a%tenantmanagement/theme/v1/theme.proto\"\xd8\x02\n" +
 	"\x06Tenant\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -494,10 +503,11 @@ const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\rbusiness_type\x18\x03 \x01(\tR\fbusinessType\x12\x1d\n" +
 	"\n" +
 	"sub_domain\x18\x04 \x01(\tR\tsubDomain\x12\x19\n" +
-	"\btheme_id\x18\x05 \x01(\tR\athemeId\"x\n" +
+	"\btheme_id\x18\x05 \x01(\tR\athemeId\"\x9f\x01\n" +
 	"\x14CreateTenantResponse\x12)\n" +
-	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x125\n" +
-	"\bsettings\x18\x02 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\"H\n" +
+	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x12%\n" +
+	"\x05theme\x18\x02 \x01(\v2\x0f.theme.v1.ThemeR\x05theme\x125\n" +
+	"\bsettings\x18\x03 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\"H\n" +
 	"\x10GetTenantRequest\x12\x10\n" +
 	"\x02id\x18\x01 \x01(\tH\x00R\x02id\x12\x14\n" +
 	"\x04slug\x18\x02 \x01(\tH\x00R\x04slugB\f\n" +
@@ -531,6 +541,7 @@ var file_tenantmanagement_tenant_v1_tenant_proto_goTypes = []any{
 	(*GetTenantResponse)(nil),     // 5: tenant.v1.GetTenantResponse
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 	(*structpb.Struct)(nil),       // 7: google.protobuf.Struct
+	(*v1.Theme)(nil),              // 8: theme.v1.Theme
 }
 var file_tenantmanagement_tenant_v1_tenant_proto_depIdxs = []int32{
 	6,  // 0: tenant.v1.Tenant.created_at:type_name -> google.protobuf.Timestamp
@@ -539,17 +550,18 @@ var file_tenantmanagement_tenant_v1_tenant_proto_depIdxs = []int32{
 	7,  // 3: tenant.v1.TenantSettings.theme_config:type_name -> google.protobuf.Struct
 	6,  // 4: tenant.v1.TenantSettings.updated:type_name -> google.protobuf.Timestamp
 	0,  // 5: tenant.v1.CreateTenantResponse.tenant:type_name -> tenant.v1.Tenant
-	1,  // 6: tenant.v1.CreateTenantResponse.settings:type_name -> tenant.v1.TenantSettings
-	0,  // 7: tenant.v1.GetTenantResponse.tenant:type_name -> tenant.v1.Tenant
-	2,  // 8: tenant.v1.TenantService.CreateTenant:input_type -> tenant.v1.CreateTenantRequest
-	4,  // 9: tenant.v1.TenantService.GetTenant:input_type -> tenant.v1.GetTenantRequest
-	3,  // 10: tenant.v1.TenantService.CreateTenant:output_type -> tenant.v1.CreateTenantResponse
-	5,  // 11: tenant.v1.TenantService.GetTenant:output_type -> tenant.v1.GetTenantResponse
-	10, // [10:12] is the sub-list for method output_type
-	8,  // [8:10] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	8,  // 6: tenant.v1.CreateTenantResponse.theme:type_name -> theme.v1.Theme
+	1,  // 7: tenant.v1.CreateTenantResponse.settings:type_name -> tenant.v1.TenantSettings
+	0,  // 8: tenant.v1.GetTenantResponse.tenant:type_name -> tenant.v1.Tenant
+	2,  // 9: tenant.v1.TenantService.CreateTenant:input_type -> tenant.v1.CreateTenantRequest
+	4,  // 10: tenant.v1.TenantService.GetTenant:input_type -> tenant.v1.GetTenantRequest
+	3,  // 11: tenant.v1.TenantService.CreateTenant:output_type -> tenant.v1.CreateTenantResponse
+	5,  // 12: tenant.v1.TenantService.GetTenant:output_type -> tenant.v1.GetTenantResponse
+	11, // [11:13] is the sub-list for method output_type
+	9,  // [9:11] is the sub-list for method input_type
+	9,  // [9:9] is the sub-list for extension type_name
+	9,  // [9:9] is the sub-list for extension extendee
+	0,  // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_tenantmanagement_tenant_v1_tenant_proto_init() }

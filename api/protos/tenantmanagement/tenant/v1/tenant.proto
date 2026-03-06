@@ -5,9 +5,11 @@ package tenant.v1;
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
+import "tenantmanagement/theme/v1/theme.proto";
+
 option go_package = "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1;tenantv1";
 
-// TenantService, tenant service will handle all thenant related operations such creating, retrieving, updating and deleting a tenant. 
+// TenantService, tenant service will handle all thenant related operations such creating, retrieving, updating and deleting a tenant.
 service TenantService {
     // Identity & Onboarding
   rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
@@ -44,7 +46,8 @@ message CreateTenantRequest {
 
 message CreateTenantResponse {
   Tenant         tenant   = 1;
-  TenantSettings settings = 2;
+  theme.v1.Theme theme    = 2;
+  TenantSettings settings = 3;
 }
 
 message GetTenantRequest {
