@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS tenant_settings (
     theme_id UUID NOT NULL REFERENCES themes(id),
     config JSONB NOT NULL DEFAULT '{}',
     version INT NOT NULL DEFAULT 1,
-    updated_at TIMESTAMP
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX idx_tenants_slug ON tenants(slug);
