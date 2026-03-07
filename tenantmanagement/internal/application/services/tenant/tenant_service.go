@@ -45,7 +45,6 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		SubDomain:    req.SubDomain,
 	}
 
-	// Access the inner map correctly
 	tenantConfig := theme.DefaultConfig.Config
 	if tenantConfig == nil {
 		tenantConfig = make(entity.ThemeConfig)

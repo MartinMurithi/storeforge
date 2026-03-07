@@ -24,26 +24,6 @@ func NewThemeRepository(db database.DB) IThemeRepository {
 	return &ThemeRepository{DB: db}
 }
 
-// func (r *ThemeRepository) GetThemeById(ctx context.Context, id value_object.ThemeID) (*entity.Theme, error) {
-// 	const op = "ThemeRepository.GetThemeById"
-
-// 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
-// 	defer cancel()
-
-// 	query := `SELECT id, name, description, is_active, default_config, created_at FROM themes
-// 	WHERE id = $1`
-
-// 	theme := &entity.Theme{}
-
-// 	err := r.DB.QueryRow(ctx, query, id).Scan(&theme.ID, &theme.Name, &theme.Description, &theme.IsActive, &theme.DefaultConfig, &theme.CreatedAt)
-// 	if err != nil {
-// 		log.Printf("[%s]: failed to fetch requested theme: %v", op, err)
-// 		return nil, fmt.Errorf("[%s]: failed to fetch requested theme:: %w", op, err)
-// 	}
-
-// 	return theme, nil
-// }
-
 func (r *ThemeRepository) GetThemeById(ctx context.Context, id value_object.ThemeID) (*entity.Theme, error) {
 	const op = "ThemeRepository.GetThemeById"
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
