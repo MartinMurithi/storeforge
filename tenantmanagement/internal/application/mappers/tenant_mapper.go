@@ -19,6 +19,7 @@ func ToProtoTenant(t *entity.Tenant) *tenantv1.Tenant {
 		StoreName:    t.StoreName,
 		Slug:         t.Slug,
 		SubDomain:    t.SubDomain,
+		Status: t.Status,
 		BusinessType: t.BusinessType,
 		CreatedAt:    timestamppb.New(t.CreatedAt),
 	}
