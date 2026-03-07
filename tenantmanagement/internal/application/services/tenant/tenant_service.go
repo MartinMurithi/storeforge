@@ -32,16 +32,10 @@ func NewTenantService(tr domain.ITenantRepository, th domain.IThemeRepository) *
 func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantRequestDTO) (*tenantv1.CreateTenantResponse, error) {
 	const op = "TenantService.CreateTenant"
 
-	// Fetch the Theme blueprint from the master catalog
-	// We need the 'Golden Template' settings stored in this Theme.
-	themeID, err := value_object.NewThemeID(req.ThemeID)
-	if err != nil {
-		return nil, fmt.Errorf("[%s]: invalid theme id: %w", op, err)
-	}
-
+	themeID, _ := value_object.NewThemeID(req.ThemeID)
 	theme, err := s.themeRepo.GetThemeById(ctx, themeID)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: failed to fetch theme template: %w", op, err)
+		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
 
 	newTenant := &entity.Tenant{
@@ -51,26 +45,26 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		SubDomain:    req.SubDomain,
 	}
 
-	// Clone the Theme's DefaultSettings for this specific Tenant
-	// This creates a unique 'Settings' instance for the tenant so they can
-	// customize their config without affecting the master theme.
+	// Access the inner map correctly
+	tenantConfig := theme.DefaultConfig.Config
+	if tenantConfig == nil {
+		tenantConfig = make(entity.ThemeConfig)
+	}
+
 	newTenant.Settings = &entity.Settings{
 		ThemeID:   theme.ID,
-		Config:    theme.DefaultConfig.Config, // The map[string]any snapshot
-		Version:   1,                          // Initial version
+		Config:    tenantConfig,
+		Version:   1,
 		UpdatedAt: time.Now(),
 	}
 
-	// Persist the Tenant and Settings
 	if err := s.tenantRepo.CreateTenant(ctx, newTenant); err != nil {
-		return nil, fmt.Errorf("[%s]: failed to persist store: %w", op, err)
+		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
 
-	resp := mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
+	return mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
 		Tenant:         newTenant,
 		Theme:          theme,
 		TenantSettings: newTenant.Settings,
-	})
-
-	return resp, nil
+	}), nil
 }

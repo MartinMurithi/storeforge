@@ -3,10 +3,11 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/config"
-	
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -60,7 +61,7 @@ func Connect(ctx context.Context, cfg *config.DBConfig) (*Pool, error) {
 		return nil, fmt.Errorf("initial database ping failed(DB unreachable) %w", err)
 	}
 
-	fmt.Println("[DATABASE] : database connection successful maxConns=%w, minConns=%w", config.MaxConns, config.MinConns)
+	log.Printf("[DATABASE] : database connection successful maxConns=%s, minConns=%s", config.MaxConns, config.MinConns)
 
 	return db, nil
 }

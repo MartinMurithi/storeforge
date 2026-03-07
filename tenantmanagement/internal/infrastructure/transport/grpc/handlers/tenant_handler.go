@@ -10,12 +10,16 @@ import (
 )
 
 type TenantGrpcHandler struct {
+	tenantv1.UnimplementedTenantServiceServer
 	TenantService *tenant.TenantService
-	*tenantv1.UnimplementedTenantServiceServer
+	
 }
 
 // NewTenantGrpcHandler initializes the handler with the required application service.
 func NewTenantGrpcHandler(s *tenant.TenantService) *TenantGrpcHandler {
+	if s == nil {
+		panic("NewTenantGrpcHandler: service is nil")
+	}
 	return &TenantGrpcHandler{
 		TenantService: s,
 	}

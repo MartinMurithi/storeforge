@@ -17,6 +17,7 @@ type Server struct {
 
 // NewGRPCServer creates a gRPC server with all services and handlers registered.
 func NewGRPCServer(port int, tenantSrv *tenant.TenantService) (*Server, error) {
+	
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
 	if err != nil {
