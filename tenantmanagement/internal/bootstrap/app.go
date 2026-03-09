@@ -7,7 +7,7 @@ import (
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/config"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/repository"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc/handlers"
@@ -15,7 +15,7 @@ import (
 
 type App struct {
 	DB            *postgres.Pool
-	TenantRepo    domain.ITenantRepository
+	TenantRepo    repository.ITenantRepository
 	TenantService *tenant.TenantService
 	Handler       *handlers.TenantGrpcHandler
 	GRPCServer    *grpc.Server
@@ -44,8 +44,8 @@ func Init(cfg *config.Config) (*App, error) {
 	// -------------------------
 	// Repository
 	// --------------------------
-	tenantRepo := domain.NewTenantRepository(dbAdapter)
-	themeRepo := domain.NewThemeRepository(dbAdapter)
+	tenantRepo := repository.NewTenantRepository(dbAdapter)
+	themeRepo := repository.NewThemeRepository(dbAdapter)
 
 	// -------------------------
 	// Application services

@@ -1,14 +1,13 @@
-package domain
+package repository
 
 import (
 	"context"
 	"fmt"
 	"log"
-
-	// "log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
 )
@@ -72,7 +71,7 @@ func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) e
 		log.Printf("[%s]: error creating tenant: %v", op, err)
 
 		infraErr := postgres.MapPostgresError(err)
-		return TranslateUserRepoError(infraErr)
+		return domain.TranslateUserRepoError(infraErr)
 	}
 
 	return tx.Commit(ctx)

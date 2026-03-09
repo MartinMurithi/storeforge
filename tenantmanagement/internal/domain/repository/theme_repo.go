@@ -1,4 +1,4 @@
-package domain
+package repository
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/value_object"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
@@ -54,7 +55,7 @@ func (r *ThemeRepository) GetThemeById(ctx context.Context, id value_object.Them
 		log.Printf("[%s]: error fetching theme: %v", op, err)
 
 		infraErr := postgres.MapPostgresError(err)
-		return nil, TranslateUserRepoError(infraErr)
+		return nil, domain.TranslateUserRepoError(infraErr)
 	}
 
 	return theme, nil

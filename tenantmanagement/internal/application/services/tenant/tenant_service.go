@@ -9,19 +9,19 @@ import (
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/mappers"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/repository"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/value_object"
 )
 
 // TenantService implements the business logic for tenant lifecycle management.
 type TenantService struct {
-	tenantRepo domain.ITenantRepository
-	themeRepo  domain.IThemeRepository
+	tenantRepo repository.ITenantRepository
+	themeRepo  repository.IThemeRepository
 }
 
 // NewTenantService creates a new instance of the TenantService.
-func NewTenantService(tr domain.ITenantRepository, th domain.IThemeRepository) *TenantService {
+func NewTenantService(tr repository.ITenantRepository, th repository.IThemeRepository) *TenantService {
 	return &TenantService{
 		tenantRepo: tr,
 		themeRepo:  th,
