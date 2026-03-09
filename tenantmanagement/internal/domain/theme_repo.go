@@ -2,13 +2,15 @@ package domain
 
 import (
 	"context"
-	"fmt"
+	"log"
+
 	// "log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/value_object"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
 )
 
 type ThemeRepository struct {
@@ -47,8 +49,12 @@ func (r *ThemeRepository) GetThemeById(ctx context.Context, id value_object.Them
 		&theme.DefaultConfig.Config,
 		&theme.CreatedAt,
 	)
+
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: %w", op, err)
+		log.Printf("[%s]: error fetching theme: %v", op, err)
+
+		infraErr := postgres.MapPostgresError(err)
+		return nil, TranslateUserRepoError(infraErr)
 	}
 
 	return theme, nil

@@ -21,11 +21,12 @@ message Tenant {
   string                    store_name    = 2;
   string                    slug          = 3;
   string                    sub_domain    = 4;
-  string                    business_type = 5;
-  string                    status        = 6;
-  google.protobuf.Timestamp created_at    = 7;
-  google.protobuf.Timestamp updated_at    = 8;
-  google.protobuf.Timestamp deleted_at    = 9;
+  string                    domain        = 5;
+  string                    business_type = 6;
+  string                    status        = 7;
+  google.protobuf.Timestamp created_at    = 8;
+  google.protobuf.Timestamp updated_at    = 9;
+  google.protobuf.Timestamp deleted_at    = 10;
 }
 
 message TenantSettings{
@@ -38,10 +39,8 @@ message TenantSettings{
 
 message CreateTenantRequest {
   string store_name    = 1;
-  string slug          = 2;
-  string business_type = 3;
-  string sub_domain    = 4;
-  string theme_id      = 5;
+  string business_type = 2;
+  string theme_id      = 3;
 }
 
 message CreateTenantResponse {

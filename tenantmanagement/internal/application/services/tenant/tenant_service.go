@@ -3,6 +3,7 @@ package tenant
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
@@ -32,17 +33,39 @@ func NewTenantService(tr domain.ITenantRepository, th domain.IThemeRepository) *
 func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantRequestDTO) (*tenantv1.CreateTenantResponse, error) {
 	const op = "TenantService.CreateTenant"
 
+	log.Printf("theme id : %v", req)
+
 	themeID, _ := value_object.NewThemeID(req.ThemeID)
+
 	theme, err := s.themeRepo.GetThemeById(ctx, themeID)
+
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
+	
+	if theme == nil {
+		return nil, fmt.Errorf("[%s]: theme not found", op)
+	}
+
+	log.Printf("feteched theme: %s", theme.Name)
+	// Generate slug from store_name
+	slug := GenerateSlug(req.StoreName)
+
+	// Generate sub_domain from slug + domain
+	subDomain, err := GenerateSubdomain(slug)
+
+	if err != nil {
+		return nil, fmt.Errorf("an error occurred when generating a sub domain: %w", err)
+	}
+
+	domain := FullDomain(subDomain)
 
 	newTenant := &entity.Tenant{
 		StoreName:    req.StoreName,
-		Slug:         req.Slug,
+		Slug:         slug,
 		BusinessType: req.BusinessType,
-		SubDomain:    req.SubDomain,
+		SubDomain:    subDomain,
+		Domain:       domain,
 	}
 
 	tenantConfig := theme.DefaultConfig.Config

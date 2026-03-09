@@ -30,11 +30,12 @@ type Tenant struct {
 	StoreName     string                 `protobuf:"bytes,2,opt,name=store_name,json=storeName,proto3" json:"store_name,omitempty"`
 	Slug          string                 `protobuf:"bytes,3,opt,name=slug,proto3" json:"slug,omitempty"`
 	SubDomain     string                 `protobuf:"bytes,4,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain,omitempty"`
-	BusinessType  string                 `protobuf:"bytes,5,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
-	Status        string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,7,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	Domain        string                 `protobuf:"bytes,5,opt,name=domain,proto3" json:"domain,omitempty"`
+	BusinessType  string                 `protobuf:"bytes,6,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
+	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,8,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,10,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -93,6 +94,13 @@ func (x *Tenant) GetSlug() string {
 func (x *Tenant) GetSubDomain() string {
 	if x != nil {
 		return x.SubDomain
+	}
+	return ""
+}
+
+func (x *Tenant) GetDomain() string {
+	if x != nil {
+		return x.Domain
 	}
 	return ""
 }
@@ -211,10 +219,8 @@ func (x *TenantSettings) GetUpdated() *timestamppb.Timestamp {
 type CreateTenantRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StoreName     string                 `protobuf:"bytes,1,opt,name=store_name,json=storeName,proto3" json:"store_name,omitempty"`
-	Slug          string                 `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
-	BusinessType  string                 `protobuf:"bytes,3,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
-	SubDomain     string                 `protobuf:"bytes,4,opt,name=sub_domain,json=subDomain,proto3" json:"sub_domain,omitempty"`
-	ThemeId       string                 `protobuf:"bytes,5,opt,name=theme_id,json=themeId,proto3" json:"theme_id,omitempty"`
+	BusinessType  string                 `protobuf:"bytes,2,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
+	ThemeId       string                 `protobuf:"bytes,3,opt,name=theme_id,json=themeId,proto3" json:"theme_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -256,23 +262,9 @@ func (x *CreateTenantRequest) GetStoreName() string {
 	return ""
 }
 
-func (x *CreateTenantRequest) GetSlug() string {
-	if x != nil {
-		return x.Slug
-	}
-	return ""
-}
-
 func (x *CreateTenantRequest) GetBusinessType() string {
 	if x != nil {
 		return x.BusinessType
-	}
-	return ""
-}
-
-func (x *CreateTenantRequest) GetSubDomain() string {
-	if x != nil {
-		return x.SubDomain
 	}
 	return ""
 }
@@ -474,36 +466,35 @@ var File_tenantmanagement_tenant_v1_tenant_proto protoreflect.FileDescriptor
 
 const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\n" +
-	"'tenantmanagement/tenant/v1/tenant.proto\x12\ttenant.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a%tenantmanagement/theme/v1/theme.proto\"\xd8\x02\n" +
+	"'tenantmanagement/tenant/v1/tenant.proto\x12\ttenant.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a%tenantmanagement/theme/v1/theme.proto\"\xf0\x02\n" +
 	"\x06Tenant\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"store_name\x18\x02 \x01(\tR\tstoreName\x12\x12\n" +
 	"\x04slug\x18\x03 \x01(\tR\x04slug\x12\x1d\n" +
 	"\n" +
-	"sub_domain\x18\x04 \x01(\tR\tsubDomain\x12#\n" +
-	"\rbusiness_type\x18\x05 \x01(\tR\fbusinessType\x12\x16\n" +
-	"\x06status\x18\x06 \x01(\tR\x06status\x129\n" +
+	"sub_domain\x18\x04 \x01(\tR\tsubDomain\x12\x16\n" +
+	"\x06domain\x18\x05 \x01(\tR\x06domain\x12#\n" +
+	"\rbusiness_type\x18\x06 \x01(\tR\fbusinessType\x12\x16\n" +
+	"\x06status\x18\a \x01(\tR\x06status\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\b \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"updated_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\xd4\x01\n" +
+	"deleted_at\x18\n" +
+	" \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\xd4\x01\n" +
 	"\x0eTenantSettings\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x19\n" +
 	"\btheme_id\x18\x02 \x01(\tR\athemeId\x12:\n" +
 	"\ftheme_config\x18\x03 \x01(\v2\x17.google.protobuf.StructR\vthemeConfig\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x05R\aversion\x124\n" +
-	"\aupdated\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\aupdated\"\xa7\x01\n" +
+	"\aupdated\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\aupdated\"t\n" +
 	"\x13CreateTenantRequest\x12\x1d\n" +
 	"\n" +
-	"store_name\x18\x01 \x01(\tR\tstoreName\x12\x12\n" +
-	"\x04slug\x18\x02 \x01(\tR\x04slug\x12#\n" +
-	"\rbusiness_type\x18\x03 \x01(\tR\fbusinessType\x12\x1d\n" +
-	"\n" +
-	"sub_domain\x18\x04 \x01(\tR\tsubDomain\x12\x19\n" +
-	"\btheme_id\x18\x05 \x01(\tR\athemeId\"\x9f\x01\n" +
+	"store_name\x18\x01 \x01(\tR\tstoreName\x12#\n" +
+	"\rbusiness_type\x18\x02 \x01(\tR\fbusinessType\x12\x19\n" +
+	"\btheme_id\x18\x03 \x01(\tR\athemeId\"\x9f\x01\n" +
 	"\x14CreateTenantResponse\x12)\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x12%\n" +
 	"\x05theme\x18\x02 \x01(\v2\x0f.theme.v1.ThemeR\x05theme\x125\n" +

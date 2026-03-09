@@ -12,6 +12,7 @@ type Tenant struct {
 	BusinessType string
 	Slug         string
 	SubDomain    string
+	Domain       string
 	Status       string //provisioning, active, suspended, pending deletion, deleted
 	CreatedAt    time.Time
 	UpdatedAt    *time.Time

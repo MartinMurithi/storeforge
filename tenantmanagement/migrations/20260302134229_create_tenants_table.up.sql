@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS tenants(
     store_name VARCHAR(25) UNIQUE NOT NULL,
     business_type VARCHAR(25) NOT NULL,
     slug VARCHAR(25) UNIQUE NOT NULL,
-    sub_domain VARCHAR(25) UNIQUE NOT NULL,
+    sub_domain TEXT UNIQUE NOT NULL,
+    domain TEXT UNIQUE NOT NULL,
     status VARCHAR(25) NOT NULL DEFAULT 'provisioning' CHECK (
         status IN(
             'provisioning',

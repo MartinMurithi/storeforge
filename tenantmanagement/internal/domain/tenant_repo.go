@@ -3,11 +3,14 @@ package domain
 import (
 	"context"
 	"fmt"
+	"log"
+
 	// "log"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
 )
 
 type TenantRepository struct {
@@ -28,40 +31,49 @@ func NewTenantRepository(db database.DB) ITenantRepository {
 // It uses a database transaction to ensure that a tenant is never created without its
 // corresponding theme configuration.
 func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) error {
-    const op = "TenantRepository.CreateTenant"
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-    defer cancel()
+	const op = "TenantRepository.CreateTenant"
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-    tx, err := r.DB.Tx(ctx)
-    if err != nil {
-        return fmt.Errorf("[%s]: %w", op, err)
-    }
-    defer tx.Rollback(ctx)
+	tx, err := r.DB.Tx(ctx)
+	if err != nil {
+		return fmt.Errorf("[%s]: %w", op, err)
+	}
+	defer tx.Rollback(ctx)
 
-    tenantQuery := `INSERT INTO tenants (store_name, business_type, slug, sub_domain)
-                    VALUES($1, $2, $3, $4) RETURNING id, store_name, status, created_at`
+	tenantQuery := `INSERT INTO tenants (store_name, business_type, slug, sub_domain, domain)
+                    VALUES($1, $2, $3, $4, $5) RETURNING id, store_name, sub_domain, domain, status, created_at`
 
-    err = tx.QueryRow(ctx, tenantQuery, t.StoreName, t.BusinessType, t.Slug, t.SubDomain).
-        Scan(&t.ID, &t.StoreName, &t.Status, &t.CreatedAt)
-    if err != nil {
-        return fmt.Errorf("[%s]: %w", op, err)
-    }
+	err = tx.QueryRow(ctx, tenantQuery, t.StoreName, t.BusinessType, t.Slug, t.SubDomain, t.Domain).
+		Scan(&t.ID,
+			&t.StoreName,
+			&t.SubDomain,
+			&t.Domain,
+			&t.Status,
+			&t.CreatedAt,
+		)
+	if err != nil {
+		return fmt.Errorf("[%s]: %w", op, err)
+	}
 
-    t.Settings.TenantID = t.ID
+	t.Settings.TenantID = t.ID
 
-    settingsQuery := `INSERT INTO tenant_settings (tenant_id, theme_id, config, version)
+	settingsQuery := `INSERT INTO tenant_settings (tenant_id, theme_id, config, version)
                       VALUES($1, $2, $3, $4) RETURNING updated_at`
 
-    configToPersist := t.Settings.Config
-    if configToPersist == nil {
-        configToPersist = make(entity.ThemeConfig)
-    }
+	configToPersist := t.Settings.Config
+	if configToPersist == nil {
+		configToPersist = make(entity.ThemeConfig)
+	}
 
-    err = tx.QueryRow(ctx, settingsQuery, t.ID, t.Settings.ThemeID, configToPersist, t.Settings.Version).
-        Scan(&t.Settings.UpdatedAt)
-    if err != nil {
-        return fmt.Errorf("[%s]: %w", op, err)
-    }
+	err = tx.QueryRow(ctx, settingsQuery, t.ID, t.Settings.ThemeID, configToPersist, t.Settings.Version).
+		Scan(&t.Settings.UpdatedAt)
+	if err != nil {
+		log.Printf("[%s]: error creating tenant: %v", op, err)
 
-    return tx.Commit(ctx)
+		infraErr := postgres.MapPostgresError(err)
+		return TranslateUserRepoError(infraErr)
+	}
+
+	return tx.Commit(ctx)
 }

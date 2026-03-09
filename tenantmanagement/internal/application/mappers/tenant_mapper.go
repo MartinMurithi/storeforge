@@ -19,12 +19,12 @@ func ToProtoTenant(t *entity.Tenant) *tenantv1.Tenant {
 		StoreName:    t.StoreName,
 		Slug:         t.Slug,
 		SubDomain:    t.SubDomain,
-		Status: t.Status,
+		Domain:       t.Domain,
+		Status:       t.Status,
 		BusinessType: t.BusinessType,
 		CreatedAt:    timestamppb.New(t.CreatedAt),
 	}
 }
-
 
 // ToProtoCreateTenantResponse composes multiple entity mappers into a single response DTO.
 func ToProtoCreateTenantResponse(data *dtos.CreateTenantResponseDTO) *tenantv1.CreateTenantResponse {
