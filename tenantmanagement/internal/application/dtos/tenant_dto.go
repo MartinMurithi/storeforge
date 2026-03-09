@@ -5,9 +5,7 @@ import "github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/ent
 // CreateTenantRequestDTO carries onboarding data from the transport layer.
 type CreateTenantRequestDTO struct {
 	StoreName    string
-	Slug         string
 	BusinessType string
-	SubDomain    string
 	ThemeID      string
 }
 

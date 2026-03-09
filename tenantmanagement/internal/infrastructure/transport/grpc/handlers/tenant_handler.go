@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"log"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
@@ -28,13 +29,11 @@ func NewTenantGrpcHandler(s *tenant.TenantService) *TenantGrpcHandler {
 // CreateTenant converts the protobuf request into an internal DTO,
 // executes the creation logic, and returns a mapped protobuf response.
 func (h *TenantGrpcHandler) CreateTenant(ctx context.Context, req *tenantv1.CreateTenantRequest) (*tenantv1.CreateTenantResponse, error) {
-	// Map Proto Request -> Application DTO
+	log.Printf("request obj {}: %v", req)
 	dtoReq := dtos.CreateTenantRequestDTO{
-		StoreName:    req.StoreName,
-		Slug:         req.Slug,
+		StoreName: req.StoreName,
 		BusinessType: req.BusinessType,
-		SubDomain:    req.SubDomain,
-		ThemeID:      req.ThemeId,
+		ThemeID: req.ThemeId,
 	}
 
 	result, err := h.TenantService.CreateTenant(ctx, dtoReq)
