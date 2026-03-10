@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"

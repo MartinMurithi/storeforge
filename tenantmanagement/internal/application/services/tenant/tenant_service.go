@@ -84,6 +84,8 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
 
+	// We need to get currently logged in user in order t
+
 	return mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
 		Tenant:         newTenant,
 		Theme:          theme,

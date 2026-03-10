@@ -3,8 +3,8 @@ package auth
 import (
 	"time"
 
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )

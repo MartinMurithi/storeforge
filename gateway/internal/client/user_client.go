@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

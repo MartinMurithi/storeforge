@@ -5,9 +5,9 @@ package api.auth.v1;
 import "google/protobuf/timestamp.proto";
 import "google/api/annotations.proto";
 
-import "user/v1/user.proto";
+import "usermanagement/user/v1/user.proto";
 
-option go_package = "github.com/MartinMurithi/storeforge/api/protos/auth/v1;authv1";
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1;authv1";
 
 // AuthService provides operations for managing user authentication and authorization.
 service AuthService {

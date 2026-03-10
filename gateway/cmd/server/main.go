@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/config"
 	"github.com/MartinMurithi/storeforge/gateway/internal/handlers"
 	"github.com/MartinMurithi/storeforge/gateway/internal/jwt"

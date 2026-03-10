@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"

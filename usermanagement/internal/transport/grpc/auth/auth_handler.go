@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
