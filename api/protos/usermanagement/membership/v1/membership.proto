@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package membership.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1;membershipv1";
+
+// MembershipService handles the linking of users to tenants.
+service MembershipService {
+  // LinkUserToTenant creates a record in the users_tenants table.
+  rpc LinkUserToTenant(LinkUserToTenantRequest) returns (LinkUserToTenantResponse);
+}
+
+message LinkUserToTenantRequest {
+  string user_id   = 1;
+  string tenant_id = 2;
+  string role      = 3; // 'owner', 'admin', 'editor', 'viewer'.
+}
+
+message LinkUserToTenantResponse {
+  bool success     = 1;
+  string message   = 2;
+}

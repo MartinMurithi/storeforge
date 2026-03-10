@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

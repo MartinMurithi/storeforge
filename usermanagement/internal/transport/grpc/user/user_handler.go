@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	userv1 "github.com/MartinMurithi/storeforge/api/protos/user/v1"
+	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"

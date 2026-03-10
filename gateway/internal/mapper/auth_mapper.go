@@ -1,7 +1,7 @@
 package mapper
 
 import (
-	authv1 "github.com/MartinMurithi/storeforge/api/protos/auth/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 )
 
