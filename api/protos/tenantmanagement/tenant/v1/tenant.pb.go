@@ -221,6 +221,7 @@ type CreateTenantRequest struct {
 	StoreName     string                 `protobuf:"bytes,1,opt,name=store_name,json=storeName,proto3" json:"store_name,omitempty"`
 	BusinessType  string                 `protobuf:"bytes,2,opt,name=business_type,json=businessType,proto3" json:"business_type,omitempty"`
 	ThemeId       string                 `protobuf:"bytes,3,opt,name=theme_id,json=themeId,proto3" json:"theme_id,omitempty"`
+	UserId        string                 `protobuf:"bytes,4,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -272,6 +273,13 @@ func (x *CreateTenantRequest) GetBusinessType() string {
 func (x *CreateTenantRequest) GetThemeId() string {
 	if x != nil {
 		return x.ThemeId
+	}
+	return ""
+}
+
+func (x *CreateTenantRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
 	}
 	return ""
 }
@@ -489,12 +497,13 @@ const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\btheme_id\x18\x02 \x01(\tR\athemeId\x12:\n" +
 	"\ftheme_config\x18\x03 \x01(\v2\x17.google.protobuf.StructR\vthemeConfig\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x05R\aversion\x124\n" +
-	"\aupdated\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\aupdated\"t\n" +
+	"\aupdated\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\aupdated\"\x8d\x01\n" +
 	"\x13CreateTenantRequest\x12\x1d\n" +
 	"\n" +
 	"store_name\x18\x01 \x01(\tR\tstoreName\x12#\n" +
 	"\rbusiness_type\x18\x02 \x01(\tR\fbusinessType\x12\x19\n" +
-	"\btheme_id\x18\x03 \x01(\tR\athemeId\"\x9f\x01\n" +
+	"\btheme_id\x18\x03 \x01(\tR\athemeId\x12\x17\n" +
+	"\auser_id\x18\x04 \x01(\tR\x06userId\"\x9f\x01\n" +
 	"\x14CreateTenantResponse\x12)\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x12%\n" +
 	"\x05theme\x18\x02 \x01(\v2\x0f.theme.v1.ThemeR\x05theme\x125\n" +

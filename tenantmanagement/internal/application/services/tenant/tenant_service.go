@@ -7,24 +7,28 @@ import (
 	"time"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	membershipv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/mappers"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/repository"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/repository"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/value_object"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/clients"
 )
 
 // TenantService implements the business logic for tenant lifecycle management.
 type TenantService struct {
 	tenantRepo repository.ITenantRepository
 	themeRepo  repository.IThemeRepository
+	userSvc    *clients.UserServiceClient
 }
 
 // NewTenantService creates a new instance of the TenantService.
-func NewTenantService(tr repository.ITenantRepository, th repository.IThemeRepository) *TenantService {
+func NewTenantService(tr repository.ITenantRepository, th repository.IThemeRepository, us *clients.UserServiceClient) *TenantService {
 	return &TenantService{
 		tenantRepo: tr,
 		themeRepo:  th,
+		userSvc:    us,
 	}
 }
 
@@ -42,7 +46,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
-	
+
 	if theme == nil {
 		return nil, fmt.Errorf("[%s]: theme not found", op)
 	}
@@ -84,7 +88,27 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
 
-	// We need to get currently logged in user in order t
+	// Link tenant to user
+	// Use timeout to ensure tenant svc does not hang if linking fails
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	linkUserReq := &membershipv1.LinkUserToTenantRequest{
+		UserId:   "",
+		TenantId: newTenant.ID.String(),
+		Role:     "owner",
+	}
+
+	resp, err := s.userSvc.LinkUserToTenant(ctx, linkUserReq)
+
+	log.Printf("link user to tenant result %v", resp)
+
+	if err != nil {
+		log.Printf("[%s]: failed to link user %s to tenant %s: %v", op, linkUserReq.UserId, newTenant.ID, err)
+
+		// For now, return an error so the user knows something went wrong
+		return nil, fmt.Errorf("store created but ownership link failed: %w", err)
+	}
 
 	return mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
 		Tenant:         newTenant,

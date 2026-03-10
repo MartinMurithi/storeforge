@@ -7,12 +7,12 @@ type CreateTenantRequestDTO struct {
 	StoreName    string
 	BusinessType string
 	ThemeID      string
+	UserId       string
 }
 
 // CreateTenantResponseDTO combines the created tenant and its chosen theme.
 type CreateTenantResponseDTO struct {
-	Tenant *entity.Tenant
-	Theme *entity.Theme
+	Tenant         *entity.Tenant
+	Theme          *entity.Theme
 	TenantSettings *entity.Settings
 }
-
