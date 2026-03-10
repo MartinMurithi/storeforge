@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
+func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, tenantHandler *handlers.TenantHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
 	r := gin.Default()
 
 	// Global Middleware (Optional: CORS, Logging)
@@ -32,6 +32,15 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			user.GET("/", userHandler.FetchAll) // Admin (paginated)
 			// user.GET("/:id", userHandler.FetchByID)
 			user.PATCH("/me", userHandler.UpdateMe)
+		}
+
+		// NEW: Tenants/Stores Group
+		// This is where CreateStore lives!
+		stores := api.Group("/stores")
+		stores.Use(authMiddleware)
+		{
+			// This handler will pull UserID from context and forward to gRPC
+			stores.POST("/", tenantHandler.CreateTenant)
 		}
 	}
 

@@ -31,6 +31,6 @@ func (h *MembershipGrpcHnadler) LinkUserToTenant(ctx context.Context, req *membe
 
 	return &membershipv1.LinkUserToTenantResponse{
 		Success: true,
-		Message: "user linked to their stor successfully",
+		Message: "user linked to their store successfully",
 	}, nil
 }

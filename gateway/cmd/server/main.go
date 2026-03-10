@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	userv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/user/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/config"
@@ -41,10 +42,12 @@ func main() {
 	// Initialize gRPC clients USING the connection
 	userClient := userv1.NewUserServiceClient(conn)
 	authClient := authv1.NewAuthServiceClient(conn)
+	tenantClient := tenantv1.NewTenantServiceClient(conn)
 
 	// Initialize user & auth handlers
 	userHandler := &handlers.UserHandler{UserClient: userClient}
 	authHandler := &handlers.AuthHandler{AuthClient: authClient}
+	tenantHandler := &handlers.TenantHandler{TenantClient: tenantClient}
 
 	// Load the pub rsa key
 	publicKey, err := jwt.LoadPublicKey(cfg.PublicKeyPath)
@@ -56,7 +59,7 @@ func main() {
 	authMiddleware := middleware.AuthMiddleware(publicKey, "storeforge-client", "storeforge-api")
 
 	// setup router
-	r := router.SetupRouter(userHandler, authHandler, authMiddleware)
+	r := router.SetupRouter(userHandler, authHandler, tenantHandler, authMiddleware)
 
 	log.Printf("Gateway running on port 9095\n")
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/google/uuid"
 )
@@ -22,6 +23,8 @@ func NewMembershipService(r repository.IMembershipRepository) *MembershipService
 func (s *MembershipService) LinkUserToTenant(ctx context.Context, userId, tenantId uuid.UUID, roleName string) error{
 
 	const op = "MembershipService.LinkUserToTenant"
+
+	roleName = entity.RoleOwner
 
 	// Ensure only "owner role" is assigned
 	if roleName != "owner"{

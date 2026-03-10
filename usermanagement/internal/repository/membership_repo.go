@@ -52,7 +52,7 @@ func (r *MembershipRepository) AddTenantMembership(ctx context.Context, userID, 
 	ON CONFLICT (user_id, tenant_id) DO NOTHING
 	RETURNING user_id, tenant_id`
 
-	err = r.DB.QueryRow(ctx, query, userID, tenantID, roleID).Scan(userID, tenantID, roleName)
+	err = r.DB.QueryRow(ctx, query, userID, tenantID, roleID).Scan(&userID, &tenantID)
 
 	if err != nil {
 		log.Printf("[%s]: error inserting membership %v", op, err)
