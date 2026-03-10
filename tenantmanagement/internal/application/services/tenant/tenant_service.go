@@ -94,7 +94,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 	defer cancel()
 
 	linkUserReq := &membershipv1.LinkUserToTenantRequest{
-		UserId:   "",
+		UserId:   req.UserId,
 		TenantId: newTenant.ID.String(),
 		Role:     "owner",
 	}

@@ -14,3 +14,10 @@ type Role struct {
 	Description string       `json:"description"`
 	Permissions []Permission `json:"-"`
 }
+
+const (
+    RoleOwner  = "owner"
+    RoleAdmin  = "admin"
+    RoleMember = "member"
+    RoleViewer = "viewer"
+)
