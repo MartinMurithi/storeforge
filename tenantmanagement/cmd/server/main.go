@@ -43,6 +43,12 @@ func main() {
 	// Graceful shutdown gRPC
 	app.GRPCServer.Stop()
 
+	// Close the connection to the User Service
+	if app.UserConn != nil {
+		log.Println("closing connection to user service")
+		app.UserConn.Close()
+	}
+
 	// Close DB pool
 	if app.DB != nil {
 		app.DB.Close()

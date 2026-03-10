@@ -41,6 +41,7 @@ message CreateTenantRequest {
   string store_name    = 1;
   string business_type = 2;
   string theme_id      = 3;
+  string user_id       = 4;
 }
 
 message CreateTenantResponse {

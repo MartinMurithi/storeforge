@@ -5,15 +5,17 @@ import (
 	"log"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type TenantGrpcHandler struct {
 	tenantv1.UnimplementedTenantServiceServer
 	TenantService *tenant.TenantService
-	
 }
 
 // NewTenantGrpcHandler initializes the handler with the required application service.
@@ -29,11 +31,21 @@ func NewTenantGrpcHandler(s *tenant.TenantService) *TenantGrpcHandler {
 // CreateTenant converts the protobuf request into an internal DTO,
 // executes the creation logic, and returns a mapped protobuf response.
 func (h *TenantGrpcHandler) CreateTenant(ctx context.Context, req *tenantv1.CreateTenantRequest) (*tenantv1.CreateTenantResponse, error) {
-	log.Printf("request obj {}: %v", req)
+
+	userID, err := auth.GetUserIDFromMetadata(ctx)
+
+	if err != nil {
+		log.Printf("failed to extract user id from metadata %s", err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	log.Printf("extracted user id %s", userID)
+
 	dtoReq := dtos.CreateTenantRequestDTO{
-		StoreName: req.StoreName,
+		StoreName:    req.StoreName,
 		BusinessType: req.BusinessType,
-		ThemeID: req.ThemeId,
+		ThemeID:      req.ThemeId,
+		UserId:       userID,
 	}
 
 	result, err := h.TenantService.CreateTenant(ctx, dtoReq)

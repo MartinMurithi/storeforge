@@ -8,9 +8,13 @@ import (
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/repository"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/clients"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc"
+	grpc_trans "github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc/handlers"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type App struct {
@@ -18,7 +22,8 @@ type App struct {
 	TenantRepo    repository.ITenantRepository
 	TenantService *tenant.TenantService
 	Handler       *handlers.TenantGrpcHandler
-	GRPCServer    *grpc.Server
+	GRPCServer    *grpc_trans.Server
+	UserConn      *grpc.ClientConn
 }
 
 // Init initializes the application with full dependency injection
@@ -42,6 +47,18 @@ func Init(cfg *config.Config) (*App, error) {
 	dbAdapter := postgres.NewAdapter(pool.Pool)
 
 	// -------------------------
+	// User Service Client
+	// -------------------------
+	// Establish the connection to User Service
+	userConn, err := grpc.NewClient(fmt.Sprintf("localhost:%d", cfg.GRPC.UserSvcAddr), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to user service client: %w", err)
+	}
+
+	// 2. Initialize the Client Wrapper
+	userSvcClient := clients.NewUserServiceClient(userConn)
+
+	// -------------------------
 	// Repository
 	// --------------------------
 	tenantRepo := repository.NewTenantRepository(dbAdapter)
@@ -50,18 +67,19 @@ func Init(cfg *config.Config) (*App, error) {
 	// -------------------------
 	// Application services
 	// -------------------------
-	tenantSrv := tenant.NewTenantService(tenantRepo, themeRepo)
+	tenantSrv := tenant.NewTenantService(tenantRepo, themeRepo, userSvcClient)
 
 	// -------------------------
-    // gRPC Handler
-    // -------------------------
-    tenantHandler := handlers.NewTenantGrpcHandler(tenantSrv)
+	// gRPC Handler
+	// -------------------------
+	tenantHandler := handlers.NewTenantGrpcHandler(tenantSrv)
 
 	// -------------------------
 	// gRPC Server
 	// -------------------------
-	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, tenantSrv)
+	grpcSrv, err := grpc_trans.NewGRPCServer(cfg.GRPC.Port, tenantSrv)
 	if err != nil {
+		userConn.Close() // Cleanup if server fails
 		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
 	}
 
@@ -69,7 +87,7 @@ func Init(cfg *config.Config) (*App, error) {
 		DB:            pool,
 		TenantRepo:    tenantRepo,
 		TenantService: tenantSrv,
-		Handler: tenantHandler,
+		Handler:       tenantHandler,
 		GRPCServer:    grpcSrv,
 	}, nil
 }
