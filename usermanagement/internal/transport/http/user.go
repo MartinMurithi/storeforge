@@ -8,6 +8,7 @@ import (
 
 	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/membership"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
@@ -20,12 +21,14 @@ import (
 type UserHandler struct {
 	UserService *user.UserService
 	AuthService *auth.AuthService
+	MembershipService *membership.MembershipService
 }
 
-func NewUserHandler(userService *user.UserService, authService *auth.AuthService) *UserHandler {
+func NewUserHandler(userService *user.UserService, authService *auth.AuthService, membershipService *membership.MembershipService) *UserHandler {
 	return &UserHandler{
 		UserService: userService,
 		AuthService: authService,
+		MembershipService: membershipService,
 	}
 }
 

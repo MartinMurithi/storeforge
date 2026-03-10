@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/membership"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
@@ -16,14 +17,16 @@ import (
 )
 
 type App struct {
-	DB          *postgres.Pool
-	UserRepo    repository.IUserRepository
-	AuthRepo    repository.IAuthRepository
-	UserService *user.UserService
-	AuthService *auth.AuthService
-	Handler     *http.UserHandler
-	JWTMaker    *token.JWTMaker
-	GRPCServer  *grpc.Server
+	DB                *postgres.Pool
+	UserRepo          repository.IUserRepository
+	AuthRepo          repository.IAuthRepository
+	MembershipRepo    repository.IMembershipRepository
+	UserService       *user.UserService
+	AuthService       *auth.AuthService
+	MembershipService *membership.MembershipService
+	Handler           *http.UserHandler
+	JWTMaker          *token.JWTMaker
+	GRPCServer        *grpc.Server
 }
 
 // Init initializes the application with full dependency injection
@@ -70,18 +73,21 @@ func Init(cfg *config.Config) (*App, error) {
 	// --------------------------
 	userRepo := repository.NewUserRepository(dbAdapter)
 	authRepo := repository.NewUAuthRepository(dbAdapter)
+	membershipRepo := repository.NewMembershipRepository(dbAdapter)
 
 	// -------------------------
 	// Application services
 	// -------------------------
 	userSrv := user.NewUserService(userRepo)
+	membershipSrv := membership.NewMembershipService(membershipRepo)
 	authSrv := auth.NewAuthService(userRepo, authRepo, jwtMaker)
-	handler := http.NewUserHandler(userSrv, authSrv)
+
+	handler := http.NewUserHandler(userSrv, authSrv, membershipSrv)
 
 	// -------------------------
 	// gRPC Server
 	// -------------------------
-	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv)
+	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv, membershipSrv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
 	}

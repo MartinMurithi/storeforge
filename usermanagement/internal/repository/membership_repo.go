@@ -14,8 +14,14 @@ type MembershipRepository struct {
 	DB database.DB
 }
 
-type IMemberRepository interface {
+type IMembershipRepository interface {
 	AddTenantMembership(ctx context.Context, userId uuid.UUID, tenantId uuid.UUID, roleName string) error
+}
+
+func NewMembershipRepository(db database.DB) *MembershipRepository {
+	return &MembershipRepository{
+		DB: db,
+	}
 }
 
 func (r *MembershipRepository) AddTenantMembership(ctx context.Context, userID, tenantID uuid.UUID, roleName string) error {
