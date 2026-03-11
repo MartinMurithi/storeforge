@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"log"
+	"net/http"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	"github.com/MartinMurithi/storeforge/gateway/internal/response"
 	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/metadata"
@@ -14,6 +16,13 @@ type TenantHandler struct {
 }
 
 func (h *TenantHandler) CreateTenant(c *gin.Context) {
+
+	if h.TenantClient == nil {
+		log.Println("Internal Error: TenantClient not initialized in TenantHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Tenant service unavailable")
+		return
+	}
+
 	userID, _ := c.Get(auth.CtxUserID)
 
 	log.Printf("id of active user %s", userID)

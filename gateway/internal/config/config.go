@@ -7,21 +7,28 @@ import (
 )
 
 type Config struct {
-	PublicKeyPath string
-	GrpcPort      string
+	PublicKeyPath     string
+	UserSvcGrpcPort   string
+	TenantSvcGrpcPort string
 }
 
 func Load() (*Config, error) {
 
-	grpcPort := env.GetEnv("GRPC_PORT", "50051")
+	userSvcGrpcPort := env.GetEnv("USER_SVC_GRPC_PORT", "50051")
+	tenantSvcGrpcPort := env.GetEnv("TENANT_SVC_GRPC_PORT", "50052")
 
 	cfg := &Config{
-		GrpcPort:      grpcPort,
-		PublicKeyPath: env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/gateway/internal/certs/jwt_public.pem"),
+		UserSvcGrpcPort:   userSvcGrpcPort,
+		TenantSvcGrpcPort: tenantSvcGrpcPort,
+		PublicKeyPath:     env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/gateway/internal/certs/jwt_public.pem"),
 	}
 
-	if cfg.GrpcPort == "" {
-		return nil, fmt.Errorf("grpc port is required")
+	if cfg.UserSvcGrpcPort == "" {
+		return nil, fmt.Errorf("user service grpc port is required")
+	}
+
+	if cfg.TenantSvcGrpcPort == "" {
+		return nil, fmt.Errorf("tenant service grpc port is required")
 	}
 
 	if cfg.PublicKeyPath == "" {

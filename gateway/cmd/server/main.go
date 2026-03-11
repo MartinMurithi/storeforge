@@ -28,21 +28,34 @@ func main() {
 		return
 	}
 
-	serverAddr := fmt.Sprintf("0.0.0.0:%s", cfg.GrpcPort)
+	// -------------- Usermanagement Client ------------
+	userServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.UserSvcGrpcPort)
 
-	conn, err := grpc.NewClient(serverAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := grpc.NewClient(userServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		log.Fatalf("did not connect to the usermanagement service %v", err)
 		return
 	}
 
-	defer conn.Close()
+	defer userConn.Close()
+
+	// -------------- Tenant Management Client ------------
+	tenantServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.TenantSvcGrpcPort)
+
+	tenantConn, err := grpc.NewClient(tenantServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		log.Fatalf("did not connect to the tenant management service %v", err)
+		return
+	}
+
+	defer tenantConn.Close()
 
 	// Initialize gRPC clients USING the connection
-	userClient := userv1.NewUserServiceClient(conn)
-	authClient := authv1.NewAuthServiceClient(conn)
-	tenantClient := tenantv1.NewTenantServiceClient(conn)
+	userClient := userv1.NewUserServiceClient(userConn)
+	authClient := authv1.NewAuthServiceClient(userConn)
+	tenantClient := tenantv1.NewTenantServiceClient(tenantConn)
 
 	// Initialize user & auth handlers
 	userHandler := &handlers.UserHandler{UserClient: userClient}
