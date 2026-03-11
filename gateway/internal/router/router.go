@@ -24,7 +24,7 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 		}
 
 		// --- PROTECTED ROUTES ---
-		// Apply the AuthMiddleware to this group only
+
 		user := api.Group("/users")
 		user.Use(authMiddleware)
 		{
@@ -34,12 +34,9 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			user.PATCH("/me", userHandler.UpdateMe)
 		}
 
-		// NEW: Tenants/Stores Group
-		// This is where CreateStore lives!
-		stores := api.Group("/stores")
+		stores := api.Group("/stores/new")
 		stores.Use(authMiddleware)
 		{
-			// This handler will pull UserID from context and forward to gRPC
 			stores.POST("/", tenantHandler.CreateTenant)
 		}
 	}

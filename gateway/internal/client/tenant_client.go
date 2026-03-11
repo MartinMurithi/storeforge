@@ -1,7 +1,9 @@
 package client
 
 import (
+	"context"
 	"log"
+	"time"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	"google.golang.org/grpc"
@@ -22,4 +24,18 @@ func NewTenantClient(addr string) *TenantClient {
 	return &TenantClient{
 		Service: tenantv1.NewTenantServiceClient(conn),
 	}
+}
+
+func (c *TenantClient) CreateTenant(ctx context.Context, req *tenantv1.CreateTenantRequest) (*tenantv1.CreateTenantResponse, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	res, err := c.Service.CreateTenant(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
