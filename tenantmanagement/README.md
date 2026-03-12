@@ -12,11 +12,11 @@ Give new jwt token that has tenant id and role
 
 1. The Gateway "End-to-End" Test. Done
 2. We will verify that the Gateway successfully takes your real RSA-signed JWT, pulls the sub (User ID), and stamps it into the gRPC metadata. No more hardcoded IDs! Done
-3. The Identity Update (New JWT)Once the Tenant is created and linked, the Gateway should ideally provide a way to "switch" into that tenant. This usually means issuing a new JWT that includes:user_id: 9db73ad3...tenant_id: b8cb7b9f...role: owner
+3. The Identity Update (New JWT)Once the Tenant is created and linked, the Gateway should ideally provide a way to "switch" into that tenant. This usually means issuing a new JWT that includes:user_id: 9db73ad3...tenant_id: b8cb7b9f...role: owner Done
 4. The "Orphan Killer" (Compensating Transaction)We will refine the code we discussed today. If LinkUserToTenant returns an error, the Tenant Service will immediately trigger:repo.Delete(ctx, newlyCreatedTenantID)This ensures your database stays clean.Tomorrow's Technical ChecklistPhaseFocusKey TaskTestingGateway $\rightarrow$ TenantVerify Metadata propagation.ReliabilityRollback LogicTrigger a fake failure to ensure DELETE works.CRUDTenant ManagementImplement GetByUserID, Patch, and Delete.SecurityPBACStart defining "Permission-Based Access Control" (can this user edit this specific store?).A Note on PBAC (Permissions)Since you want to move into PBAC, we will need to ensure your users_tenants table in the User Service is ready to return not just the role_name, but the specific Permission Strings (e.g., edit_themes, manage_inventory) associated with that role.I’m ready when you are. Get some rest—tomorrow we turn this into a fully functioning multi-tenant platform.
 
 
-3.  Update JWT to include tenant ID.Figure out how tenant and user srv will interact.
+3.  Update JWT to include tenant ID.Figure out how tenant and user srv will interact. Done.
 4. Design landing page for storeforge.(Look for another name)
 5. Design 3 sample themes and save them in DB.
 6. Get tenant by ID or slug.
