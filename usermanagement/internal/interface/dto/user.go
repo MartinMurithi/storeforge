@@ -10,20 +10,20 @@ import (
 )
 
 type UserResponseDTO struct {
-	Id           pgtype.UUID `json:"id"`
-	FullName     string      `json:"fullName"`
-	Email        string      `json:"email"`
-	Phone        string      `json:"phone"`
-	CreatedAt    time.Time   `json:"createdAt"`
-	UpdatedAt    *time.Time  `json:"updatedAt"`
-	IsVerified   bool        `json:"isVerified"`
+	Id         pgtype.UUID `json:"id"`
+	FullName   string      `json:"fullName"`
+	Email      string      `json:"email"`
+	Phone      string      `json:"phone"`
+	CreatedAt  time.Time   `json:"createdAt"`
+	UpdatedAt  *time.Time  `json:"updatedAt"`
+	IsVerified bool        `json:"isVerified"`
 }
 
 type RegisterUserRequestDTO struct {
-	FullName     string
-	Email        string
-	Phone        string
-	Password     string
+	FullName string
+	Email    string
+	Phone    string
+	Password string
 }
 
 type RegisterUserResponseDTO struct {
@@ -54,7 +54,7 @@ type LoginUserRequestDTO struct {
 
 type LoginUserResponseDTO struct {
 	User  *UserResponseDTO `json:"user"`
-	Token *entity.Token     `json:"token"`
+	Token *entity.Token    `json:"token"`
 }
 
 type FetchAllUsersResponseDTO struct {
@@ -69,4 +69,10 @@ type FetchUserResponseDTO struct {
 type PatchUserRequestDTO struct {
 	Email *string `json:"email"`
 	Phone *string `json:"phone"`
+}
+
+type UpdateActiveSessionContextRequestDTO struct {
+	UserId   pgtype.UUID `json:"userId"`
+	TenantId pgtype.UUID `json:"tenantId"`
+	Role     string      `json:"role"`
 }

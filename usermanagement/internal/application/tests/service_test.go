@@ -411,3 +411,64 @@ func TestLoginUser_UserNotFound(t *testing.T) {
 
 // helper for pointer literals
 func ptr[T any](v T) *T { return &v }
+
+
+// func TestUpdateSessionContext_Success(t *testing.T) {
+// 	// 1. Setup
+// 	mockAuthRepo := new(MockRepository)
+// 	mockUserRepo := new(MockRepository) // Assume similar mock for User
+
+// 	cfg, err := config.Load()
+// 	// Use your real JWTMaker to verify the outcome
+// 	jwtMaker := *&token.JWTMaker{PrivateKey: cfg.JWT.PrivateKeyPath}
+
+// 	srv := NewAuthService(mockAuthRepo, mockUserRepo, jwtMaker)
+
+// 	// 2. Data
+// 	uID := uuid.New()
+// 	tID := uuid.New()
+// 	userEmail := "martin@storeforge.com"
+
+// 	targetUserID := pgtype.UUID{Bytes: uID, Valid: true}
+// 	targetTenantID := pgtype.UUID{Bytes: tID, Valid: true}
+
+// 	input := &dto.UpdateActiveSessionContextRequestDTO{
+// 		UserId:   targetUserID,
+// 		TenantId: targetTenantID,
+// 		Role:     "owner",
+// 	}
+
+// 	// 3. Set Expectations
+// 	// When the service calls the repo, the repo returns this "fake" result
+// 	mockAuthRepo.On("UpdateActiveSessionContext", mock.Anything, targetUserID, targetTenantID, "owner").
+// 		Return(&entity.RefreshToken{
+// 			UserId:       targetUserID,
+// 			LastTenantId: targetTenantID,
+// 			LastRole:     "owner",
+// 		}, nil)
+
+// 	mockUserRepo.On("GetActiveUserById", mock.Anything, targetUserID).
+// 		Return(&entity.User{
+// 			ID:    uID,
+// 			Email: userEmail,
+// 		}, nil)
+
+// 	// 4. Execute
+// 	token, err := srv.UpdateSessionContext(context.Background(), input)
+
+// 	// 5. Assertions
+// 	require.NoError(t, err)
+// 	require.NotNil(t, token)
+
+// 	// Verify the JWT actually has the data!
+// 	payload, err := jwtMaker.VerifyToken(token.AccessToken)
+// 	require.NoError(t, err)
+
+// 	assert.Equal(t, uID, payload.UserID)
+// 	assert.Equal(t, tID.String(), payload.TenantID) // Proof that promotion worked
+// 	assert.Equal(t, "owner", payload.Role)
+
+// 	// Ensure the mocks were actually used
+// 	mockAuthRepo.AssertExpectations(t)
+// 	mockUserRepo.AssertExpectations(t)
+// }

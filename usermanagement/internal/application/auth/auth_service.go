@@ -16,6 +16,7 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -158,8 +159,12 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		return nil, nil, err // unexpected crypto failure
 	}
 
+	// To issue a token WITHOUT a tenant context:
+	var emptyTenantID pgtype.UUID
+	emptyTenantID.Valid = false
+
 	// Generate JWT access token
-	accessToken, _, err := srv.jwtMaker.CreateToken(existingUser.ID, existingUser.ID, existingUser.Email, "owner", 25*time.Minute)
+	accessToken, claims, err := srv.jwtMaker.CreateToken(existingUser.ID, emptyTenantID, existingUser.Email, "", 25*time.Minute)
 	if err != nil {
 		log.Printf("[%s] failed to create JWT: %v", op, err)
 		return nil, nil, fmt.Errorf("%s: failed to issue access token: %w", op, err)
@@ -175,10 +180,12 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 
 	// Store hashed refresh token in DB
 	newTokenEntity := &entity.RefreshToken{
-		UserId:    existingUser.ID,
-		TokenHash: auth.HashToken(newRefreshToken),
-		ExpiresAt: time.Now().Add(refreshTokenExpiry),
-		Revoked:   false,
+		UserId:       existingUser.ID,
+		TokenHash:    auth.HashToken(newRefreshToken),
+		ExpiresAt:    time.Now().Add(refreshTokenExpiry),
+		Revoked:      false,
+		LastRole:     "",
+		LastTenantId: emptyTenantID,
 	}
 	if err := srv.authRepo.CreateRefreshToken(ctx, newTokenEntity); err != nil {
 		log.Printf("[%s] failed to store refresh token: %v", op, err)
@@ -194,6 +201,8 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		TokenType:    "Bearer",
 	}
 
+	log.Printf("issued access token with no role and tenant id %s %s", *claims.TenantId, claims.Role)
+
 	return existingUser, token, nil
 }
 
@@ -204,54 +213,57 @@ func (srv *AuthService) RefreshToken(ctx context.Context, incomingRefresh string
 		return nil, apperrors.ErrInvalidRefreshToken
 	}
 
-	log.Printf("[%s] incoming refresh token: %v", op, incomingRefresh)
-
 	// Hash incoming token to compare with DB
 	hash := auth.HashToken(incomingRefresh)
-	log.Printf("[%s] hashed refresh token: %v", op, hash)
 
-	// Lookup token
-	tokenEntity, err := srv.authRepo.GetRefreshTokenByHash(ctx, hash)
+	oldToken, err := srv.authRepo.GetRefreshTokenByHash(ctx, hash)
 	if err != nil {
 		log.Printf("[%s] refresh token lookup failed: %v", op, err)
 		return nil, apperrors.ErrInvalidRefreshToken
 	}
 
-	// Validate token
-	if tokenEntity.Revoked || time.Now().After(tokenEntity.ExpiresAt) {
-		log.Printf("Access denied: Token %s was previously revoked", hash)
+	// Validate token status and expiration
+	if oldToken.Revoked || time.Now().After(oldToken.ExpiresAt) {
+		log.Printf("[%s] access denied: token %s was revoked or expired", op, hash)
 		return nil, apperrors.ErrInvalidRefreshToken
 	}
 
-	// Revoke old token
-	_, err = srv.authRepo.RevokeRefreshToken(ctx, tokenEntity.Id.String())
+	user, err := srv.userRepo.GetActiveUserById(ctx, oldToken.UserId)
+	if err != nil {
+		log.Printf("[%s] user lookup failed during refresh: %v", op, err)
+		return nil, apperrors.ErrUserNotFound
+	}
+
+	// Revoke the old refresh token (Rotation)
+	_, err = srv.authRepo.RevokeRefreshToken(ctx, oldToken.Id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	// Generate new refresh token
+	// Generate a new rotating refresh token
 	newRefreshToken, err := GenerateRefreshToken()
 	if err != nil {
 		return nil, err
 	}
 
 	newTokenEntity := &entity.RefreshToken{
-		UserId:    tokenEntity.UserId,
-		TokenHash: auth.HashToken(newRefreshToken),
-		ExpiresAt: time.Now().Add(refreshTokenExpiry),
-		Revoked:   false,
+		UserId:       oldToken.UserId,
+		TokenHash:    auth.HashToken(newRefreshToken),
+		ExpiresAt:    time.Now().Add(refreshTokenExpiry),
+		Revoked:      false,
+		LastRole:     oldToken.LastRole,
+		LastTenantId: oldToken.LastTenantId,
 	}
 
 	if err = srv.authRepo.CreateRefreshToken(ctx, newTokenEntity); err != nil {
 		return nil, err
 	}
 
-	// Create new JWT access token
 	accessToken, _, err := srv.jwtMaker.CreateToken(
-		tokenEntity.UserId,
-		tokenEntity.UserId,
-		"",
-		"owner",
+		user.ID,
+		oldToken.LastTenantId,
+		user.Email,
+		oldToken.LastRole,
 		30*time.Minute,
 	)
 	if err != nil {
@@ -261,9 +273,9 @@ func (srv *AuthService) RefreshToken(ctx context.Context, incomingRefresh string
 	return &entity.Token{
 		AccessToken:  accessToken.AccessToken,
 		RefreshToken: newRefreshToken, // raw token to client
-		ExpiresAt:    time.Now().Local().Add(30 * time.Minute),
+		ExpiresAt:    time.Now().Add(30 * time.Minute),
 		ExpiresIn:    int64((30 * time.Minute).Seconds()),
-		IssuedAt:     time.Now().Local(),
+		IssuedAt:     time.Now(),
 		TokenType:    "Bearer",
 	}, nil
 }
@@ -294,7 +306,6 @@ func (srv *AuthService) Logout(ctx context.Context, refreshToken string) error {
 	hash := auth.HashToken(refreshToken)
 	log.Printf("[%s] hashed refresh token: %v", op, hash)
 
-
 	log.Printf("[%s] hashed refresh token from DB: %v", op, hash)
 
 	// Revoke old token
@@ -305,4 +316,48 @@ func (srv *AuthService) Logout(ctx context.Context, refreshToken string) error {
 	}
 
 	return nil
+}
+
+func (srv *AuthService) UpdateSessionContext(ctx context.Context, input *dto.UpdateActiveSessionContextRequestDTO) (*entity.Token, error) {
+	const op = "AuthService.UpdateSessionContext"
+
+	// We update the Refresh Token record so the session "remembers" this store.
+	dbSession, err := srv.authRepo.UpdateActiveSessionContext(ctx, input.UserId, input.TenantId, input.Role)
+
+	if err != nil {
+		return nil, fmt.Errorf("%s: failed to update active session context in DB: %w", op, err)
+	}
+
+	// We need the user's email to put it into the new JWT claims.
+	user, err := srv.userRepo.GetActiveUserById(ctx, input.UserId)
+
+	if err != nil {
+		return nil, fmt.Errorf("%s: user lookup failed: %w", op, err)
+	}
+
+	// ISSUE THE NEW JWT
+	// This creates a BRAND NEW Access Token with the TenantID and Role inside it.
+	accessToken, claims, err := srv.jwtMaker.CreateToken(
+		user.ID,
+		dbSession.LastTenantId,
+		user.Email,
+		dbSession.LastRole,
+		30*time.Minute,
+	)
+
+	log.Printf("claims from updated JWT token %s, %s", claims.TenantId, *claims.Role)
+
+	if err != nil {
+		return nil, fmt.Errorf("%s: token signing failed: %w", op, err)
+	}
+
+	token := &entity.Token{
+		AccessToken: accessToken.AccessToken,
+		ExpiresAt:   time.Now().Local().Add(25 * time.Minute),
+		ExpiresIn:   int64((25 * time.Minute)),
+		IssuedAt:    time.Now().Local(),
+		TokenType:   "Bearer",
+	}
+
+	return token, nil
 }

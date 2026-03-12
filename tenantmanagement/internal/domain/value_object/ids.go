@@ -5,86 +5,81 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type TenantID struct{ value uuid.UUID }
-type ThemeID struct{ value uuid.UUID }
+type TenantID struct{ value pgtype.UUID }
+type ThemeID struct{ value pgtype.UUID }
 
 // ---------------------------------------------------------
-// Constructors (Keep these for Service Layer)
+// Constructors
 // ---------------------------------------------------------
 
 func NewTenantID(id string) (TenantID, error) {
-	parsed, err := uuid.Parse(id)
+	var u pgtype.UUID
+	err := u.Scan(id) // pgtype.UUID handles string parsing natively
 	if err != nil {
-		return TenantID{}, fmt.Errorf("invalid tenant id")
+		return TenantID{}, fmt.Errorf("invalid tenant id: %w", err)
 	}
-	return TenantID{value: parsed}, nil
+	return TenantID{value: u}, nil
 }
 
 func NewThemeID(id string) (ThemeID, error) {
-	parsed, err := uuid.Parse(id)
+	var u pgtype.UUID
+	err := u.Scan(id)
 	if err != nil {
-		return ThemeID{}, fmt.Errorf("invalid theme id")
+		return ThemeID{}, fmt.Errorf("invalid theme id: %w", err)
 	}
-	return ThemeID{value: parsed}, nil
+	return ThemeID{value: u}, nil
 }
 
-func NewTenantIDFromUUID(u uuid.UUID) TenantID { return TenantID{value: u} }
-func NewThemeIDFromUUID(u uuid.UUID) ThemeID   { return ThemeID{value: u} }
+func NewTenantIDFromUUID(u uuid.UUID) TenantID {
+	return TenantID{value: pgtype.UUID{Bytes: u, Valid: true}}
+}
+func NewThemeIDFromUUID(u uuid.UUID) ThemeID {
+	return ThemeID{value: pgtype.UUID{Bytes: u, Valid: true}}
+}
 
 // ---------------------------------------------------------
 // Accessors
 // ---------------------------------------------------------
 
-func (t TenantID) UUID() uuid.UUID { return t.value }
-func (t TenantID) String() string  { return t.value.String() }
-
-func (t ThemeID) UUID() uuid.UUID { return t.value }
-func (t ThemeID) String() string  { return t.value.String() }
+func (t TenantID) Raw() pgtype.UUID { return t.value }
+func (t TenantID) String() string {
+	if !t.value.Valid {
+		return ""
+	}
+	// Converts [16]byte to string format
+	u := uuid.UUID(t.value.Bytes)
+	return u.String()
+}
 
 // ---------------------------------------------------------
-// Database Interfaces (Required for pgx/sql Scanning)
+// Database Interfaces (pgx compatibility)
 // ---------------------------------------------------------
 
-// Scan implements sql.Scanner to read from DB (UUID -> ValueObject)
+// Scan implements sql.Scanner for database/sql compatibility
 func (t *TenantID) Scan(value interface{}) error {
-	return scanUUID(&t.value, value)
+	return t.value.Scan(value)
 }
 
-func (t *ThemeID) Scan(value interface{}) error {
-	return scanUUID(&t.value, value)
-}
-
-// Value implements driver.Valuer to write to DB (ValueObject -> UUID)
+// Value implements driver.Valuer for database/sql compatibility
 func (t TenantID) Value() (driver.Value, error) {
-	return t.value.String(), nil
+	if !t.value.Valid {
+		return nil, nil
+	}
+	return t.value.Value()
 }
 
-func (t ThemeID) Value() (driver.Value, error) {
-	return t.value.String(), nil
-}
+func (t *ThemeID) Scan(value interface{}) error { return t.value.Scan(value) }
+func (t ThemeID) Value() (driver.Value, error)  { return t.value.Value() }
 
-// Internal helper to avoid code duplication
-func scanUUID(target *uuid.UUID, value interface{}) error {
-	if value == nil {
-		return nil
-	}
-	switch v := value.(type) {
-	case []byte:
-		u, err := uuid.FromBytes(v)
-		if err != nil {
-			return err
-		}
-		*target = u
-	case string:
-		u, err := uuid.Parse(v)
-		if err != nil {
-			return err
-		}
-		*target = u
-	default:
-		return fmt.Errorf("unsupported type for UUID scan: %T", value)
-	}
-	return nil
+func (t ThemeID) Raw() pgtype.UUID { return t.value }
+
+func (t ThemeID) String() string {
+    if !t.value.Valid {
+        return ""
+    }
+    u := uuid.UUID(t.value.Bytes)
+    return u.String()
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type AuthRepository struct {
@@ -22,6 +23,7 @@ type IAuthRepository interface {
 	GetRefreshTokenByHash(ctx context.Context, hash string) (*entity.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id string) (*entity.RefreshToken, error)
 	RevokeRefreshTokenByHash(ctx context.Context, hash string) (*entity.RefreshToken, error)
+	UpdateActiveSessionContext(ctx context.Context, userId, tenantId pgtype.UUID, role string) (*entity.RefreshToken, error)
 }
 
 func NewUAuthRepository(db database.DB) IAuthRepository {
@@ -35,8 +37,8 @@ func (repo *AuthRepository) CreateRefreshToken(ctx context.Context, token *entit
 	defer cancel()
 
 	query := `
-        INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked)
-        VALUES ($1,$2,$3,$4)
+        INSERT INTO refresh_tokens (user_id, token_hash, expires_at, revoked, last_role, last_tenant_id)
+        VALUES ($1,$2,$3,$4,$5,$6)
 		RETURNING id, token_hash
     `
 	err := repo.DB.QueryRow(ctx, query,
@@ -44,6 +46,8 @@ func (repo *AuthRepository) CreateRefreshToken(ctx context.Context, token *entit
 		token.TokenHash,
 		token.ExpiresAt,
 		token.Revoked,
+		token.LastRole,
+		token.LastTenantId,
 	).Scan(&token.Id, &token.TokenHash)
 
 	if err != nil {
@@ -69,7 +73,7 @@ func (repo *AuthRepository) GetRefreshTokenByHash(ctx context.Context, tokenHash
 	defer cancel()
 
 	query := `
-		SELECT id, user_id, token_hash, expires_at, revoked, created_at, revoked_at
+		SELECT id, user_id, token_hash, expires_at, revoked, created_at, revoked_at, last_role, last_tenant_id
 		FROM refresh_tokens 
 		WHERE token_hash = $1
 	`
@@ -86,6 +90,8 @@ func (repo *AuthRepository) GetRefreshTokenByHash(ctx context.Context, tokenHash
 		&refreshToken.Revoked,
 		&refreshToken.CreatedAt,
 		&refreshToken.RevokedAt,
+		&refreshToken.LastRole,
+		&refreshToken.LastTenantId,
 	)
 
 	if err != nil {
@@ -141,12 +147,12 @@ func (repo *AuthRepository) RevokeRefreshToken(ctx context.Context, id string) (
 // RevokeRefreshTokenByHash invalidates a token using its hash.
 // This is used during logout and refresh rotation when we only have the token string.
 func (repo *AuthRepository) RevokeRefreshTokenByHash(ctx context.Context, hash string) (*entity.RefreshToken, error) {
-    const op = "auth.revokeRefreshTokenByHash"
+	const op = "auth.revokeRefreshTokenByHash"
 
-    ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
-    defer cancel()
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-    query := `
+	query := `
         UPDATE refresh_tokens 
         SET 
             revoked = TRUE,
@@ -155,26 +161,70 @@ func (repo *AuthRepository) RevokeRefreshTokenByHash(ctx context.Context, hash s
         RETURNING id, user_id, token_hash, expires_at, revoked, created_at, revoked_at
     `
 
-    refreshToken := &entity.RefreshToken{}
+	refreshToken := &entity.RefreshToken{}
 
-    // use QueryRow because we expect exactly one row back (the newly updated token)
-    err := repo.DB.QueryRow(ctx, query, hash).Scan(
-        &refreshToken.Id,
-        &refreshToken.UserId,
-        &refreshToken.TokenHash,
-        &refreshToken.ExpiresAt,
-        &refreshToken.Revoked,
-        &refreshToken.CreatedAt,
-        &refreshToken.RevokedAt,
-    )
+	// use QueryRow because we expect exactly one row back (the newly updated token)
+	err := repo.DB.QueryRow(ctx, query, hash).Scan(
+		&refreshToken.Id,
+		&refreshToken.UserId,
+		&refreshToken.TokenHash,
+		&refreshToken.ExpiresAt,
+		&refreshToken.Revoked,
+		&refreshToken.CreatedAt,
+		&refreshToken.RevokedAt,
+	)
 
-    if err != nil {
-        // If no rows were updated (already revoked or doesn't exist), Scan returns sql.ErrNoRows
-        log.Printf("[%s]: could not revoke token (might already be revoked): %v", op, err)
+	if err != nil {
+		// If no rows were updated (already revoked or doesn't exist), Scan returns sql.ErrNoRows
+		log.Printf("[%s]: could not revoke token (might already be revoked): %v", op, err)
 
-        infraErr := postgres.MapPostgresError(err)
-        return nil, TranslateUserRepoError(infraErr)
-    }
+		infraErr := postgres.MapPostgresError(err)
+		return nil, TranslateUserRepoError(infraErr)
+	}
 
-    return refreshToken, nil
+	return refreshToken, nil
+}
+
+// UpdateActiveSessionContext ensures the current session is updated to a tenant session
+func (repo *AuthRepository) UpdateActiveSessionContext(ctx context.Context, userId, tenantId pgtype.UUID, role string) (*entity.RefreshToken, error) {
+	const op = "auth.UpdateActiveSessionContext"
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	// The sub query ensures we don't update revoked refresh tokens
+	query := `
+	 UPDATE refresh_tokens 
+        SET last_tenant_id = $1, 
+            last_role = $2
+        WHERE id = (
+            SELECT id FROM refresh_tokens 
+            WHERE user_id = $3 AND revoked = false 
+            ORDER BY created_at DESC LIMIT 1
+        )
+		RETURNING id, user_id, token_hash, revoked, last_role, last_tenant_id, created_at, revoked_at
+	`
+
+	updatedSession := &entity.RefreshToken{}
+
+	err := repo.DB.QueryRow(ctx, query, tenantId, role, userId).Scan(
+		&updatedSession.Id,
+		&updatedSession.UserId,
+		&updatedSession.TokenHash,
+		&updatedSession.Revoked,
+		&updatedSession.LastRole,
+		&updatedSession.LastTenantId,
+		&updatedSession.CreatedAt,
+		&updatedSession.RevokedAt,
+	)
+
+	if err != nil {
+		// If no rows were updated (already revoked or doesn't exist), Scan returns sql.ErrNoRows
+		log.Printf("[%s]: could not update active session context: %v", op, err)
+
+		infraErr := postgres.MapPostgresError(err)
+		return nil, TranslateUserRepoError(infraErr)
+	}
+
+	return updatedSession, nil
 }

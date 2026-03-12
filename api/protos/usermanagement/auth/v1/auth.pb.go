@@ -508,6 +508,114 @@ func (x *LogoutResponse) GetSuccess() bool {
 	return false
 }
 
+type UpdateSessionContextRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The ID of the user whose session needs upgrading
+	UserId string `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	// The ID of the newly created tenant (or the one they are switching to)
+	TenantId string `protobuf:"bytes,2,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	// The role assigned to the user for this specific tenant (e.g., "owner")
+	Role          string `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateSessionContextRequest) Reset() {
+	*x = UpdateSessionContextRequest{}
+	mi := &file_usermanagement_auth_v1_auth_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateSessionContextRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSessionContextRequest) ProtoMessage() {}
+
+func (x *UpdateSessionContextRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_auth_v1_auth_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSessionContextRequest.ProtoReflect.Descriptor instead.
+func (*UpdateSessionContextRequest) Descriptor() ([]byte, []int) {
+	return file_usermanagement_auth_v1_auth_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UpdateSessionContextRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UpdateSessionContextRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *UpdateSessionContextRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+type UpdateSessionContextResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The new "Upgraded" JWT containing the tenant_id and role claims
+	Token         *Token `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateSessionContextResponse) Reset() {
+	*x = UpdateSessionContextResponse{}
+	mi := &file_usermanagement_auth_v1_auth_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateSessionContextResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateSessionContextResponse) ProtoMessage() {}
+
+func (x *UpdateSessionContextResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_auth_v1_auth_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateSessionContextResponse.ProtoReflect.Descriptor instead.
+func (*UpdateSessionContextResponse) Descriptor() ([]byte, []int) {
+	return file_usermanagement_auth_v1_auth_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UpdateSessionContextResponse) GetToken() *Token {
+	if x != nil {
+		return x.Token
+	}
+	return nil
+}
+
 var File_usermanagement_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_usermanagement_auth_v1_auth_proto_rawDesc = "" +
@@ -544,12 +652,19 @@ const file_usermanagement_auth_v1_auth_proto_rawDesc = "" +
 	"\rLogoutRequest\x12#\n" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"*\n" +
 	"\x0eLogoutResponse\x12\x18\n" +
-	"\asuccess\x18\x02 \x01(\bR\asuccess2\xa6\x03\n" +
+	"\asuccess\x18\x02 \x01(\bR\asuccess\"g\n" +
+	"\x1bUpdateSessionContextRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\"H\n" +
+	"\x1cUpdateSessionContextResponse\x12(\n" +
+	"\x05token\x18\x01 \x01(\v2\x12.api.auth.v1.TokenR\x05token2\xc0\x04\n" +
 	"\vAuthService\x12e\n" +
 	"\bRegister\x12\x1c.api.auth.v1.RegisterRequest\x1a\x1d.api.auth.v1.RegisterResponse\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/v1/auth/register\x12Y\n" +
 	"\x05Login\x12\x19.api.auth.v1.LoginRequest\x1a\x1a.api.auth.v1.LoginResponse\"\x19\x82\xd3\xe4\x93\x02\x13:\x01*\"\x0e/v1/auth/login\x12v\n" +
 	"\fRefreshToken\x12 .api.auth.v1.RefreshTokenRequest\x1a!.api.auth.v1.RefreshTokenResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/auth/refresh_token\x12]\n" +
-	"\x06Logout\x12\x1a.api.auth.v1.LogoutRequest\x1a\x1b.api.auth.v1.LogoutResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/logoutBNZLgithub.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1;authv1b\x06proto3"
+	"\x06Logout\x12\x1a.api.auth.v1.LogoutRequest\x1a\x1b.api.auth.v1.LogoutResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/auth/logout\x12\x97\x01\n" +
+	"\x14UpdateSessionContext\x12(.api.auth.v1.UpdateSessionContextRequest\x1a).api.auth.v1.UpdateSessionContextResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/auth/update_session_contextBNZLgithub.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1;authv1b\x06proto3"
 
 var (
 	file_usermanagement_auth_v1_auth_proto_rawDescOnce sync.Once
@@ -563,40 +678,45 @@ func file_usermanagement_auth_v1_auth_proto_rawDescGZIP() []byte {
 	return file_usermanagement_auth_v1_auth_proto_rawDescData
 }
 
-var file_usermanagement_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_usermanagement_auth_v1_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_usermanagement_auth_v1_auth_proto_goTypes = []any{
-	(*RegisterRequest)(nil),       // 0: api.auth.v1.RegisterRequest
-	(*RegisterResponse)(nil),      // 1: api.auth.v1.RegisterResponse
-	(*LoginRequest)(nil),          // 2: api.auth.v1.LoginRequest
-	(*LoginResponse)(nil),         // 3: api.auth.v1.LoginResponse
-	(*RefreshTokenRequest)(nil),   // 4: api.auth.v1.RefreshTokenRequest
-	(*RefreshTokenResponse)(nil),  // 5: api.auth.v1.RefreshTokenResponse
-	(*Token)(nil),                 // 6: api.auth.v1.Token
-	(*LogoutRequest)(nil),         // 7: api.auth.v1.LogoutRequest
-	(*LogoutResponse)(nil),        // 8: api.auth.v1.LogoutResponse
-	(*v1.User)(nil),               // 9: api.user.v1.User
-	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
+	(*RegisterRequest)(nil),              // 0: api.auth.v1.RegisterRequest
+	(*RegisterResponse)(nil),             // 1: api.auth.v1.RegisterResponse
+	(*LoginRequest)(nil),                 // 2: api.auth.v1.LoginRequest
+	(*LoginResponse)(nil),                // 3: api.auth.v1.LoginResponse
+	(*RefreshTokenRequest)(nil),          // 4: api.auth.v1.RefreshTokenRequest
+	(*RefreshTokenResponse)(nil),         // 5: api.auth.v1.RefreshTokenResponse
+	(*Token)(nil),                        // 6: api.auth.v1.Token
+	(*LogoutRequest)(nil),                // 7: api.auth.v1.LogoutRequest
+	(*LogoutResponse)(nil),               // 8: api.auth.v1.LogoutResponse
+	(*UpdateSessionContextRequest)(nil),  // 9: api.auth.v1.UpdateSessionContextRequest
+	(*UpdateSessionContextResponse)(nil), // 10: api.auth.v1.UpdateSessionContextResponse
+	(*v1.User)(nil),                      // 11: api.user.v1.User
+	(*timestamppb.Timestamp)(nil),        // 12: google.protobuf.Timestamp
 }
 var file_usermanagement_auth_v1_auth_proto_depIdxs = []int32{
-	9,  // 0: api.auth.v1.RegisterResponse.user:type_name -> api.user.v1.User
-	9,  // 1: api.auth.v1.LoginResponse.user:type_name -> api.user.v1.User
+	11, // 0: api.auth.v1.RegisterResponse.user:type_name -> api.user.v1.User
+	11, // 1: api.auth.v1.LoginResponse.user:type_name -> api.user.v1.User
 	6,  // 2: api.auth.v1.LoginResponse.token:type_name -> api.auth.v1.Token
 	6,  // 3: api.auth.v1.RefreshTokenResponse.token:type_name -> api.auth.v1.Token
-	10, // 4: api.auth.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
-	10, // 5: api.auth.v1.Token.issued_at:type_name -> google.protobuf.Timestamp
-	0,  // 6: api.auth.v1.AuthService.Register:input_type -> api.auth.v1.RegisterRequest
-	2,  // 7: api.auth.v1.AuthService.Login:input_type -> api.auth.v1.LoginRequest
-	4,  // 8: api.auth.v1.AuthService.RefreshToken:input_type -> api.auth.v1.RefreshTokenRequest
-	7,  // 9: api.auth.v1.AuthService.Logout:input_type -> api.auth.v1.LogoutRequest
-	1,  // 10: api.auth.v1.AuthService.Register:output_type -> api.auth.v1.RegisterResponse
-	3,  // 11: api.auth.v1.AuthService.Login:output_type -> api.auth.v1.LoginResponse
-	5,  // 12: api.auth.v1.AuthService.RefreshToken:output_type -> api.auth.v1.RefreshTokenResponse
-	8,  // 13: api.auth.v1.AuthService.Logout:output_type -> api.auth.v1.LogoutResponse
-	10, // [10:14] is the sub-list for method output_type
-	6,  // [6:10] is the sub-list for method input_type
-	6,  // [6:6] is the sub-list for extension type_name
-	6,  // [6:6] is the sub-list for extension extendee
-	0,  // [0:6] is the sub-list for field type_name
+	12, // 4: api.auth.v1.Token.expires_at:type_name -> google.protobuf.Timestamp
+	12, // 5: api.auth.v1.Token.issued_at:type_name -> google.protobuf.Timestamp
+	6,  // 6: api.auth.v1.UpdateSessionContextResponse.token:type_name -> api.auth.v1.Token
+	0,  // 7: api.auth.v1.AuthService.Register:input_type -> api.auth.v1.RegisterRequest
+	2,  // 8: api.auth.v1.AuthService.Login:input_type -> api.auth.v1.LoginRequest
+	4,  // 9: api.auth.v1.AuthService.RefreshToken:input_type -> api.auth.v1.RefreshTokenRequest
+	7,  // 10: api.auth.v1.AuthService.Logout:input_type -> api.auth.v1.LogoutRequest
+	9,  // 11: api.auth.v1.AuthService.UpdateSessionContext:input_type -> api.auth.v1.UpdateSessionContextRequest
+	1,  // 12: api.auth.v1.AuthService.Register:output_type -> api.auth.v1.RegisterResponse
+	3,  // 13: api.auth.v1.AuthService.Login:output_type -> api.auth.v1.LoginResponse
+	5,  // 14: api.auth.v1.AuthService.RefreshToken:output_type -> api.auth.v1.RefreshTokenResponse
+	8,  // 15: api.auth.v1.AuthService.Logout:output_type -> api.auth.v1.LogoutResponse
+	10, // 16: api.auth.v1.AuthService.UpdateSessionContext:output_type -> api.auth.v1.UpdateSessionContextResponse
+	12, // [12:17] is the sub-list for method output_type
+	7,  // [7:12] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_usermanagement_auth_v1_auth_proto_init() }
@@ -610,7 +730,7 @@ func file_usermanagement_auth_v1_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usermanagement_auth_v1_auth_proto_rawDesc), len(file_usermanagement_auth_v1_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

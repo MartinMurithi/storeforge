@@ -7,11 +7,13 @@ import (
 )
 
 type RefreshToken struct {
-	Id        pgtype.UUID
-	UserId    pgtype.UUID //ID of logged in user
-	TokenHash string
-	ExpiresAt time.Time
-	Revoked   bool
-	CreatedAt time.Time
-	RevokedAt *time.Time
+	Id           pgtype.UUID
+	UserId       pgtype.UUID //ID of logged in user
+	TokenHash    string
+	ExpiresAt    time.Time
+	Revoked      bool
+	LastRole     string
+	LastTenantId pgtype.UUID
+	CreatedAt    time.Time
+	RevokedAt    *time.Time
 }

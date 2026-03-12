@@ -15,6 +15,7 @@ type MockRepository struct {
 	mock.Mock
 }
 
+
 // CreateUser implements [repository.IUserRepository].
 func (m *MockRepository) CreateUser(ctx context.Context, user *entity.User) error {
 	args := m.Called(ctx, user)
@@ -105,7 +106,7 @@ func (m *MockRepository) GetUserByPhoneIncludingDeleted(ctx context.Context, pho
 
 // GetUserByIdIcludingDeleted implements [repository.IUserRepository].
 func (m *MockRepository) GetUserByIdIcludingDeleted(ctx context.Context, id pgtype.UUID) (*entity.User, error) {
-		args := m.Called(ctx, id)
+	args := m.Called(ctx, id)
 
 	var user *entity.User
 	if args.Get(0) != nil {

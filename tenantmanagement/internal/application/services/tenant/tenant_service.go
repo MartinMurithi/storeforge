@@ -7,6 +7,7 @@ import (
 	"time"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	membershipv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/mappers"
@@ -110,9 +111,27 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		return nil, fmt.Errorf("store created but ownership link failed: %w", err)
 	}
 
+	// Return new JWT Token after user has been linked to their store, incase linking fails, new JWT should not be issued
+	updateActiveSessionReq := &authv1.UpdateSessionContextRequest{
+		UserId:   req.UserId,
+		TenantId: newTenant.ID.String(),
+		Role:     "owner",
+	}
+
+	newToken, err := s.userSvc.UpdateActiveSessionContext(ctx, updateActiveSessionReq)
+
+	tokenDTO := &dtos.TokenInfoDTO{
+		AccessToken: newToken.Token.AccessToken,
+		TokenType:   newToken.Token.TokenType,
+		ExpiresIn:   newToken.Token.ExpiresIn,
+		ExpiresAt:   time.Now().Add(time.Duration(newToken.Token.ExpiresIn) * time.Second),
+		IssuedAt:    time.Now(),
+	}
+
 	return mappers.ToProtoCreateTenantResponse(&dtos.CreateTenantResponseDTO{
 		Tenant:         newTenant,
 		Theme:          theme,
 		TenantSettings: newTenant.Settings,
+		Token:          tokenDTO,
 	}), nil
 }

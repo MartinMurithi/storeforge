@@ -5,5 +5,7 @@ CREATE TABLE IF NOT EXISTS refresh_tokens(
     expires_at TIMESTAMP NOT NULL,
     revoked BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT NOW(),
-    revoked_at TIMESTAMP
+    revoked_at TIMESTAMP,
+    last_role VARCHAR(50) DEFAULT NULL,
+    last_tenant_id UUID DEFAULT NULL
 );

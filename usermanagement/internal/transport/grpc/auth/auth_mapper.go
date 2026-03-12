@@ -27,8 +27,8 @@ func ToProtoUser(u *entity.User) *userv1.User {
 		Email:      u.Email,
 		IsVerified: u.IsVerified,
 		Profile: &userv1.UserProfile{
-			FullName:     u.FullName,
-			Phone:        u.Phone,
+			FullName: u.FullName,
+			Phone:    u.Phone,
 		},
 		CreatedAt: timestamppb.New(u.CreatedAt),
 		UpdatedAt: toProtoTimestamp(u.UpdatedAt),
@@ -61,12 +61,28 @@ func toProtoToken(t *entity.Token) *authv1.Token {
 	}
 
 	return &authv1.Token{
-		AccessToken: t.AccessToken,
+		AccessToken:  t.AccessToken,
 		RefreshToken: t.RefreshToken,
-		TokenType:   "Bearer",
-		ExpiresIn:   t.ExpiresIn,
-		IssuedAt:    timestamppb.New(t.IssuedAt),
-		ExpiresAt:   timestamppb.New(t.ExpiresAt),
+		TokenType:    "Bearer",
+		ExpiresIn:    t.ExpiresIn,
+		IssuedAt:     timestamppb.New(t.IssuedAt),
+		ExpiresAt:    timestamppb.New(t.ExpiresAt),
+	}
+}
+
+func ToProtoUpdateActiveSessionContext(t *entity.Token) *authv1.UpdateSessionContextResponse {
+	if t == nil {
+		return nil
+	}
+
+	return &authv1.UpdateSessionContextResponse{
+		Token: &authv1.Token{
+			AccessToken: t.AccessToken,
+			TokenType:   "Bearer",
+			ExpiresIn:   t.ExpiresIn,
+			IssuedAt:    timestamppb.New(t.IssuedAt),
+			ExpiresAt:   timestamppb.New(t.ExpiresAt),
+		},
 	}
 }
 
