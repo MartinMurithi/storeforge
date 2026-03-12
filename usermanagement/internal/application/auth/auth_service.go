@@ -321,14 +321,12 @@ func (srv *AuthService) Logout(ctx context.Context, refreshToken string) error {
 func (srv *AuthService) UpdateSessionContext(ctx context.Context, input *dto.UpdateActiveSessionContextRequestDTO) (*entity.Token, error) {
 	const op = "AuthService.UpdateSessionContext"
 
-	// We update the Refresh Token record so the session "remembers" this store.
 	dbSession, err := srv.authRepo.UpdateActiveSessionContext(ctx, input.UserId, input.TenantId, input.Role)
 
 	if err != nil {
 		return nil, fmt.Errorf("%s: failed to update active session context in DB: %w", op, err)
 	}
 
-	// We need the user's email to put it into the new JWT claims.
 	user, err := srv.userRepo.GetActiveUserById(ctx, input.UserId)
 
 	if err != nil {
@@ -337,7 +335,7 @@ func (srv *AuthService) UpdateSessionContext(ctx context.Context, input *dto.Upd
 
 	// ISSUE THE NEW JWT
 	// This creates a BRAND NEW Access Token with the TenantID and Role inside it.
-	accessToken, claims, err := srv.jwtMaker.CreateToken(
+	accessToken, _, err := srv.jwtMaker.CreateToken(
 		user.ID,
 		dbSession.LastTenantId,
 		user.Email,
@@ -345,7 +343,7 @@ func (srv *AuthService) UpdateSessionContext(ctx context.Context, input *dto.Upd
 		30*time.Minute,
 	)
 
-	log.Printf("claims from updated JWT token %s, %s", claims.TenantId, *claims.Role)
+	// log.Printf("claims from updated JWT token %s", claims.TenantId)
 
 	if err != nil {
 		return nil, fmt.Errorf("%s: token signing failed: %w", op, err)

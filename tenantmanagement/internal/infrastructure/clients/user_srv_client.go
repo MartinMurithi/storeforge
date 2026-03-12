@@ -10,7 +10,6 @@ import (
 )
 
 type UserServiceClient struct {
-	// To link user to their store
 	MembershipClient          membershipv1.MembershipServiceClient
 	UpdateActiveSessionClient authv1.AuthServiceClient
 }
