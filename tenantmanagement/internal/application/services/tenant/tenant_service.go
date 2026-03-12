@@ -108,10 +108,10 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		log.Printf("[%s]: failed to link user %s to tenant %s: %v", op, linkUserReq.UserId, newTenant.ID, err)
 
 		// For now, return an error so the user knows something went wrong
+		// To Do: Delete the created tenant(store) to avoid orphaned stores in the database
 		return nil, fmt.Errorf("store created but ownership link failed: %w", err)
 	}
 
-	// Return new JWT Token after user has been linked to their store, incase linking fails, new JWT should not be issued
 	updateActiveSessionReq := &authv1.UpdateSessionContextRequest{
 		UserId:   req.UserId,
 		TenantId: newTenant.ID.String(),
