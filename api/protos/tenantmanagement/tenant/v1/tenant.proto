@@ -6,6 +6,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/struct.proto";
 
 import "tenantmanagement/theme/v1/theme.proto";
+import "usermanagement/auth/v1/auth.proto";
 
 option go_package = "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1;tenantv1";
 
@@ -48,6 +49,7 @@ message CreateTenantResponse {
   Tenant         tenant   = 1;
   theme.v1.Theme theme    = 2;
   TenantSettings settings = 3;
+  api.auth.v1.Token token = 4;
 }
 
 message GetTenantRequest {

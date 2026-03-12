@@ -8,6 +8,8 @@ import (
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,10 +27,10 @@ func NewAuthGrpcHandler(a *auth.AuthService) *AuthGrpcHandler {
 func (h *AuthGrpcHandler) Register(ctx context.Context, req *authv1.RegisterRequest) (*authv1.RegisterResponse, error) {
 
 	dtoReq := &dto.RegisterUserRequestDTO{
-		FullName:     req.FullName,
-		Email:        req.Email,
-		Phone:        req.Phone,
-		Password:     req.Password,
+		FullName: req.FullName,
+		Email:    req.Email,
+		Phone:    req.Phone,
+		Password: req.Password,
 	}
 
 	user, err := h.AuthService.RegisterUser(ctx, dtoReq)
@@ -90,7 +92,7 @@ func (a *AuthGrpcHandler) Logout(ctx context.Context, req *authv1.LogoutRequest)
 	}
 
 	err := a.AuthService.Logout(ctx, req.RefreshToken)
-	
+
 	if err != nil {
 		return nil, errconv.ToGrpcError(err)
 	}
@@ -98,4 +100,23 @@ func (a *AuthGrpcHandler) Logout(ctx context.Context, req *authv1.LogoutRequest)
 	return &authv1.LogoutResponse{
 		Success: true,
 	}, nil
+}
+
+func (a *AuthGrpcHandler) UpdateSessionContext(ctx context.Context, req *authv1.UpdateSessionContextRequest) (*authv1.UpdateSessionContextResponse, error) {
+	const op = "AuthGrpcHandler.UpdateSessionContext"
+
+	dtoReq := &dto.UpdateActiveSessionContextRequestDTO{
+		UserId:   pgtype.UUID{Bytes: uuid.MustParse(req.UserId), Valid: true},
+		TenantId: pgtype.UUID{Bytes: uuid.MustParse(req.TenantId), Valid: true},
+		Role:     req.Role,
+	}
+
+	// This will return the new Access Token (JWT) with the new claims
+	token, err := a.AuthService.UpdateSessionContext(ctx, dtoReq)
+
+	if err != nil {
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return ToProtoUpdateActiveSessionContext(token), nil
 }

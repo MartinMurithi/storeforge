@@ -40,6 +40,15 @@ service AuthService {
       body: "*"
     };
   };
+
+  // Updates a user's session after they create a tenant
+  // Issues a new JWT token with a tenant id and role.
+  rpc UpdateSessionContext(UpdateSessionContextRequest) returns(UpdateSessionContextResponse){
+    option (google.api.http) = {
+      post: "/v1/auth/update_session_context"
+      body: "*"
+    };
+  }
 }
 
 message RegisterRequest {
@@ -87,4 +96,20 @@ message LogoutRequest{
 
 message LogoutResponse{
   bool success = 2;
+}
+
+message UpdateSessionContextRequest {
+    // The ID of the user whose session needs upgrading
+    string user_id = 1;
+    
+    // The ID of the newly created tenant (or the one they are switching to)
+    string tenant_id = 2;
+    
+    // The role assigned to the user for this specific tenant (e.g., "owner")
+    string role = 3;
+}
+
+message UpdateSessionContextResponse {
+    // The new "Upgraded" JWT containing the tenant_id and role claims
+    Token token = 1;
 }
