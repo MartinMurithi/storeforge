@@ -201,7 +201,7 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		TokenType:    "Bearer",
 	}
 
-	log.Printf("issued access token with no role and tenant id %s %s", *claims.TenantId, claims.Role)
+	log.Printf("issued access token with no role and tenant id %s, %s", claims.TenantId, claims.Role)
 
 	return existingUser, token, nil
 }
