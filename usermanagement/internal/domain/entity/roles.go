@@ -1,23 +1,21 @@
 package entity
 
-import "github.com/google/uuid"
-
-//owner(can do everything), admin(manage orders, settings, products, etc), member(manage products only), viewer(read only)
-
-type Permission struct {
-	Name string `json:"name"` //eg edit_products
-}
+import (
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Role struct {
-	ID          uuid.UUID    `json:"id"`
-	Name        string       `json:"name"` // e.g., "admin", "editor", "member", "viewer"
-	Description string       `json:"description"`
-	Permissions []Permission `json:"-"`
+	ID          pgtype.UUID
+	Name        string
+	Slug        string
+	Description string
+	IsSystem    bool // if its a store owner
+	Permissions []*Permission
 }
 
 const (
-    RoleOwner  = "owner"
-    RoleAdmin  = "admin"
-    RoleMember = "member"
-    RoleViewer = "viewer"
+	RoleOwner  = "owner"
+	RoleAdmin  = "admin"
+	RoleMember = "member"
+	RoleViewer = "viewer"
 )
