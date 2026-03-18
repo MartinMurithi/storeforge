@@ -1,22 +1,31 @@
 package rbac
 
 import (
+	"log"
+
 	rbacv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1"
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // MapCreateRoleRequest converts a gRPC request to an Application DTO
-func MapCreateRoleRequest(pbReq *rbacv1.CreateRoleRequest) *dto.CreateRoleRequestDTO {
+
+func MapCreateRoleRequest(pbReq *rbacv1.CreateRoleRequest) (*dto.CreateRoleRequestDTO, error) {
 	ids := make([]pgtype.UUID, 0, len(pbReq.PermissionIds))
 
-	for _, id := range pbReq.PermissionIds {
-		parsedID := pgtype.UUID{Bytes: uuid.MustParse(id), Valid: true}
+	for _, idStr := range pbReq.PermissionIds {
+		parsed, err := uuid.Parse(idStr)
+		if err != nil {
+			log.Printf("invalid permission uuid '%s': %w", idStr, err)
+			return nil, apperrors.ErrInvalidPermissionID
+		}
 
-		ids = append(ids, parsedID)
+		ids = append(ids, pgtype.UUID{Bytes: parsed, Valid: true})
 	}
 
 	return &dto.CreateRoleRequestDTO{
@@ -24,7 +33,7 @@ func MapCreateRoleRequest(pbReq *rbacv1.CreateRoleRequest) *dto.CreateRoleReques
 		Slug:          pbReq.Slug,
 		Description:   pbReq.Description,
 		PermissionIDs: ids,
-	}
+	}, nil
 }
 
 func MapRoleToPb(role *entity.Role) *rbacv1.Role {
@@ -39,6 +48,7 @@ func MapRoleToPb(role *entity.Role) *rbacv1.Role {
 			Id:          p.Id.String(),
 			Slug:        p.Slug,
 			Description: p.Description,
+			CreatedAt:   timestamppb.New(p.CreatedAt),
 		}
 	}
 
@@ -46,7 +56,9 @@ func MapRoleToPb(role *entity.Role) *rbacv1.Role {
 		Id:          role.ID.String(),
 		Name:        role.Name,
 		Slug:        role.Slug,
+		Description: role.Description,
 		IsSystem:    role.IsSystem,
 		Permissions: pbPermissions,
+		CreatedAt:   timestamppb.New(role.CreatedAt),
 	}
 }

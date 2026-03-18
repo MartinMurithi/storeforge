@@ -22,74 +22,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Permission struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Slug          string                 `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *Permission) Reset() {
-	*x = Permission{}
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[0]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *Permission) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*Permission) ProtoMessage() {}
-
-func (x *Permission) ProtoReflect() protoreflect.Message {
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[0]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use Permission.ProtoReflect.Descriptor instead.
-func (*Permission) Descriptor() ([]byte, []int) {
-	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{0}
-}
-
-func (x *Permission) GetId() string {
-	if x != nil {
-		return x.Id
-	}
-	return ""
-}
-
-func (x *Permission) GetSlug() string {
-	if x != nil {
-		return x.Slug
-	}
-	return ""
-}
-
-func (x *Permission) GetDescription() string {
-	if x != nil {
-		return x.Description
-	}
-	return ""
-}
-
-func (x *Permission) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
 type Role struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -105,7 +37,7 @@ type Role struct {
 
 func (x *Role) Reset() {
 	*x = Role{}
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[1]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -117,7 +49,7 @@ func (x *Role) String() string {
 func (*Role) ProtoMessage() {}
 
 func (x *Role) ProtoReflect() protoreflect.Message {
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[1]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -130,7 +62,7 @@ func (x *Role) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Role.ProtoReflect.Descriptor instead.
 func (*Role) Descriptor() ([]byte, []int) {
-	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{1}
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Role) GetId() string {
@@ -176,6 +108,74 @@ func (x *Role) GetPermissions() []*Permission {
 }
 
 func (x *Role) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+type Permission struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Slug          string                 `protobuf:"bytes,2,opt,name=slug,proto3" json:"slug,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Permission) Reset() {
+	*x = Permission{}
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Permission) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Permission) ProtoMessage() {}
+
+func (x *Permission) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Permission.ProtoReflect.Descriptor instead.
+func (*Permission) Descriptor() ([]byte, []int) {
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Permission) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Permission) GetSlug() string {
+	if x != nil {
+		return x.Slug
+	}
+	return ""
+}
+
+func (x *Permission) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Permission) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
@@ -402,14 +402,7 @@ var File_usermanagement_rbac_v1_rbac_proto protoreflect.FileDescriptor
 
 const file_usermanagement_rbac_v1_rbac_proto_rawDesc = "" +
 	"\n" +
-	"!usermanagement/rbac/v1/rbac.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\x8d\x01\n" +
-	"\n" +
-	"Permission\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
-	"\x04slug\x18\x02 \x01(\tR\x04slug\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\x129\n" +
-	"\n" +
-	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xef\x01\n" +
+	"!usermanagement/rbac/v1/rbac.proto\x12\arbac.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"\xef\x01\n" +
 	"\x04Role\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12\x12\n" +
@@ -418,7 +411,14 @@ const file_usermanagement_rbac_v1_rbac_proto_rawDesc = "" +
 	"\tis_system\x18\x05 \x01(\bR\bisSystem\x125\n" +
 	"\vpermissions\x18\x06 \x03(\v2\x13.rbac.v1.PermissionR\vpermissions\x129\n" +
 	"\n" +
-	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x84\x01\n" +
+	"created_at\x18\a \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x8d\x01\n" +
+	"\n" +
+	"Permission\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
+	"\x04slug\x18\x02 \x01(\tR\x04slug\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x129\n" +
+	"\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\x84\x01\n" +
 	"\x11CreateRoleRequest\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04slug\x18\x02 \x01(\tR\x04slug\x12 \n" +
@@ -451,8 +451,8 @@ func file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP() []byte {
 
 var file_usermanagement_rbac_v1_rbac_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_usermanagement_rbac_v1_rbac_proto_goTypes = []any{
-	(*Permission)(nil),            // 0: rbac.v1.Permission
-	(*Role)(nil),                  // 1: rbac.v1.Role
+	(*Role)(nil),                  // 0: rbac.v1.Role
+	(*Permission)(nil),            // 1: rbac.v1.Permission
 	(*CreateRoleRequest)(nil),     // 2: rbac.v1.CreateRoleRequest
 	(*CreateRoleResponse)(nil),    // 3: rbac.v1.CreateRoleResponse
 	(*GetRolesRequest)(nil),       // 4: rbac.v1.GetRolesRequest
@@ -460,11 +460,11 @@ var file_usermanagement_rbac_v1_rbac_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_usermanagement_rbac_v1_rbac_proto_depIdxs = []int32{
-	6, // 0: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
-	0, // 1: rbac.v1.Role.permissions:type_name -> rbac.v1.Permission
-	6, // 2: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
-	1, // 3: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
-	1, // 4: rbac.v1.GetRolesResponse.roles:type_name -> rbac.v1.Role
+	1, // 0: rbac.v1.Role.permissions:type_name -> rbac.v1.Permission
+	6, // 1: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
+	6, // 2: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
+	0, // 3: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
+	0, // 4: rbac.v1.GetRolesResponse.roles:type_name -> rbac.v1.Role
 	2, // 5: rbac.v1.RbacService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
 	4, // 6: rbac.v1.RbacService.GetRoles:input_type -> rbac.v1.GetRolesRequest
 	3, // 7: rbac.v1.RbacService.CreateRole:output_type -> rbac.v1.CreateRoleResponse

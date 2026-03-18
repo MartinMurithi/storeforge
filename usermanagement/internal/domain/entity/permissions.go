@@ -1,6 +1,10 @@
 package entity
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 // Permission represents a granular action (e.g., "orders:read")
 // owner(can do everything), admin(manage orders, settings, products, etc), member(manage products only), viewer(read only)
@@ -9,6 +13,7 @@ type Permission struct {
 	Slug        string //eg edit_products
 	Category    string
 	Description string
+	CreatedAt   time.Time
 }
 
 // Permissions will be seeded directly to DB
