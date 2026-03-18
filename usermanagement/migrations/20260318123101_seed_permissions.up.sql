@@ -58,4 +58,11 @@ VALUES -- Product Management
         'tenants:suspend',
         'super-admin',
         'Can disable a store instance'
-    ) ON CONFLICT(slug) DO NOTHING;
+    ) ON CONFLICT(slug) DO
+        UPDATE
+        SET slug = EXCLUDED.slug 
+        RETURNING id,
+            slug,
+            category,
+            description,
+            created_at;

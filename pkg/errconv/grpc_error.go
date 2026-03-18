@@ -34,7 +34,8 @@ func ToGrpcError(err error) error {
 		errors.Is(err, apperrors.ErrInvalidPhoneNumber),
 		errors.Is(err, apperrors.ErrInvalidUUIDFormat),
 		errors.Is(err, apperrors.ErrInvalidPageNumber),
-		errors.Is(err, apperrors.ErrInvalidLimitNumber):
+		errors.Is(err, apperrors.ErrInvalidLimitNumber),
+		errors.Is(err, apperrors.ErrInvalidPermissionID):
 		return status.Error(codes.InvalidArgument, err.Error())
 
 	// 401 - Unauthenticated

@@ -53,13 +53,13 @@ func (p *PermissionRepository) GetPermissionsById(ctx context.Context, permIds [
 			&perm.Category,
 			&perm.Description,
 		); err != nil {
-			return nil, fmt.Errorf("%s scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+			return nil, fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 		}
 		perms = append(perms, perm)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%s scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+		return nil, fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 	}
 	return perms, nil
 }
@@ -78,7 +78,7 @@ func (p *PermissionRepository) GetPermissions(ctx context.Context) ([]*entity.Pe
 
 	rows, err := p.DB.Query(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("%s scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+		return nil, fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 	}
 	defer rows.Close()
 
@@ -91,13 +91,13 @@ func (p *PermissionRepository) GetPermissions(ctx context.Context) ([]*entity.Pe
 			&perm.Category,
 			&perm.Description,
 		); err != nil {
-			return nil, fmt.Errorf("%s scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+			return nil, fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 		}
 		perms = append(perms, perm)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("%s scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+		return nil, fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 	}
 	return perms, nil
 }

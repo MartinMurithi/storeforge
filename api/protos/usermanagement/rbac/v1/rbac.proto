@@ -12,23 +12,22 @@ service RbacService {
   rpc GetRoles(GetRolesRequest) returns (GetRolesResponse){};
 }
 
+message Role {
+  string                    id          = 1;
+  string                    name        = 2;
+  string                    slug        = 3;
+  string                    description = 4;
+  bool                      is_system   = 5;
+  repeated Permission       permissions = 6;
+  google.protobuf.Timestamp created_at  = 7;
+}
+
 message Permission{
   string                    id          = 1;
   string                    slug        = 2;
   string                    description = 3;
   google.protobuf.Timestamp created_at  = 4;
 }
-
-message Role {
-  string                    id          = 1;
-  string                    name        = 2;
-  string                    slug        = 3;
-  string description = 4;
-  bool                      is_system   = 5;
-  repeated Permission       permissions = 6;
-  google.protobuf.Timestamp created_at  = 7;
-}
-
 message CreateRoleRequest{
   string          name           = 1;
   string          slug           = 2;

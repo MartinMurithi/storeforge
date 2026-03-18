@@ -5,6 +5,7 @@ import (
 
 	rbacv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
+
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/rbac"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
 )
@@ -22,7 +23,11 @@ func NewRoleGrpcHandler(r *rbac.RoleService) *RoleGrpcHandler {
 
 func (h *RoleGrpcHandler) CreateRole(ctx context.Context, req *rbacv1.CreateRoleRequest) (*rbacv1.CreateRoleResponse, error) {
 
-	newIds := MapCreateRoleRequest(req)
+	newIds, err := MapCreateRoleRequest(req)
+
+	if err != nil {
+		return nil, errconv.ToGrpcError(err)
+	}
 
 	dtoReq := &dto.CreateRoleRequestDTO{
 		Name:          req.Name,

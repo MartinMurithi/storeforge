@@ -49,10 +49,10 @@ func (repo *RoleRepository) CreateRole(ctx context.Context, role *entity.Role) e
 	const query = `
 		INSERT INTO roles (name, slug, description)
 		VALUES ($1, $2, $3)
-		RETURNING id
+		RETURNING id, created_at
 	`
 
-	if err := tx.QueryRow(ctx, query, role.Name, role.Slug, role.Description).Scan(&role.ID); err != nil {
+	if err := tx.QueryRow(ctx, query, role.Name, role.Slug, role.Description).Scan(&role.ID, &role.CreatedAt); err != nil {
 		log.Printf("%s: create role: %v", op, err)
 		return fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
 	}

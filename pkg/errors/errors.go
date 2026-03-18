@@ -18,6 +18,7 @@ var (
 	ErrInvalidPhoneNumber   = errors.New("invalid phone number")
 	ErrInvalidUUIDFormat    = errors.New("invalid UUID format")
 	ErrInvalidID            = errors.New("invalid UUID")
+	ErrInvalidPermissionID  = errors.New("invalid permission ID")
 	ErrInvalidUserIdFormat  = errors.New("invalid user id format")
 	ErrInvalidPageNumber    = errors.New("invalid page")
 	ErrInvalidLimitNumber   = errors.New("invalid limit")
