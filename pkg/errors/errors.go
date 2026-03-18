@@ -27,6 +27,8 @@ var (
 // Database & Resource State Errors
 var (
 	ErrUserNotFound              = errors.New("user not found")
+	ErrRoleNotFound              = errors.New("role not found")
+	ErrRoleAlreadyExists         = errors.New("role already exists")
 	ErrUserAlreadyExists         = errors.New("user already exists")
 	ErrUserEmailAlreadyExists    = errors.New("user with that email already exists")
 	ErrUserMobileExists          = errors.New("user with that mobile already exists")

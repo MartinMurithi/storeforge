@@ -9,8 +9,6 @@ package membershipv1
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	_ "google.golang.org/protobuf/types/known/structpb"
-	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -139,7 +137,7 @@ var File_usermanagement_membership_v1_membership_proto protoreflect.FileDescript
 
 const file_usermanagement_membership_v1_membership_proto_rawDesc = "" +
 	"\n" +
-	"-usermanagement/membership/v1/membership.proto\x12\rmembership.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"c\n" +
+	"-usermanagement/membership/v1/membership.proto\x12\rmembership.v1\"c\n" +
 	"\x17LinkUserToTenantRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +

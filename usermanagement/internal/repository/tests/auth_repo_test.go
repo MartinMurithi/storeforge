@@ -18,6 +18,7 @@ import (
 )
 
 var repo repository.IAuthRepository
+var permRepo repository.IPermissionRepository
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
@@ -34,6 +35,7 @@ func TestMain(m *testing.M) {
 	dbAdapter := postgres.NewAdapter(pool.Pool)
 
 	repo = repository.NewUAuthRepository(dbAdapter)
+	permRepo = repository.NewPermissionRepository(dbAdapter)
 
 	os.Exit(m.Run())
 }
@@ -77,4 +79,54 @@ func TestUpdateSctiveSessionContext(t *testing.T) {
 	assert.True(t, updatedSession.LastTenantId.Valid)
 	assert.Equal(t, testInput.TenantId.Bytes, updatedSession.LastTenantId.Bytes)
 
+}
+
+func TestGetPermissions(t *testing.T) {
+
+	permissions, err := permRepo.GetPermissions(context.Background())
+	assert.NoError(t, err)
+
+	// assertions
+	assert.NoError(t, err)
+	assert.NotNil(t, permissions)
+	assert.Equal(t, len(permissions), 11, "should have exactly 11 seeded permissions")
+
+	var found = false
+
+	for _, perm := range permissions {
+		// Check if at least one expected permission exists in the slice
+		assert.NotEqual(t, uuid.Nil, perm.Id, "each permission should have a generated uuid")
+
+		if perm.Slug == "products:write" {
+			found = true
+			assert.NotEmpty(t, perm.Description)
+		}
+	}
+	assert.True(t, found, "The 'products:write' permission should be present in the results")
+}
+
+func TestGetPermissionsById(t *testing.T) {
+    ctx := context.Background()
+
+    // get all permissions so we have valid IDs to work with
+    allPerms, err := permRepo.GetPermissions(ctx)
+    require.NoError(t, err)
+    require.True(t, len(allPerms) >= 2, "Need at least 2 permissions in DB to run this test")
+
+    // Pick the first two IDs
+    permIds := []pgtype.UUID{
+        {Bytes: allPerms[0].Id.Bytes, Valid: true},
+        {Bytes: allPerms[1].Id.Bytes, Valid: true},
+    }
+
+    // test the GetByIDs function
+    permissions, err := permRepo.GetPermissionsById(ctx, permIds)
+    
+    assert.NoError(t, err)
+    require.NotNil(t, permissions)
+    assert.Equal(t, 2, len(permissions), "Should return exactly the number of unique IDs requested")
+
+    // 4. Verify the IDs returned match the ones we sent
+    assert.Equal(t, allPerms[0].Id, permissions[0].Id)
+    assert.Equal(t, allPerms[1].Id, permissions[1].Id)
 }

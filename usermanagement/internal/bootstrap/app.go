@@ -7,6 +7,7 @@ import (
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/membership"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/rbac"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
@@ -21,9 +22,11 @@ type App struct {
 	UserRepo          repository.IUserRepository
 	AuthRepo          repository.IAuthRepository
 	MembershipRepo    repository.IMembershipRepository
+	RoleRepo          repository.IRoleRepository
 	UserService       *user.UserService
 	AuthService       *auth.AuthService
 	MembershipService *membership.MembershipService
+	RoleService       *rbac.RoleService
 	Handler           *http.UserHandler
 	JWTMaker          *token.JWTMaker
 	GRPCServer        *grpc.Server
@@ -74,6 +77,8 @@ func Init(cfg *config.Config) (*App, error) {
 	userRepo := repository.NewUserRepository(dbAdapter)
 	authRepo := repository.NewUAuthRepository(dbAdapter)
 	membershipRepo := repository.NewMembershipRepository(dbAdapter)
+	roleRepo := repository.NewRoleRepository(dbAdapter)
+	permissionRepo := repository.NewPermissionRepository(dbAdapter)
 
 	// -------------------------
 	// Application services
@@ -81,13 +86,14 @@ func Init(cfg *config.Config) (*App, error) {
 	userSrv := user.NewUserService(userRepo)
 	membershipSrv := membership.NewMembershipService(membershipRepo)
 	authSrv := auth.NewAuthService(userRepo, authRepo, jwtMaker)
+	rbacSrv := rbac.NewRoleService(roleRepo, permissionRepo)
 
 	handler := http.NewUserHandler(userSrv, authSrv, membershipSrv)
 
 	// -------------------------
 	// gRPC Server
 	// -------------------------
-	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv, membershipSrv)
+	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv, membershipSrv, rbacSrv)
 	if err != nil {
 		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
 	}
@@ -99,8 +105,10 @@ func Init(cfg *config.Config) (*App, error) {
 		DB:          pool,
 		UserRepo:    userRepo,
 		AuthRepo:    authRepo,
+		RoleRepo:    roleRepo,
 		UserService: userSrv,
 		AuthService: authSrv,
+		RoleService: rbacSrv,
 		Handler:     handler,
 		JWTMaker:    jwtMaker,
 		GRPCServer:  grpcSrv,

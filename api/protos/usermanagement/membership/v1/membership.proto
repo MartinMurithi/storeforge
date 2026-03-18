@@ -2,9 +2,6 @@ syntax = "proto3";
 
 package membership.v1;
 
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/struct.proto";
-
 option go_package = "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1;membershipv1";
 
 // MembershipService handles the linking of users to tenants.

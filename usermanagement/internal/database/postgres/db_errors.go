@@ -19,6 +19,7 @@ var (
 	ErrSerialization   = errors.New("serialization failure")
 	ErrConnection      = errors.New("database connection error")
 	ErrUnknown         = errors.New("unknown database error")
+	ErrTxClosed        = errors.New("rollback failed")
 )
 
 func MapPostgresError(err error) error {
