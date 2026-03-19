@@ -29,7 +29,9 @@ var (
 var (
 	ErrUserNotFound              = errors.New("user not found")
 	ErrRoleNotFound              = errors.New("role not found")
+	ErrThemeNotFound             = errors.New("theme not found")
 	ErrRoleAlreadyExists         = errors.New("role already exists")
+	ErrTenantAlreadyExists       = errors.New("tenant with that name already exists")
 	ErrUserAlreadyExists         = errors.New("user already exists")
 	ErrUserEmailAlreadyExists    = errors.New("user with that email already exists")
 	ErrUserMobileExists          = errors.New("user with that mobile already exists")

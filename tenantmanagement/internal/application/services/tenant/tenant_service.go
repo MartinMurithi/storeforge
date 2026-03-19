@@ -86,7 +86,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 	}
 
 	if err := s.tenantRepo.CreateTenant(ctx, newTenant); err != nil {
-		return nil, fmt.Errorf("[%s]: %w", op, err)
+		return nil, err
 	}
 
 	// Link tenant to user
@@ -100,16 +100,19 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		Role:     "owner",
 	}
 
+	log.Printf("user id in tenant service %s", req.UserId)
+	log.Printf("tenant id  in tenant service %s", newTenant.ID.String())
+
 	resp, err := s.userSvc.LinkUserToTenant(ctx, linkUserReq)
 
 	log.Printf("link user to tenant result %v", resp)
 
 	if err != nil {
-		log.Printf("[%s]: failed to link user %s to tenant %s: %v", op, linkUserReq.UserId, newTenant.ID, err)
+		log.Printf("[%s]: store created but ownership link failed: %v", op, err)
 
 		// For now, return an error so the user knows something went wrong
 		// To Do: Delete the created tenant(store) to avoid orphaned stores in the database
-		return nil, fmt.Errorf("store created but ownership link failed: %w", err)
+		return nil, err
 	}
 
 	updateActiveSessionReq := &authv1.UpdateSessionContextRequest{

@@ -5,8 +5,11 @@ import (
 	"net/http"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
+	"github.com/MartinMurithi/storeforge/gateway/internal/util"
 	"github.com/MartinMurithi/storeforge/pkg/auth"
+	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/metadata"
 )
@@ -29,21 +32,20 @@ func (h *TenantHandler) CreateTenant(c *gin.Context) {
 
 	var req tenantv1.CreateTenantRequest
 
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": "invalid request body"})
+	if !util.BindAndValidateJSON(c, &req) {
 		return
 	}
 
-	// 3. The Relay (Setting the Metadata)
+	// Setting the Metadata
 	md := metadata.Pairs("user-id", userID.(string))
 	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
 
-	// 4. The Execution
 	resp, err := h.TenantClient.CreateTenant(ctx, &req)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
 		return
 	}
 
-	c.JSON(201, resp)
+	response.JSON(c, http.StatusCreated, mapper.MapCreateTenantResponseProtoToDTO(resp))
 }

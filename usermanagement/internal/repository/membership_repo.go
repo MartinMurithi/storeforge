@@ -43,14 +43,14 @@ func (r *MembershipRepository) AddTenantMembership(ctx context.Context, userID, 
 		infraErr := postgres.MapPostgresError(err)
 
 		// Translate infra → domain errors
-		return TranslateUserRepoError(infraErr)
+		return TranslateRoleRepoError(infraErr)
 	}
 
 	// Added ON CONFLICT to make the operation idempotent (safe to retry)
 	query := `INSERT INTO users_tenants (user_id, tenant_id, role_id)
-	VALUES ($1, $2, $3) 
-	ON CONFLICT (user_id, tenant_id) DO NOTHING
-	RETURNING user_id, tenant_id`
+				VALUES ($1, $2, $3) 
+				ON CONFLICT (user_id, tenant_id) DO NOTHING
+				RETURNING user_id, tenant_id`
 
 	err = r.DB.QueryRow(ctx, query, userID, tenantID, roleID).Scan(&userID, &tenantID)
 
@@ -61,7 +61,7 @@ func (r *MembershipRepository) AddTenantMembership(ctx context.Context, userID, 
 		infraErr := postgres.MapPostgresError(err)
 
 		// Translate infra → domain errors
-		return TranslateUserRepoError(infraErr)
+		return TranslateRoleRepoError(infraErr)
 	}
 
 	return err

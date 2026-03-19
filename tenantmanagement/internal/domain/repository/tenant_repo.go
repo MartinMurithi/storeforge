@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
 )
@@ -52,7 +52,8 @@ func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) e
 			&t.CreatedAt,
 		)
 	if err != nil {
-		return fmt.Errorf("[%s]: %w", op, err)
+		log.Printf("[%s error]: %v", op, err)
+		return fmt.Errorf("%w", domain.TranslateTenantRepoError(postgres.MapPostgresError(err)))
 	}
 
 	t.Settings.TenantID = t.ID
@@ -68,10 +69,9 @@ func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) e
 	err = tx.QueryRow(ctx, settingsQuery, t.ID, t.Settings.ThemeID, configToPersist, t.Settings.Version).
 		Scan(&t.Settings.UpdatedAt)
 	if err != nil {
-		log.Printf("[%s]: error creating tenant: %v", op, err)
+		log.Printf("%s error: %v", op, err)
 
-		infraErr := postgres.MapPostgresError(err)
-		return domain.TranslateUserRepoError(infraErr)
+		return fmt.Errorf("%w", domain.TranslateTenantRepoError(postgres.MapPostgresError(err)))
 	}
 
 	return tx.Commit(ctx)

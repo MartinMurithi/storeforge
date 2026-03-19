@@ -24,3 +24,24 @@ func TranslateUserRepoError(err error) error {
 		return err
 	}
 }
+
+
+// TranslateRoleRepoError converts infra-level role DB errors into domain-level role errors.
+func TranslateRoleRepoError(err error) error {
+	// Map infra error to a stable set of infra DB errors first
+	switch postgres.MapPostgresError(err) {
+
+	case postgres.ErrNotFound:
+		return apperrors.ErrRoleNotFound
+
+	case postgres.ErrUniqueViolation:
+		return apperrors.ErrRoleAlreadyExists
+
+	case postgres.ErrNotNull:
+		return apperrors.ErrInvalidInput
+
+	default:
+		// Return original error if it doesn’t match known mappings
+		return err
+	}
+}

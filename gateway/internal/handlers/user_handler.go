@@ -10,6 +10,7 @@ import (
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/request"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
+	"github.com/MartinMurithi/storeforge/gateway/internal/util"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 
 	"github.com/gin-gonic/gin"
@@ -89,8 +90,7 @@ func (h *UserHandler) FetchAll(c *gin.Context) {
 func (h *UserHandler) UpdateMe(c *gin.Context) {
 	var reqDTO dto.UpdateUserRequestDTO
 
-	if err := c.ShouldBindJSON(&reqDTO); err != nil {
-		response.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "Invalid request body")
+	if !util.BindAndValidateJSON(c, &reqDTO) {
 		return
 	}
 
@@ -104,7 +104,7 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 	}
 
 	res, err := h.UserClient.UpdateUser(c.Request.Context(), &userv1.UpdateUserRequest{
-		Id:           userID,
+		Id:    userID,
 		Email: reqDTO.Email,
 		Phone: reqDTO.Phone,
 	})

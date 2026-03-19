@@ -8,6 +8,7 @@ import (
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
+	"github.com/MartinMurithi/storeforge/gateway/internal/util"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/gin-gonic/gin"
 )
@@ -25,8 +26,7 @@ func (h *RbacHandler) CreateRole(c *gin.Context) {
 
 	var reqDTO dto.CreateRoleRequestDTO
 
-	if err := c.ShouldBindJSON(&reqDTO); err != nil {
-		response.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "kindly check your request body")
+	if !util.BindAndValidateJSON(c, &reqDTO) {
 		return
 	}
 

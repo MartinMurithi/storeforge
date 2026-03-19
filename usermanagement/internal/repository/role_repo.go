@@ -54,7 +54,7 @@ func (repo *RoleRepository) CreateRole(ctx context.Context, role *entity.Role) e
 
 	if err := tx.QueryRow(ctx, query, role.Name, role.Slug, role.Description).Scan(&role.ID, &role.CreatedAt); err != nil {
 		log.Printf("%s: create role: %v", op, err)
-		return fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+		return fmt.Errorf("%w", TranslateRoleRepoError(postgres.MapPostgresError(err)))
 	}
 
 	const linkQuery = `
@@ -72,7 +72,7 @@ func (repo *RoleRepository) CreateRole(ctx context.Context, role *entity.Role) e
 
 		if _, err := tx.Exec(ctx, linkQuery, role.ID, perm.Id); err != nil {
 			log.Printf("%s: link permission %s to role %s: %v", op, perm.Id, role.ID, err)
-			return fmt.Errorf("scan %w", TranslateUserRepoError(postgres.MapPostgresError(err)))
+			return fmt.Errorf("%w", TranslateRoleRepoError(postgres.MapPostgresError(err)))
 		}
 	}
 
@@ -109,7 +109,7 @@ func (repo *RoleRepository) GetRoleBySlug(ctx context.Context, slug string) (*en
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, apperrors.ErrRoleNotFound
 		}
-		return nil, TranslateUserRepoError(postgres.MapPostgresError(err))
+		return nil, TranslateRoleRepoError(postgres.MapPostgresError(err))
 	}
 
 	return role, nil
