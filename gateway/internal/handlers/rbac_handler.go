@@ -6,7 +6,9 @@ import (
 
 	rbacv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
+	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
+	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,22 +23,21 @@ func (h *RbacHandler) CreateRole(c *gin.Context) {
 		return
 	}
 
-	var reqDTO dto.RegisterRequestDTO
+	var reqDTO dto.CreateRoleRequestDTO
 
-	// 1. Validate JSON Input
 	if err := c.ShouldBindJSON(&reqDTO); err != nil {
 		response.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "kindly check your request body")
 		return
 	}
 
-	grpcRequest := &authv1.RegisterRequest{
-		FullName: reqDTO.FullName,
-		Email:    reqDTO.Email,
-		Phone:    reqDTO.Phone,
-		Password: reqDTO.Password,
+	grpcRequest := &rbacv1.CreateRoleRequest{
+		Name:          reqDTO.Name,
+		Slug:          reqDTO.Slug,
+		Description:   reqDTO.Description,
+		PermissionIds: reqDTO.PermissionIDs,
 	}
 
-	res, err := h.AuthClient.Register(c.Request.Context(), grpcRequest)
+	res, err := h.RbacClient.CreateRole(c.Request.Context(), grpcRequest)
 
 	if err != nil {
 		code, slug, msg := errconv.FromGrpcToHttp(err)
@@ -44,6 +45,6 @@ func (h *RbacHandler) CreateRole(c *gin.Context) {
 		return
 	}
 
-	resp := mapper.MapRegisterResponseProtoToDTO(res)
+	resp := mapper.MapCreateRoleResponseProtoToDTO(res)
 	response.JSON(c, http.StatusCreated, resp)
 }

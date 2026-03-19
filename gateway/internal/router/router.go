@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, tenantHandler *handlers.TenantHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
+func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, tenantHandler *handlers.TenantHandler, rbacHandler *handlers.RbacHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
 	r := gin.Default()
 
 	// Global Middleware (Optional: CORS, Logging)
@@ -38,6 +38,12 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 		stores.Use(authMiddleware)
 		{
 			stores.POST("/", tenantHandler.CreateTenant)
+		}
+
+		roles := api.Group("/roles")
+		roles.Use(authMiddleware)
+		{
+			roles.POST("/", rbacHandler.CreateRole)
 		}
 	}
 
