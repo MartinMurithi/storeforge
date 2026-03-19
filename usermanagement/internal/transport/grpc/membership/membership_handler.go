@@ -2,6 +2,7 @@ package membership
 
 import (
 	"context"
+	"log"
 
 	membershipv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
@@ -23,6 +24,9 @@ func NewMembershipGrpcHandler(m *membership.MembershipService) *MembershipGrpcHn
 func (h *MembershipGrpcHnadler) LinkUserToTenant(ctx context.Context, req *membershipv1.LinkUserToTenantRequest) (*membershipv1.LinkUserToTenantResponse, error) {
 	uID, _ := uuid.Parse(req.UserId)
 	tID, _ := uuid.Parse(req.TenantId)
+
+	log.Printf("user id in user service %s", uID)
+	log.Printf("tenant id user service %s", tID)
 
 	err := h.MembershipSrv.LinkUserToTenant(ctx, uID, tID, req.Role)
 	if err != nil {

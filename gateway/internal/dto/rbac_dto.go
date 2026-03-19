@@ -20,7 +20,7 @@ type CreateRoleRequestDTO struct {
 	Name          string   `json:"name" binding:"required"`
 	Slug          string   `json:"slug" binding:"required"`
 	Description   string   `json:"description" binding:"required"`
-	PermissionIDs []string `json:"permission_ids" binding:"required"`
+	PermissionIDs []string `json:"permission_ids" binding:"required,gt=0"` // Must have at least one ID
 }
 
 type CreateRoleResponseDTO struct {

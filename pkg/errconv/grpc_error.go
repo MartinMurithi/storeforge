@@ -52,7 +52,9 @@ func ToGrpcError(err error) error {
 
 	// 409 - Conflict
 	case errors.Is(err, apperrors.ErrUserAlreadyExists),
+		errors.Is(err, apperrors.ErrRoleAlreadyExists),
 		errors.Is(err, apperrors.ErrUserEmailAlreadyExists),
+		errors.Is(err, apperrors.ErrTenantAlreadyExists),
 		errors.Is(err, apperrors.ErrUserMobileExists),
 		errors.Is(err, apperrors.ErrBusinessNameAlreadyExists):
 		return status.Error(codes.AlreadyExists, err.Error())

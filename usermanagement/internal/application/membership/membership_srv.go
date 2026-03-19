@@ -3,6 +3,7 @@ package membership
 import (
 	"context"
 	"fmt"
+	"log"
 
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
@@ -34,7 +35,8 @@ func (s *MembershipService) LinkUserToTenant(ctx context.Context, userId, tenant
 	err := s.membershipRepo.AddTenantMembership(ctx, userId, tenantId, roleName)
 
 	if err != nil{
-		return fmt.Errorf("[%s]: an error occurred when linking user to tenant %w", op, err)
+		log.Printf("[%s]: an error occurred when linking user to tenant %v", op, err)
+		return err
 	}
 	return nil
 }
