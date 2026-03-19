@@ -200,7 +200,3 @@ bash
 Copy code
 docker-compose up -d
 Run gRPC servers for core services (e.g., Auth, Onboarding, Catalog)
-
-Start API Gateway
-
-Access dashboard at http://localhost:8080
