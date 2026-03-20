@@ -56,3 +56,29 @@ func (h *TenantGrpcHandler) CreateTenant(ctx context.Context, req *tenantv1.Crea
 
 	return result, nil
 }
+
+func (h *TenantGrpcHandler) GetTenantContext(ctx context.Context, req *tenantv1.GetTenantContextRequest) (*tenantv1.GetTenantContextResponse, error) {
+    // Extract authenticated user from metadata
+    userID, err := auth.GetUserIDFromMetadata(ctx)
+    if err != nil {
+        log.Printf("[%s] failed to extract user id from metadata: %v", "GetTenantContext", err)
+        return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+    }
+
+    log.Printf("extracted user id %s", userID)
+
+    // Map Proto → internal DTO
+    dtoReq := dtos.GetTenantContextRequestDTO{
+       UserId: userID,
+	   TenantId: req.TenantId,
+    }
+
+    // Call service
+    tenantCtxResp, err := h.TenantService.GetTenantContext(ctx, dtoReq)
+    if err != nil {
+        return nil, errconv.ToGrpcError(err)
+    }
+
+    // 4. Return Proto response
+    return tenantCtxResp, nil
+}

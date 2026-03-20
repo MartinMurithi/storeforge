@@ -14,6 +14,9 @@ option go_package = "github.com/MartinMurithi/storeforge/api/protos/tenantmanage
 service TenantService {
     // Identity & Onboarding
   rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+   // Get the full tenant context for a user
+  rpc GetTenantContext(GetTenantContextRequest) returns (GetTenantContextResponse);
+
   rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
 }
 
@@ -46,10 +49,10 @@ message CreateTenantRequest {
 }
 
 message CreateTenantResponse {
-  Tenant         tenant   = 1;
-  theme.v1.Theme theme    = 2;
-  TenantSettings settings = 3;
-  api.auth.v1.Token token = 4;
+  Tenant            tenant   = 1;
+  theme.v1.Theme    theme    = 2;
+  TenantSettings    settings = 3;
+  api.auth.v1.Token token    = 4;
 }
 
 message GetTenantRequest {
@@ -61,4 +64,15 @@ message GetTenantRequest {
 
 message GetTenantResponse {
   Tenant tenant = 1;
+}
+
+message GetTenantContextRequest {
+  string tenant_id = 1;
+  string user_id   = 2; // the caller whose context we resolve
+}
+
+message GetTenantContextResponse {
+  Tenant         tenant   = 1;
+  TenantSettings settings = 2;
+  string         role_id  = 3; // caller's role in this tenant
 }

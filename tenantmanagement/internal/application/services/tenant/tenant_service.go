@@ -138,3 +138,48 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		Token:          tokenDTO,
 	}), nil
 }
+
+// GetTenantContext retrieves the full tenant context for a given user and tenant.
+// Includes tenant info, settings, and the caller’s role.
+func (s *TenantService) GetTenantContext(ctx context.Context, req dtos.GetTenantContextRequestDTO) (*tenantv1.GetTenantContextResponse, error) {
+	const op = "TenantService.GetTenantContext"
+
+	tenantId, err := value_object.NewTenantID(req.TenantId)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid tenant id: %w", op, err)
+	}
+
+	userID, err := value_object.NewUserID(req.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid user id: %w", op, err)
+	}
+
+	// Fetch tenant context from repository (includes tenant + settings + role)
+	tenantCtx, err := s.tenantRepo.GetTenantContext(ctx, tenantId, userID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to fetch tenant context: %w", op, err)
+	}
+
+	if tenantCtx == nil || tenantCtx.Tenant == nil {
+		return nil, fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	tenant := tenantCtx.Tenant
+
+	// Defensive: settings always exist but double-check
+	settings := tenant.Settings
+	if settings == nil {
+		settings = &entity.Settings{
+			Config: make(entity.ThemeConfig),
+		}
+	}
+
+	// role info if needed for caller context
+	roleID := tenantCtx.RoleId.String()
+
+	return &tenantv1.GetTenantContextResponse{
+		Tenant:   mappers.ToProtoTenant(tenant),
+		Settings: mappers.ToProtoSettings(settings),
+		RoleId:   roleID,
+	}, nil
+}
