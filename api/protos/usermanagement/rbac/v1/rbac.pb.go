@@ -302,6 +302,127 @@ func (x *CreateRoleResponse) GetRole() *Role {
 	return nil
 }
 
+// UpdateRole request/response
+type UpdateRoleRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoleId        string                 `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"` // which role to update
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	PermissionIds []string               `protobuf:"bytes,4,rep,name=permission_ids,json=permissionIds,proto3" json:"permission_ids,omitempty"` // final list of permission IDs
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRoleRequest) Reset() {
+	*x = UpdateRoleRequest{}
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRoleRequest) ProtoMessage() {}
+
+func (x *UpdateRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRoleRequest.ProtoReflect.Descriptor instead.
+func (*UpdateRoleRequest) Descriptor() ([]byte, []int) {
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *UpdateRoleRequest) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+func (x *UpdateRoleRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateRoleRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *UpdateRoleRequest) GetPermissionIds() []string {
+	if x != nil {
+		return x.PermissionIds
+	}
+	return nil
+}
+
+type UpdateRoleResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Role          *Role                  `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"` // updated role with updated permissions
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateRoleResponse) Reset() {
+	*x = UpdateRoleResponse{}
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateRoleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateRoleResponse) ProtoMessage() {}
+
+func (x *UpdateRoleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateRoleResponse.ProtoReflect.Descriptor instead.
+func (*UpdateRoleResponse) Descriptor() ([]byte, []int) {
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *UpdateRoleResponse) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateRoleResponse) GetRole() *Role {
+	if x != nil {
+		return x.Role
+	}
+	return nil
+}
+
 type GetRolesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
@@ -311,7 +432,7 @@ type GetRolesRequest struct {
 
 func (x *GetRolesRequest) Reset() {
 	*x = GetRolesRequest{}
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[4]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -323,7 +444,7 @@ func (x *GetRolesRequest) String() string {
 func (*GetRolesRequest) ProtoMessage() {}
 
 func (x *GetRolesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[4]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +457,7 @@ func (x *GetRolesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRolesRequest.ProtoReflect.Descriptor instead.
 func (*GetRolesRequest) Descriptor() ([]byte, []int) {
-	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{4}
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *GetRolesRequest) GetTenantId() string {
@@ -356,7 +477,7 @@ type GetRolesResponse struct {
 
 func (x *GetRolesResponse) Reset() {
 	*x = GetRolesResponse{}
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[5]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -368,7 +489,7 @@ func (x *GetRolesResponse) String() string {
 func (*GetRolesResponse) ProtoMessage() {}
 
 func (x *GetRolesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[5]
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -381,7 +502,7 @@ func (x *GetRolesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRolesResponse.ProtoReflect.Descriptor instead.
 func (*GetRolesResponse) Descriptor() ([]byte, []int) {
-	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{5}
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *GetRolesResponse) GetSuccess() bool {
@@ -394,6 +515,94 @@ func (x *GetRolesResponse) GetSuccess() bool {
 func (x *GetRolesResponse) GetRoles() []*Role {
 	if x != nil {
 		return x.Roles
+	}
+	return nil
+}
+
+type GetRoleByIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RoleId        string                 `protobuf:"bytes,1,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRoleByIDRequest) Reset() {
+	*x = GetRoleByIDRequest{}
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRoleByIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRoleByIDRequest) ProtoMessage() {}
+
+func (x *GetRoleByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRoleByIDRequest.ProtoReflect.Descriptor instead.
+func (*GetRoleByIDRequest) Descriptor() ([]byte, []int) {
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetRoleByIDRequest) GetRoleId() string {
+	if x != nil {
+		return x.RoleId
+	}
+	return ""
+}
+
+type GetRoleByIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Role          *Role                  `protobuf:"bytes,1,opt,name=role,proto3" json:"role,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetRoleByIDResponse) Reset() {
+	*x = GetRoleByIDResponse{}
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetRoleByIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetRoleByIDResponse) ProtoMessage() {}
+
+func (x *GetRoleByIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_usermanagement_rbac_v1_rbac_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetRoleByIDResponse.ProtoReflect.Descriptor instead.
+func (*GetRoleByIDResponse) Descriptor() ([]byte, []int) {
+	return file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetRoleByIDResponse) GetRole() *Role {
+	if x != nil {
+		return x.Role
 	}
 	return nil
 }
@@ -426,16 +635,31 @@ const file_usermanagement_rbac_v1_rbac_proto_rawDesc = "" +
 	"\x0epermission_ids\x18\x04 \x03(\tR\rpermissionIds\"Q\n" +
 	"\x12CreateRoleResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12!\n" +
+	"\x04role\x18\x02 \x01(\v2\r.rbac.v1.RoleR\x04role\"\x89\x01\n" +
+	"\x11UpdateRoleRequest\x12\x17\n" +
+	"\arole_id\x18\x01 \x01(\tR\x06roleId\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x12%\n" +
+	"\x0epermission_ids\x18\x04 \x03(\tR\rpermissionIds\"Q\n" +
+	"\x12UpdateRoleResponse\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12!\n" +
 	"\x04role\x18\x02 \x01(\v2\r.rbac.v1.RoleR\x04role\".\n" +
 	"\x0fGetRolesRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\"Q\n" +
 	"\x10GetRolesResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12#\n" +
-	"\x05roles\x18\x02 \x03(\v2\r.rbac.v1.RoleR\x05roles2\x99\x01\n" +
+	"\x05roles\x18\x02 \x03(\v2\r.rbac.v1.RoleR\x05roles\"-\n" +
+	"\x12GetRoleByIDRequest\x12\x17\n" +
+	"\arole_id\x18\x01 \x01(\tR\x06roleId\"8\n" +
+	"\x13GetRoleByIDResponse\x12!\n" +
+	"\x04role\x18\x01 \x01(\v2\r.rbac.v1.RoleR\x04role2\xae\x02\n" +
 	"\vRbacService\x12G\n" +
 	"\n" +
 	"CreateRole\x12\x1a.rbac.v1.CreateRoleRequest\x1a\x1b.rbac.v1.CreateRoleResponse\"\x00\x12A\n" +
-	"\bGetRoles\x12\x18.rbac.v1.GetRolesRequest\x1a\x19.rbac.v1.GetRolesResponse\"\x00BNZLgithub.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1;rbacv1b\x06proto3"
+	"\bGetRoles\x12\x18.rbac.v1.GetRolesRequest\x1a\x19.rbac.v1.GetRolesResponse\"\x00\x12J\n" +
+	"\vGetRoleByID\x12\x1b.rbac.v1.GetRoleByIDRequest\x1a\x1c.rbac.v1.GetRoleByIDResponse\"\x00\x12G\n" +
+	"\n" +
+	"UpdateRole\x12\x1a.rbac.v1.UpdateRoleRequest\x1a\x1b.rbac.v1.UpdateRoleResponse\"\x00BNZLgithub.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1;rbacv1b\x06proto3"
 
 var (
 	file_usermanagement_rbac_v1_rbac_proto_rawDescOnce sync.Once
@@ -449,31 +673,41 @@ func file_usermanagement_rbac_v1_rbac_proto_rawDescGZIP() []byte {
 	return file_usermanagement_rbac_v1_rbac_proto_rawDescData
 }
 
-var file_usermanagement_rbac_v1_rbac_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_usermanagement_rbac_v1_rbac_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_usermanagement_rbac_v1_rbac_proto_goTypes = []any{
 	(*Role)(nil),                  // 0: rbac.v1.Role
 	(*Permission)(nil),            // 1: rbac.v1.Permission
 	(*CreateRoleRequest)(nil),     // 2: rbac.v1.CreateRoleRequest
 	(*CreateRoleResponse)(nil),    // 3: rbac.v1.CreateRoleResponse
-	(*GetRolesRequest)(nil),       // 4: rbac.v1.GetRolesRequest
-	(*GetRolesResponse)(nil),      // 5: rbac.v1.GetRolesResponse
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*UpdateRoleRequest)(nil),     // 4: rbac.v1.UpdateRoleRequest
+	(*UpdateRoleResponse)(nil),    // 5: rbac.v1.UpdateRoleResponse
+	(*GetRolesRequest)(nil),       // 6: rbac.v1.GetRolesRequest
+	(*GetRolesResponse)(nil),      // 7: rbac.v1.GetRolesResponse
+	(*GetRoleByIDRequest)(nil),    // 8: rbac.v1.GetRoleByIDRequest
+	(*GetRoleByIDResponse)(nil),   // 9: rbac.v1.GetRoleByIDResponse
+	(*timestamppb.Timestamp)(nil), // 10: google.protobuf.Timestamp
 }
 var file_usermanagement_rbac_v1_rbac_proto_depIdxs = []int32{
-	1, // 0: rbac.v1.Role.permissions:type_name -> rbac.v1.Permission
-	6, // 1: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
-	6, // 2: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
-	0, // 3: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
-	0, // 4: rbac.v1.GetRolesResponse.roles:type_name -> rbac.v1.Role
-	2, // 5: rbac.v1.RbacService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
-	4, // 6: rbac.v1.RbacService.GetRoles:input_type -> rbac.v1.GetRolesRequest
-	3, // 7: rbac.v1.RbacService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
-	5, // 8: rbac.v1.RbacService.GetRoles:output_type -> rbac.v1.GetRolesResponse
-	7, // [7:9] is the sub-list for method output_type
-	5, // [5:7] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	5, // [5:5] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	1,  // 0: rbac.v1.Role.permissions:type_name -> rbac.v1.Permission
+	10, // 1: rbac.v1.Role.created_at:type_name -> google.protobuf.Timestamp
+	10, // 2: rbac.v1.Permission.created_at:type_name -> google.protobuf.Timestamp
+	0,  // 3: rbac.v1.CreateRoleResponse.role:type_name -> rbac.v1.Role
+	0,  // 4: rbac.v1.UpdateRoleResponse.role:type_name -> rbac.v1.Role
+	0,  // 5: rbac.v1.GetRolesResponse.roles:type_name -> rbac.v1.Role
+	0,  // 6: rbac.v1.GetRoleByIDResponse.role:type_name -> rbac.v1.Role
+	2,  // 7: rbac.v1.RbacService.CreateRole:input_type -> rbac.v1.CreateRoleRequest
+	6,  // 8: rbac.v1.RbacService.GetRoles:input_type -> rbac.v1.GetRolesRequest
+	8,  // 9: rbac.v1.RbacService.GetRoleByID:input_type -> rbac.v1.GetRoleByIDRequest
+	4,  // 10: rbac.v1.RbacService.UpdateRole:input_type -> rbac.v1.UpdateRoleRequest
+	3,  // 11: rbac.v1.RbacService.CreateRole:output_type -> rbac.v1.CreateRoleResponse
+	7,  // 12: rbac.v1.RbacService.GetRoles:output_type -> rbac.v1.GetRolesResponse
+	9,  // 13: rbac.v1.RbacService.GetRoleByID:output_type -> rbac.v1.GetRoleByIDResponse
+	5,  // 14: rbac.v1.RbacService.UpdateRole:output_type -> rbac.v1.UpdateRoleResponse
+	11, // [11:15] is the sub-list for method output_type
+	7,  // [7:11] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_usermanagement_rbac_v1_rbac_proto_init() }
@@ -487,7 +721,7 @@ func file_usermanagement_rbac_v1_rbac_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_usermanagement_rbac_v1_rbac_proto_rawDesc), len(file_usermanagement_rbac_v1_rbac_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

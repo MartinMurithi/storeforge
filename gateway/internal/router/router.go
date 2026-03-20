@@ -44,6 +44,8 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 		roles.Use(authMiddleware)
 		{
 			roles.POST("/", rbacHandler.CreateRole)
+			roles.GET("/:id", rbacHandler.GetRoleById)
+			roles.PATCH("/:id", rbacHandler.UpdateRole)
 		}
 	}
 
