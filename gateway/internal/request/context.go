@@ -32,9 +32,9 @@ func GetUserId(c *gin.Context) (string, error) {
 	return id, nil
 }
 
-// GetUserParamId parses the "id" URL parameter and returns it as a string.
+// GetParamId parses the "id" URL parameter and returns it as a string.
 // It performs a basic structural check to ensure the ID is a valid UUID format.
-func GetUserParamId(c *gin.Context) (string, error) {
+func GetParamId(c *gin.Context) (string, error) {
 	strID := c.Param("id")
 
 	if strID == "" {

@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	RbacService_CreateRole_FullMethodName = "/rbac.v1.RbacService/CreateRole"
-	RbacService_GetRoles_FullMethodName   = "/rbac.v1.RbacService/GetRoles"
+	RbacService_CreateRole_FullMethodName  = "/rbac.v1.RbacService/CreateRole"
+	RbacService_GetRoles_FullMethodName    = "/rbac.v1.RbacService/GetRoles"
+	RbacService_GetRoleByID_FullMethodName = "/rbac.v1.RbacService/GetRoleByID"
+	RbacService_UpdateRole_FullMethodName  = "/rbac.v1.RbacService/UpdateRole"
 )
 
 // RbacServiceClient is the client API for RbacService service.
@@ -30,6 +32,9 @@ type RbacServiceClient interface {
 	CreateRole(ctx context.Context, in *CreateRoleRequest, opts ...grpc.CallOption) (*CreateRoleResponse, error)
 	// GetRoles gets the roles of a user in their respective tenant
 	GetRoles(ctx context.Context, in *GetRolesRequest, opts ...grpc.CallOption) (*GetRolesResponse, error)
+	GetRoleByID(ctx context.Context, in *GetRoleByIDRequest, opts ...grpc.CallOption) (*GetRoleByIDResponse, error)
+	// UpdateRole updates the name, description, and permissions of an existing role
+	UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error)
 }
 
 type rbacServiceClient struct {
@@ -60,6 +65,26 @@ func (c *rbacServiceClient) GetRoles(ctx context.Context, in *GetRolesRequest, o
 	return out, nil
 }
 
+func (c *rbacServiceClient) GetRoleByID(ctx context.Context, in *GetRoleByIDRequest, opts ...grpc.CallOption) (*GetRoleByIDResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetRoleByIDResponse)
+	err := c.cc.Invoke(ctx, RbacService_GetRoleByID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *rbacServiceClient) UpdateRole(ctx context.Context, in *UpdateRoleRequest, opts ...grpc.CallOption) (*UpdateRoleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateRoleResponse)
+	err := c.cc.Invoke(ctx, RbacService_UpdateRole_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RbacServiceServer is the server API for RbacService service.
 // All implementations must embed UnimplementedRbacServiceServer
 // for forward compatibility.
@@ -67,6 +92,9 @@ type RbacServiceServer interface {
 	CreateRole(context.Context, *CreateRoleRequest) (*CreateRoleResponse, error)
 	// GetRoles gets the roles of a user in their respective tenant
 	GetRoles(context.Context, *GetRolesRequest) (*GetRolesResponse, error)
+	GetRoleByID(context.Context, *GetRoleByIDRequest) (*GetRoleByIDResponse, error)
+	// UpdateRole updates the name, description, and permissions of an existing role
+	UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error)
 	mustEmbedUnimplementedRbacServiceServer()
 }
 
@@ -82,6 +110,12 @@ func (UnimplementedRbacServiceServer) CreateRole(context.Context, *CreateRoleReq
 }
 func (UnimplementedRbacServiceServer) GetRoles(context.Context, *GetRolesRequest) (*GetRolesResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetRoles not implemented")
+}
+func (UnimplementedRbacServiceServer) GetRoleByID(context.Context, *GetRoleByIDRequest) (*GetRoleByIDResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetRoleByID not implemented")
+}
+func (UnimplementedRbacServiceServer) UpdateRole(context.Context, *UpdateRoleRequest) (*UpdateRoleResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method UpdateRole not implemented")
 }
 func (UnimplementedRbacServiceServer) mustEmbedUnimplementedRbacServiceServer() {}
 func (UnimplementedRbacServiceServer) testEmbeddedByValue()                     {}
@@ -140,6 +174,42 @@ func _RbacService_GetRoles_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RbacService_GetRoleByID_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetRoleByIDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RbacServiceServer).GetRoleByID(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RbacService_GetRoleByID_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RbacServiceServer).GetRoleByID(ctx, req.(*GetRoleByIDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _RbacService_UpdateRole_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RbacServiceServer).UpdateRole(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: RbacService_UpdateRole_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RbacServiceServer).UpdateRole(ctx, req.(*UpdateRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RbacService_ServiceDesc is the grpc.ServiceDesc for RbacService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -154,6 +224,14 @@ var RbacService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRoles",
 			Handler:    _RbacService_GetRoles_Handler,
+		},
+		{
+			MethodName: "GetRoleByID",
+			Handler:    _RbacService_GetRoleByID_Handler,
+		},
+		{
+			MethodName: "UpdateRole",
+			Handler:    _RbacService_UpdateRole_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

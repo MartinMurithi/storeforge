@@ -14,7 +14,6 @@ import (
 )
 
 // MapCreateRoleRequest converts a gRPC request to an Application DTO
-
 func MapCreateRoleRequest(pbReq *rbacv1.CreateRoleRequest) (*dto.CreateRoleRequestDTO, error) {
 	ids := make([]pgtype.UUID, 0, len(pbReq.PermissionIds))
 
@@ -31,6 +30,37 @@ func MapCreateRoleRequest(pbReq *rbacv1.CreateRoleRequest) (*dto.CreateRoleReque
 	return &dto.CreateRoleRequestDTO{
 		Name:          pbReq.Name,
 		Slug:          pbReq.Slug,
+		Description:   pbReq.Description,
+		PermissionIDs: ids,
+	}, nil
+}
+
+// MapUpdateRoleRequest converts a gRPC request to an Application DTO
+func MapUpdateRoleRequest(pbReq *rbacv1.UpdateRoleRequest) (*dto.UpdateRoleRequestDTO, error) {
+	ids := make([]pgtype.UUID, 0, len(pbReq.PermissionIds))
+
+	for _, idStr := range pbReq.PermissionIds {
+		parsed, err := uuid.Parse(idStr)
+		if err != nil {
+			log.Printf("invalid permission uuid '%s': %w", idStr, err)
+			return nil, apperrors.ErrInvalidPermissionID
+		}
+
+		ids = append(ids, pgtype.UUID{Bytes: parsed, Valid: true})
+	}
+
+	// Convert RoleID from string to pgtype.uuid
+	parsedID, err := uuid.Parse(pbReq.RoleId)
+	if err != nil {
+		log.Printf("invalid role uuid': %w", err)
+		return nil, apperrors.ErrInvalidUUIDFormat
+	}
+
+	roleID := pgtype.UUID{Bytes: parsedID, Valid: true}
+
+	return &dto.UpdateRoleRequestDTO{
+		RoleID:        roleID,
+		Name:          pbReq.Name,
 		Description:   pbReq.Description,
 		PermissionIDs: ids,
 	}, nil

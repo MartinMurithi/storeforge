@@ -27,3 +27,23 @@ type CreateRoleResponseDTO struct {
 	Role    RoleResponseDTO `json:"role"`
 	Message string          `json:"message"`
 }
+
+
+type GetRoleByIDRequestDTO struct {
+	Id          string   `json:"id" binding:"required"`
+}
+
+type GetRoleByIDResponseDTO struct {
+	Role          RoleResponseDTO   `json:"role"`
+}
+
+type UpdateRoleRequestDTO struct {
+	Name          string   `json:"name" binding:"omitempty"`
+	Description   string   `json:"description" binding:"omitempty"`
+	PermissionIDs []string `json:"permission_ids" binding:"omitempty"` // Must have at least one ID
+}
+
+type UpdateRoleResponseDTO struct {
+	Role    RoleResponseDTO `json:"role"`
+	Message string          `json:"message"`
+}
