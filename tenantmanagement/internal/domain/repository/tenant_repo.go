@@ -8,8 +8,11 @@ import (
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/value_object"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/database/postgres"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type TenantRepository struct {
@@ -18,6 +21,7 @@ type TenantRepository struct {
 
 type ITenantRepository interface {
 	CreateTenant(ctx context.Context, tenant *entity.Tenant) error
+	GetTenantContext(ctx context.Context, tenantID value_object.TenantID, userID value_object.UserID) (*TenantContext, error)
 	// GetTenantById(ctx context.Context, id string) (*entity.Tenant, error)
 	// GetTenantBySlug(ctx context.Context, slug string) (*entity.Tenant, error)
 }
@@ -75,4 +79,101 @@ func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) e
 	}
 
 	return tx.Commit(ctx)
+}
+
+type TenantContext struct {
+	Tenant *entity.Tenant
+	RoleId pgtype.UUID
+}
+
+// GetTenantContext resolves the full execution context of a user within a specific tenant.
+//
+// PURPOSE:
+// Loads the tenant aggregate along with the caller’s role within that tenant. This enables
+// downstream authorization and business logic decisions.
+//
+// SECURITY MODEL:
+// Access is enforced at the query level via an INNER JOIN on `users_tenants`. If the
+// provided userID is not associated with the tenantID, the query returns no rows. This
+// prevents unauthorized access and tenant ID enumeration.
+//
+// DATA COMPOSITION:
+// - tenants: core tenant identity (store metadata, domain, lifecycle status, timestamps)
+// - tenant_settings: theme configuration (cloned from the tenant’s theme at creation and always present)
+// - users_tenants: resolves the caller’s role within the tenant
+//
+// RETURNS:
+// - TenantContext: contains the hydrated Tenant entity and the caller’s RoleID
+//
+// NOTE:
+// - Settings.Config is guaranteed to be present (cloned on tenant creation).
+// - JSONB from Postgres is scanned automatically into ThemeConfig via pgx v5.
+func (r *TenantRepository) GetTenantContext(ctx context.Context, tenantID value_object.TenantID, userID value_object.UserID) (*TenantContext, error) {
+	const op = "TenantRepository.GetTenantContext"
+
+	query := `
+        SELECT 
+            t.id, t.store_name, t.business_type, t.slug, t.sub_domain, t.domain,
+            t.status, t.created_at, t.updated_at, t.deleted_at,
+            ts.theme_id, ts.config, ts.version, ts.updated_at,
+            ut.role_id
+        FROM tenants t
+        INNER JOIN users_tenants ut ON t.id = ut.tenant_id
+        LEFT JOIN tenant_settings ts ON t.id = ts.tenant_id
+        WHERE t.id = $1 AND ut.user_id = $2;
+    `
+
+	t := &entity.Tenant{
+		Settings: &entity.Settings{
+			Config: make(entity.ThemeConfig), // default to empty map
+		},
+	}
+
+	var statusDB string
+	var updatedAtDB, deletedAtDB, settingsUpdatedAtDB *time.Time
+	var themeIDDB value_object.ThemeID
+	var versionDB int32
+	var cfg entity.ThemeConfig
+	var roleIDDB pgtype.UUID
+
+	// pgx v5 automatically unmarshals JSONB into Go structs/maps
+	err := r.DB.QueryRow(ctx, query, tenantID, userID).Scan(
+		&t.ID,
+		&t.StoreName,
+		&t.BusinessType,
+		&t.Slug,
+		&t.SubDomain,
+		&t.Domain,
+		&statusDB,
+		&t.CreatedAt,
+		&updatedAtDB,
+		&deletedAtDB,
+		&themeIDDB,
+		&cfg, // automatic JSONB → ThemeConfig
+		&versionDB,
+		&settingsUpdatedAtDB,
+		&roleIDDB,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: %w", op, domain.TranslateTenantRepoError(postgres.MapPostgresError(err)))
+	}
+
+	// Map tenant fields
+	t.Status = string(entity.TenantProvisioning)
+	t.UpdatedAt = updatedAtDB
+	t.DeletedAt = deletedAtDB
+
+	// Map settings
+	t.Settings.ThemeID = themeIDDB
+	t.Settings.TenantID = t.ID
+	t.Settings.Version = int(versionDB)
+	t.Settings.UpdatedAt = time.Now()
+	if cfg != nil {
+		t.Settings.Config = cfg
+	}
+
+	return &TenantContext{
+		Tenant: t,
+		RoleId: roleIDDB,
+	}, nil
 }

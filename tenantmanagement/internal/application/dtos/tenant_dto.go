@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // CreateTenantRequestDTO carries onboarding data from the transport layer.
@@ -28,6 +29,16 @@ type CreateTenantResponseDTO struct {
 	Tenant         *entity.Tenant
 	Theme          *entity.Theme
 	TenantSettings *entity.Settings
-	Token *TokenInfoDTO
+	Token          *TokenInfoDTO
 }
 
+type GetTenantContextRequestDTO struct {
+	UserId   string
+	TenantId string
+}
+
+type GetTenantContextResponseDTO struct {
+	Tenant         *entity.Tenant
+	TenantSettings *entity.Settings
+	RoleId         pgtype.UUID
+}
