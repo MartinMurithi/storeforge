@@ -176,16 +176,20 @@ func (s *TenantService) GetTenantContext(ctx context.Context, req dtos.GetTenant
 	}
 
 	// role info if needed for caller context
-	roleID := tenantCtx.RoleId.String()
+	role := tenantCtx.Role
 
 	return &tenantv1.GetTenantContextResponse{
 		Tenant:   mappers.ToProtoTenant(tenant),
 		Settings: mappers.ToProtoSettings(settings),
-		RoleId:   roleID,
+		Role:     role,
 	}, nil
 }
 
-func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenantRequestDTO) (*tenantv1.GetTenantContextResponse, error) {
+func (s *TenantService) UpdateTenant(
+	ctx context.Context,
+	req *dtos.UpdateTenantRequestDTO,
+) (*tenantv1.GetTenantContextResponse, error) {
+
 	const op = "TenantService.UpdateTenant"
 
 	tenantID, err := value_object.NewTenantID(req.TenantID)
@@ -207,29 +211,28 @@ func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenant
 		return nil, fmt.Errorf("[%s]: tenant not found", op)
 	}
 
-	callerRole := tenantCtx.RoleId.String()
-
-	// Role-based authorization
-	// Only owner/admin can update settings
-	if req.Settings != nil && callerRole != rbac.RoleOwner && callerRole != rbac.RoleAdmin {
-		return nil, fmt.Errorf("unauthorized: only owner/admin can update settings")
+	// RBAC
+	if req.Settings == nil {
+		return nil, fmt.Errorf("[%s]: settings payload is required", op)
 	}
 
-	updatedTenant, err := s.tenantRepo.UpdateTenantSettings(ctx, tenantID, req.Settings.Config)
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return nil, fmt.Errorf("unauthorized, only admin and owner are allowed to customize theme")
+	}
+
+	config := req.Settings.Config
+	if config == nil {
+		config = make(entity.ThemeConfig)
+	}
+
+	updatedCtx, err := s.tenantRepo.UpdateTenantSettings(ctx, tenantID, userID, config)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: failed to persist tenant updates: %w", op, err)
-	}
-
-	// Defensive: ensure settings config exists
-	if updatedTenant.Settings == nil {
-		updatedTenant.Settings = &entity.Settings{
-			Config: make(entity.ThemeConfig),
-		}
+		return nil, fmt.Errorf("[%s]: failed to update settings: %w", op, err)
 	}
 
 	return &tenantv1.GetTenantContextResponse{
-		Tenant:   mappers.ToProtoTenant(updatedTenant),
-		Settings: mappers.ToProtoSettings(updatedTenant.Settings),
-		RoleId:   callerRole,
+		Tenant:   mappers.ToProtoTenant(updatedCtx.Tenant),
+		Settings: mappers.ToProtoSettings(updatedCtx.Tenant.Settings),
+		Role:     updatedCtx.Role,
 	}, nil
 }

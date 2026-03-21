@@ -75,7 +75,7 @@ message GetTenantContextRequest {
 message GetTenantContextResponse {
   Tenant         tenant   = 1;
   TenantSettings settings = 2;
-  string         role_id  = 3; // caller's role in this tenant
+  string         role  = 3; // caller's role in this tenant
 }
 
 // All fields optional for patch-style update
