@@ -535,7 +535,7 @@ type GetTenantContextResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Tenant        *Tenant                `protobuf:"bytes,1,opt,name=tenant,proto3" json:"tenant,omitempty"`
 	Settings      *TenantSettings        `protobuf:"bytes,2,opt,name=settings,proto3" json:"settings,omitempty"`
-	RoleId        string                 `protobuf:"bytes,3,opt,name=role_id,json=roleId,proto3" json:"role_id,omitempty"` // caller's role in this tenant
+	Role          string                 `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"` // caller's role in this tenant
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -584,9 +584,9 @@ func (x *GetTenantContextResponse) GetSettings() *TenantSettings {
 	return nil
 }
 
-func (x *GetTenantContextResponse) GetRoleId() string {
+func (x *GetTenantContextResponse) GetRole() string {
 	if x != nil {
-		return x.RoleId
+		return x.Role
 	}
 	return ""
 }
@@ -745,11 +745,11 @@ const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\"O\n" +
 	"\x17GetTenantContextRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x17\n" +
-	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x95\x01\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\"\x90\x01\n" +
 	"\x18GetTenantContextResponse\x12)\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x125\n" +
-	"\bsettings\x18\x02 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\x12\x17\n" +
-	"\arole_id\x18\x03 \x01(\tR\x06roleId\"o\n" +
+	"\bsettings\x18\x02 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\"o\n" +
 	"\x13UpdateTenantRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12;\n" +
 	"\bsettings\x18\x02 \x01(\v2\x1f.tenant.v1.TenantSettingsUpdateR\bsettings\"m\n" +
