@@ -9,6 +9,7 @@ import (
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	membershipv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/membership/v1"
+	"github.com/MartinMurithi/storeforge/pkg/rbac"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/mappers"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
@@ -181,5 +182,54 @@ func (s *TenantService) GetTenantContext(ctx context.Context, req dtos.GetTenant
 		Tenant:   mappers.ToProtoTenant(tenant),
 		Settings: mappers.ToProtoSettings(settings),
 		RoleId:   roleID,
+	}, nil
+}
+
+func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenantRequestDTO) (*tenantv1.GetTenantContextResponse, error) {
+	const op = "TenantService.UpdateTenant"
+
+	tenantID, err := value_object.NewTenantID(req.TenantID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid tenant id: %w", op, err)
+	}
+
+	userID, err := value_object.NewUserID(req.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid user id: %w", op, err)
+	}
+
+	tenantCtx, err := s.tenantRepo.GetTenantContext(ctx, tenantID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to fetch tenant context: %w", op, err)
+	}
+
+	if tenantCtx.Tenant == nil {
+		return nil, fmt.Errorf("[%s]: tenant not found", op)
+	}
+
+	callerRole := tenantCtx.RoleId.String()
+
+	// Role-based authorization
+	// Only owner/admin can update settings
+	if req.Settings != nil && callerRole != rbac.RoleOwner && callerRole != rbac.RoleAdmin {
+		return nil, fmt.Errorf("unauthorized: only owner/admin can update settings")
+	}
+
+	updatedTenant, err := s.tenantRepo.UpdateTenantSettings(ctx, tenantID, req.Settings.Config)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to persist tenant updates: %w", op, err)
+	}
+
+	// Defensive: ensure settings config exists
+	if updatedTenant.Settings == nil {
+		updatedTenant.Settings = &entity.Settings{
+			Config: make(entity.ThemeConfig),
+		}
+	}
+
+	return &tenantv1.GetTenantContextResponse{
+		Tenant:   mappers.ToProtoTenant(updatedTenant),
+		Settings: mappers.ToProtoSettings(updatedTenant.Settings),
+		RoleId:   callerRole,
 	}, nil
 }

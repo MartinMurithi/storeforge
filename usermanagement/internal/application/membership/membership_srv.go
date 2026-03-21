@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/pkg/rbac"
 	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
 	"github.com/google/uuid"
 )
@@ -25,7 +25,7 @@ func (s *MembershipService) LinkUserToTenant(ctx context.Context, userId, tenant
 
 	const op = "MembershipService.LinkUserToTenant"
 
-	roleName = entity.RoleOwner
+	roleName = rbac.RoleOwner
 
 	// Ensure only "owner role" is assigned
 	if roleName != "owner"{

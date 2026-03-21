@@ -158,8 +158,8 @@ func (repo *RoleRepository) GetRoleByID(ctx context.Context, roleID pgtype.UUID)
 
 		var (
 			permID          pgtype.UUID
-			permSlug        string
-			permDescription string
+			permSlug        *string
+			permDescription *string
 		)
 
 		err := rows.Scan(
@@ -181,8 +181,8 @@ func (repo *RoleRepository) GetRoleByID(ctx context.Context, roleID pgtype.UUID)
 		if permID.Valid {
 			role.Permissions = append(role.Permissions, &entity.Permission{
 				Id:          permID,
-				Slug:        permSlug,
-				Description: permDescription,
+				Slug:        *permSlug,
+				Description: *permDescription,
 			})
 		}
 	}

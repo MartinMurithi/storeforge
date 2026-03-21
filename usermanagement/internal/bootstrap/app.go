@@ -85,7 +85,7 @@ func Init(cfg *config.Config) (*App, error) {
 	// -------------------------
 	userSrv := user.NewUserService(userRepo)
 	membershipSrv := membership.NewMembershipService(membershipRepo)
-	authSrv := auth.NewAuthService(userRepo, authRepo, jwtMaker)
+	authSrv := auth.NewAuthService(userRepo, authRepo, roleRepo, jwtMaker)
 	rbacSrv := rbac.NewRoleService(roleRepo, permissionRepo)
 
 	handler := http.NewUserHandler(userSrv, authSrv, membershipSrv)

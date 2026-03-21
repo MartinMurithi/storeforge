@@ -22,6 +22,7 @@ type TenantRepository struct {
 type ITenantRepository interface {
 	CreateTenant(ctx context.Context, tenant *entity.Tenant) error
 	GetTenantContext(ctx context.Context, tenantID value_object.TenantID, userID value_object.UserID) (*TenantContext, error)
+	UpdateTenantSettings(ctx context.Context, tenantID value_object.TenantID, config entity.ThemeConfig) (*entity.Tenant, error)
 	// GetTenantById(ctx context.Context, id string) (*entity.Tenant, error)
 	// GetTenantBySlug(ctx context.Context, slug string) (*entity.Tenant, error)
 }
@@ -176,4 +177,51 @@ func (r *TenantRepository) GetTenantContext(ctx context.Context, tenantID value_
 		Tenant: t,
 		RoleId: roleIDDB,
 	}, nil
+}
+
+// UpdateTenant updates a tenant's fields and/or settings partially.
+// Only updates fields provided in the DTO; others remain unchanged.
+// UpdateTenantSettings partially updates a tenant's theme configuration and increments the version.
+// It uses a transaction to ensure atomic updates to the configuration and audit timestamps.
+//
+// SECURITY: This method assumes tenantID validation has occurred at the Service/Handler layer.
+func (r *TenantRepository) UpdateTenantSettings(ctx context.Context, tenantID value_object.TenantID, config entity.ThemeConfig) (*entity.Tenant, error) {
+	const op = "TenantRepository.UpdateTenantSettings"
+
+	tx, err := r.DB.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to begin tx: %w", op, err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Using the JSONB merge operator (||) to allow partial config updates
+	// and COALESCE to handle nil inputs gracefully.
+	query := `
+        UPDATE tenant_settings
+        SET
+            config     = config || COALESCE($1, '{}'::jsonb),
+            version    = version + 1,
+            updated_at = NOW()
+        WHERE tenant_id = $2
+        RETURNING theme_id, config, version, updated_at
+    `
+
+	tn := &entity.Tenant{}
+
+	err = tx.QueryRow(ctx, query, config, tenantID).Scan(
+		&tn.Settings.ThemeID,
+		&tn.Settings.Config,
+		&tn.Settings.Version,
+		&tn.Settings.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to update settings: %w", op, err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("[%s]: failed to commit tx: %w", op, err)
+	}
+
+	return tn, nil
 }
