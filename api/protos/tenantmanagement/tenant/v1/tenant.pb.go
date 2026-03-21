@@ -591,6 +591,112 @@ func (x *GetTenantContextResponse) GetRoleId() string {
 	return ""
 }
 
+// All fields optional for patch-style update
+type UpdateTenantRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Settings      *TenantSettingsUpdate  `protobuf:"bytes,2,opt,name=settings,proto3" json:"settings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateTenantRequest) Reset() {
+	*x = UpdateTenantRequest{}
+	mi := &file_tenantmanagement_tenant_v1_tenant_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateTenantRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateTenantRequest) ProtoMessage() {}
+
+func (x *UpdateTenantRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_tenantmanagement_tenant_v1_tenant_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateTenantRequest.ProtoReflect.Descriptor instead.
+func (*UpdateTenantRequest) Descriptor() ([]byte, []int) {
+	return file_tenantmanagement_tenant_v1_tenant_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *UpdateTenantRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *UpdateTenantRequest) GetSettings() *TenantSettingsUpdate {
+	if x != nil {
+		return x.Settings
+	}
+	return nil
+}
+
+// Partial settings update (theme/config)
+type TenantSettingsUpdate struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ThemeId       string                 `protobuf:"bytes,1,opt,name=theme_id,json=themeId,proto3" json:"theme_id,omitempty"`
+	ThemeConfig   *structpb.Struct       `protobuf:"bytes,2,opt,name=theme_config,json=themeConfig,proto3" json:"theme_config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TenantSettingsUpdate) Reset() {
+	*x = TenantSettingsUpdate{}
+	mi := &file_tenantmanagement_tenant_v1_tenant_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TenantSettingsUpdate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TenantSettingsUpdate) ProtoMessage() {}
+
+func (x *TenantSettingsUpdate) ProtoReflect() protoreflect.Message {
+	mi := &file_tenantmanagement_tenant_v1_tenant_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TenantSettingsUpdate.ProtoReflect.Descriptor instead.
+func (*TenantSettingsUpdate) Descriptor() ([]byte, []int) {
+	return file_tenantmanagement_tenant_v1_tenant_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *TenantSettingsUpdate) GetThemeId() string {
+	if x != nil {
+		return x.ThemeId
+	}
+	return ""
+}
+
+func (x *TenantSettingsUpdate) GetThemeConfig() *structpb.Struct {
+	if x != nil {
+		return x.ThemeConfig
+	}
+	return nil
+}
+
 var File_tenantmanagement_tenant_v1_tenant_proto protoreflect.FileDescriptor
 
 const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
@@ -643,10 +749,17 @@ const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\x18GetTenantContextResponse\x12)\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x125\n" +
 	"\bsettings\x18\x02 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\x12\x17\n" +
-	"\arole_id\x18\x03 \x01(\tR\x06roleId2\x85\x02\n" +
+	"\arole_id\x18\x03 \x01(\tR\x06roleId\"o\n" +
+	"\x13UpdateTenantRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12;\n" +
+	"\bsettings\x18\x02 \x01(\v2\x1f.tenant.v1.TenantSettingsUpdateR\bsettings\"m\n" +
+	"\x14TenantSettingsUpdate\x12\x19\n" +
+	"\btheme_id\x18\x01 \x01(\tR\athemeId\x12:\n" +
+	"\ftheme_config\x18\x02 \x01(\v2\x17.google.protobuf.StructR\vthemeConfig2\xda\x02\n" +
 	"\rTenantService\x12O\n" +
 	"\fCreateTenant\x12\x1e.tenant.v1.CreateTenantRequest\x1a\x1f.tenant.v1.CreateTenantResponse\x12[\n" +
-	"\x10GetTenantContext\x12\".tenant.v1.GetTenantContextRequest\x1a#.tenant.v1.GetTenantContextResponse\x12F\n" +
+	"\x10GetTenantContext\x12\".tenant.v1.GetTenantContextRequest\x1a#.tenant.v1.GetTenantContextResponse\x12S\n" +
+	"\fUpdateTenant\x12\x1e.tenant.v1.UpdateTenantRequest\x1a#.tenant.v1.GetTenantContextResponse\x12F\n" +
 	"\tGetTenant\x12\x1b.tenant.v1.GetTenantRequest\x1a\x1c.tenant.v1.GetTenantResponseBTZRgithub.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1;tenantv1b\x06proto3"
 
 var (
@@ -661,7 +774,7 @@ func file_tenantmanagement_tenant_v1_tenant_proto_rawDescGZIP() []byte {
 	return file_tenantmanagement_tenant_v1_tenant_proto_rawDescData
 }
 
-var file_tenantmanagement_tenant_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_tenantmanagement_tenant_v1_tenant_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_tenantmanagement_tenant_v1_tenant_proto_goTypes = []any{
 	(*Tenant)(nil),                   // 0: tenant.v1.Tenant
 	(*TenantSettings)(nil),           // 1: tenant.v1.TenantSettings
@@ -671,35 +784,41 @@ var file_tenantmanagement_tenant_v1_tenant_proto_goTypes = []any{
 	(*GetTenantResponse)(nil),        // 5: tenant.v1.GetTenantResponse
 	(*GetTenantContextRequest)(nil),  // 6: tenant.v1.GetTenantContextRequest
 	(*GetTenantContextResponse)(nil), // 7: tenant.v1.GetTenantContextResponse
-	(*timestamppb.Timestamp)(nil),    // 8: google.protobuf.Timestamp
-	(*structpb.Struct)(nil),          // 9: google.protobuf.Struct
-	(*v1.Theme)(nil),                 // 10: theme.v1.Theme
-	(*v11.Token)(nil),                // 11: api.auth.v1.Token
+	(*UpdateTenantRequest)(nil),      // 8: tenant.v1.UpdateTenantRequest
+	(*TenantSettingsUpdate)(nil),     // 9: tenant.v1.TenantSettingsUpdate
+	(*timestamppb.Timestamp)(nil),    // 10: google.protobuf.Timestamp
+	(*structpb.Struct)(nil),          // 11: google.protobuf.Struct
+	(*v1.Theme)(nil),                 // 12: theme.v1.Theme
+	(*v11.Token)(nil),                // 13: api.auth.v1.Token
 }
 var file_tenantmanagement_tenant_v1_tenant_proto_depIdxs = []int32{
-	8,  // 0: tenant.v1.Tenant.created_at:type_name -> google.protobuf.Timestamp
-	8,  // 1: tenant.v1.Tenant.updated_at:type_name -> google.protobuf.Timestamp
-	8,  // 2: tenant.v1.Tenant.deleted_at:type_name -> google.protobuf.Timestamp
-	9,  // 3: tenant.v1.TenantSettings.theme_config:type_name -> google.protobuf.Struct
-	8,  // 4: tenant.v1.TenantSettings.updated:type_name -> google.protobuf.Timestamp
+	10, // 0: tenant.v1.Tenant.created_at:type_name -> google.protobuf.Timestamp
+	10, // 1: tenant.v1.Tenant.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 2: tenant.v1.Tenant.deleted_at:type_name -> google.protobuf.Timestamp
+	11, // 3: tenant.v1.TenantSettings.theme_config:type_name -> google.protobuf.Struct
+	10, // 4: tenant.v1.TenantSettings.updated:type_name -> google.protobuf.Timestamp
 	0,  // 5: tenant.v1.CreateTenantResponse.tenant:type_name -> tenant.v1.Tenant
-	10, // 6: tenant.v1.CreateTenantResponse.theme:type_name -> theme.v1.Theme
+	12, // 6: tenant.v1.CreateTenantResponse.theme:type_name -> theme.v1.Theme
 	1,  // 7: tenant.v1.CreateTenantResponse.settings:type_name -> tenant.v1.TenantSettings
-	11, // 8: tenant.v1.CreateTenantResponse.token:type_name -> api.auth.v1.Token
+	13, // 8: tenant.v1.CreateTenantResponse.token:type_name -> api.auth.v1.Token
 	0,  // 9: tenant.v1.GetTenantResponse.tenant:type_name -> tenant.v1.Tenant
 	0,  // 10: tenant.v1.GetTenantContextResponse.tenant:type_name -> tenant.v1.Tenant
 	1,  // 11: tenant.v1.GetTenantContextResponse.settings:type_name -> tenant.v1.TenantSettings
-	2,  // 12: tenant.v1.TenantService.CreateTenant:input_type -> tenant.v1.CreateTenantRequest
-	6,  // 13: tenant.v1.TenantService.GetTenantContext:input_type -> tenant.v1.GetTenantContextRequest
-	4,  // 14: tenant.v1.TenantService.GetTenant:input_type -> tenant.v1.GetTenantRequest
-	3,  // 15: tenant.v1.TenantService.CreateTenant:output_type -> tenant.v1.CreateTenantResponse
-	7,  // 16: tenant.v1.TenantService.GetTenantContext:output_type -> tenant.v1.GetTenantContextResponse
-	5,  // 17: tenant.v1.TenantService.GetTenant:output_type -> tenant.v1.GetTenantResponse
-	15, // [15:18] is the sub-list for method output_type
-	12, // [12:15] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	9,  // 12: tenant.v1.UpdateTenantRequest.settings:type_name -> tenant.v1.TenantSettingsUpdate
+	11, // 13: tenant.v1.TenantSettingsUpdate.theme_config:type_name -> google.protobuf.Struct
+	2,  // 14: tenant.v1.TenantService.CreateTenant:input_type -> tenant.v1.CreateTenantRequest
+	6,  // 15: tenant.v1.TenantService.GetTenantContext:input_type -> tenant.v1.GetTenantContextRequest
+	8,  // 16: tenant.v1.TenantService.UpdateTenant:input_type -> tenant.v1.UpdateTenantRequest
+	4,  // 17: tenant.v1.TenantService.GetTenant:input_type -> tenant.v1.GetTenantRequest
+	3,  // 18: tenant.v1.TenantService.CreateTenant:output_type -> tenant.v1.CreateTenantResponse
+	7,  // 19: tenant.v1.TenantService.GetTenantContext:output_type -> tenant.v1.GetTenantContextResponse
+	7,  // 20: tenant.v1.TenantService.UpdateTenant:output_type -> tenant.v1.GetTenantContextResponse
+	5,  // 21: tenant.v1.TenantService.GetTenant:output_type -> tenant.v1.GetTenantResponse
+	18, // [18:22] is the sub-list for method output_type
+	14, // [14:18] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_tenantmanagement_tenant_v1_tenant_proto_init() }
@@ -717,7 +836,7 @@ func file_tenantmanagement_tenant_v1_tenant_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_tenantmanagement_tenant_v1_tenant_proto_rawDesc), len(file_tenantmanagement_tenant_v1_tenant_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

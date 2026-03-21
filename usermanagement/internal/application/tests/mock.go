@@ -15,6 +15,10 @@ type MockRepository struct {
 	mock.Mock
 }
 
+// GetLastActiveTenant implements [repository.IUserRepository].
+func (m *MockRepository) GetLastActiveTenant(ctx context.Context, userID pgtype.UUID) (*pgtype.UUID, *pgtype.UUID, error) {
+	panic("unimplemented")
+}
 
 // CreateUser implements [repository.IUserRepository].
 func (m *MockRepository) CreateUser(ctx context.Context, user *entity.User) error {

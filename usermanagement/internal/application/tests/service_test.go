@@ -243,14 +243,14 @@ func TestGetUserByPhoneIncludingDeleted(t *testing.T) {
 func TestRegisterUser_Success(t *testing.T) {
 	repo := new(MockRepository)
 	jwtMaker := &token.JWTMaker{}
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, jwtMaker)
 
 	ctx := context.Background()
 	input := &dto.RegisterUserRequestDTO{
-		FullName:     "Alice Doe",
-		Email:        "alice@example.com",
-		Phone:        "+254700000000",
-		Password:     "password123",
+		FullName: "Alice Doe",
+		Email:    "alice@example.com",
+		Phone:    "+254700000000",
+		Password: "password123",
 	}
 
 	repo.On("GetUserByEmail", ctx, input.Email).Return(nil, nil)
@@ -267,15 +267,15 @@ func TestRegisterUser_Success(t *testing.T) {
 
 func TestRegisterUser_EmailAlreadyExists(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, &token.JWTMaker{})
 
 	ctx := context.Background()
 
 	input := &dto.RegisterUserRequestDTO{
-		FullName:     "Alice Doe",
-		Email:        "alice@example.com",
-		Phone:        "+254700000000",
-		Password:     "password123",
+		FullName: "Alice Doe",
+		Email:    "alice@example.com",
+		Phone:    "+254700000000",
+		Password: "password123",
 	}
 
 	repo.On("GetUserByEmail", ctx, input.Email).
@@ -289,15 +289,15 @@ func TestRegisterUser_EmailAlreadyExists(t *testing.T) {
 
 func TestRegisterUser_PhoneAlreadyExists(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, &token.JWTMaker{})
 
 	ctx := context.Background()
 
 	input := &dto.RegisterUserRequestDTO{
-		FullName:     "Alice Doe",
-		Email:        "alice@example.com",
-		Phone:        "+254700000000",
-		Password:     "password123",
+		FullName: "Alice Doe",
+		Email:    "alice@example.com",
+		Phone:    "+254700000000",
+		Password: "password123",
 	}
 
 	repo.On("GetUserByEmail", ctx, input.Email).Return(nil, nil)
@@ -312,13 +312,13 @@ func TestRegisterUser_PhoneAlreadyExists(t *testing.T) {
 
 func TestRegisterUser_MissingEmail(t *testing.T) {
 	repo := new(MockRepository)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &token.JWTMaker{})
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, &token.JWTMaker{})
 
 	input := &dto.RegisterUserRequestDTO{
-		FullName:     "Alice Doe",
-		Email:        "",
-		Phone:        "+254700000000",
-		Password:     "password123",
+		FullName: "Alice Doe",
+		Email:    "",
+		Phone:    "+254700000000",
+		Password: "password123",
 	}
 
 	repo.On("GetUserByEmail", mock.Anything, input.Email).
@@ -334,7 +334,7 @@ func TestLoginUser_Success(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, jwtMaker)
 
 	password := "password123"
 	hashed, _ := utils.Hashpassword(password)
@@ -364,7 +364,7 @@ func TestLoginUser_InvalidPassword(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, jwtMaker)
 
 	hashed, _ := utils.Hashpassword("correct-password")
 
@@ -392,7 +392,7 @@ func TestLoginUser_UserNotFound(t *testing.T) {
 	repo := new(MockRepository)
 	privateKey, _ := rsa.GenerateKey(rand.Reader, 2048)
 	jwtMaker, _ := token.NewJWTMaker(privateKey)
-	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, jwtMaker)
+	srv := auth.NewAuthService(&repository.UserRepository{}, &repository.AuthRepository{}, &repository.RoleRepository{}, jwtMaker)
 
 	repo.On("GetUserByEmail", mock.Anything, "missing@example.com").
 		Return(nil, apperrors.ErrUserNotFound)
@@ -411,7 +411,6 @@ func TestLoginUser_UserNotFound(t *testing.T) {
 
 // helper for pointer literals
 func ptr[T any](v T) *T { return &v }
-
 
 // func TestUpdateSessionContext_Success(t *testing.T) {
 // 	// 1. Setup

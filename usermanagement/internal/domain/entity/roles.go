@@ -16,9 +16,4 @@ type Role struct {
 	Permissions []*Permission
 }
 
-const (
-	RoleOwner  = "owner"
-	RoleAdmin  = "admin"
-	RoleMember = "member"
-	RoleViewer = "viewer"
-)
+

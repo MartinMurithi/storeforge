@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -29,6 +30,7 @@ type IUserRepository interface {
 	GetActiveUserByPhone(ctx context.Context, phone string) (*entity.User, error)
 	GetUserByPhoneIncludingDeleted(ctx context.Context, phone string) (*entity.User, error)
 	GetAllUsers(ctx context.Context, p dto.Pagination) ([]*entity.User, int, error)
+	GetLastActiveTenant(ctx context.Context, userID pgtype.UUID) (*pgtype.UUID, *pgtype.UUID, error)
 	PatchUser(ctx context.Context, id pgtype.UUID, input *UpdateUserInput) (*entity.User, error)
 	DeleteUser(ctx context.Context, id pgtype.UUID) error
 }
@@ -220,6 +222,34 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context, p dto.Pagination) (
 	}
 
 	return users, totalUsers, nil
+}
+
+// GetLastActiveTenant returns the last active tenant + role for a given user.
+// If the user has never been linked to a tenant, returns nil.
+func (r *UserRepository) GetLastActiveTenant(ctx context.Context, userID pgtype.UUID) (*pgtype.UUID, *pgtype.UUID, error) {
+	const op = "AuthRepository.GetLastActiveTenant"
+
+	// Gets the most recent row
+	query := `
+        SELECT tenant_id, role_id
+        FROM users_tenants
+        WHERE user_id = $1
+        ORDER BY joined_at DESC
+        LIMIT 1
+    `
+
+	var tenantID pgtype.UUID
+	var roleID pgtype.UUID
+
+	err := r.DB.QueryRow(ctx, query, userID).Scan(&tenantID, &roleID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil, nil // user has no tenant yet
+		}
+		return nil, nil, fmt.Errorf("[%s]: failed to get last active tenant: %w", op, err)
+	}
+
+	return &tenantID, &roleID, nil
 }
 
 // Remember to check if business name already exists

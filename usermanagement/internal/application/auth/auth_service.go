@@ -24,13 +24,14 @@ import (
 type AuthService struct {
 	userRepo repository.IUserRepository
 	authRepo repository.IAuthRepository
+	roleRepo repository.IRoleRepository
 	jwtMaker *token.JWTMaker
 }
 
 const refreshTokenExpiry = 30 * 24 * time.Hour // 30 days
 
 // create a factory function to initialize my service with repo
-func NewAuthService(userRepo repository.IUserRepository, authRepo repository.IAuthRepository, jwtMaker *token.JWTMaker) *AuthService {
+func NewAuthService(userRepo repository.IUserRepository, authRepo repository.IAuthRepository, roleRepo repository.IRoleRepository, jwtMaker *token.JWTMaker) *AuthService {
 
 	if jwtMaker == nil {
 		panic("jwt maker must not be nil")
@@ -39,6 +40,7 @@ func NewAuthService(userRepo repository.IUserRepository, authRepo repository.IAu
 	return &AuthService{
 		userRepo: userRepo,
 		authRepo: authRepo,
+		roleRepo: roleRepo,
 		jwtMaker: jwtMaker,
 	}
 }
@@ -159,51 +161,83 @@ func (srv *AuthService) LoginUser(ctx context.Context, input *dto.LoginUserReque
 		return nil, nil, err // unexpected crypto failure
 	}
 
-	// To issue a token WITHOUT a tenant context:
-	var emptyTenantID pgtype.UUID
-	emptyTenantID.Valid = false
+	// 1. Initialize empty/global context defaults
+	var tenantID pgtype.UUID
+	tenantID.Valid = false
+	roleName := ""
 
-	// Generate JWT access token
-	accessToken, claims, err := srv.jwtMaker.CreateToken(existingUser.ID, emptyTenantID, existingUser.Email, "", 25*time.Minute)
+	// 2. Fetch last active tenant + roleID (Only call this once)
+	lastTenant, lastRoleID, err := srv.userRepo.GetLastActiveTenant(ctx, existingUser.ID)
+	if err != nil {
+		// We log but don't block login; the user just gets a global context
+		log.Printf("[%s] failed to fetch last tenant: %v", op, err)
+	}
+
+	// 3. Handle Branching: If a tenant context exists, resolve it
+	if lastTenant != nil && lastTenant.Valid {
+		tenantID = *lastTenant
+
+		// Resolve Role ID → Role Name string for the JWT
+		if lastRoleID != nil && lastRoleID.Valid {
+			roleEntity, err := srv.roleRepo.GetRoleByID(ctx, *lastRoleID)
+			if err != nil {
+				log.Printf("[%s] failed to fetch role name for ID %v: %v", op, *lastRoleID, err)
+			} else {
+				roleName = roleEntity.Name
+			}
+		}
+	}
+
+	// 4. Generate JWT with the resolved context (Tenant may be invalid/empty)
+	accessToken, _, err := srv.jwtMaker.CreateToken(
+		existingUser.ID,
+		tenantID,
+		existingUser.Email,
+		roleName,
+		25*time.Minute,
+	)
 	if err != nil {
 		log.Printf("[%s] failed to create JWT: %v", op, err)
 		return nil, nil, fmt.Errorf("%s: failed to issue access token: %w", op, err)
 	}
 
-	// Generate the very first Refresh Token
+	// 5. Generate the raw Refresh Token string
 	newRefreshToken, err := GenerateRefreshToken()
 	if err != nil {
 		log.Printf("[%s] failed to generate refresh token: %v", op, err)
 		return nil, nil, err
 	}
-	log.Printf("[%s] refresh token created: %v", op, newRefreshToken)
 
-	// Store hashed refresh token in DB
+	// 6. Store tenant + role context in the Refresh Token record
+	// This ensures that when the user "refreshes", they stay in the same store
 	newTokenEntity := &entity.RefreshToken{
 		UserId:       existingUser.ID,
 		TokenHash:    auth.HashToken(newRefreshToken),
 		ExpiresAt:    time.Now().Add(refreshTokenExpiry),
 		Revoked:      false,
-		LastRole:     "",
-		LastTenantId: emptyTenantID,
+		LastRole:     roleName,
+		LastTenantId: tenantID, // pgtype.UUID handles the "Invalid" state automatically
 	}
+
 	if err := srv.authRepo.CreateRefreshToken(ctx, newTokenEntity); err != nil {
 		log.Printf("[%s] failed to store refresh token: %v", op, err)
 		return nil, nil, err
 	}
 
+	// 7. Build the final response DTO
 	token := &entity.Token{
 		AccessToken:  accessToken.AccessToken,
 		RefreshToken: newRefreshToken,
-		ExpiresAt:    time.Now().Local().Add(25 * time.Minute),
-		ExpiresIn:    int64((25 * time.Minute)),
-		IssuedAt:     time.Now().Local(),
+		ExpiresAt:    time.Now().Add(25 * time.Minute),
+		ExpiresIn:    int64((25 * time.Minute).Seconds()),
+		IssuedAt:     time.Now(),
 		TokenType:    "Bearer",
 	}
 
-	log.Printf("issued access token with no role and tenant id %s, %s", claims.TenantId, claims.Role)
+	log.Printf("[%s] issued token: user=%s, tenant=%v, role=%s", op, existingUser.Email, tenantID.Valid, roleName)
 
 	return existingUser, token, nil
+
 }
 
 func (srv *AuthService) RefreshToken(ctx context.Context, incomingRefresh string) (*entity.Token, error) {

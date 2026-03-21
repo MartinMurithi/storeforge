@@ -42,3 +42,16 @@ type GetTenantContextResponseDTO struct {
 	TenantSettings *entity.Settings
 	RoleId         pgtype.UUID
 }
+
+// UpdateTenantRequestDTO represents a partial update request for the tenant's setting(theme)
+type UpdateTenantRequestDTO struct {
+	TenantID string
+	UserID   string
+	Settings *SettingsUpdateDTO
+}
+
+// SettingsUpdateDTO for theme/config partial updates
+type SettingsUpdateDTO struct {
+	ThemeID string
+	Config  entity.ThemeConfig
+}
