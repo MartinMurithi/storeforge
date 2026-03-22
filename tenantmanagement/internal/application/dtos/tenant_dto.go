@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/domain/entity"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // CreateTenantRequestDTO carries onboarding data from the transport layer.
@@ -40,7 +39,7 @@ type GetTenantContextRequestDTO struct {
 type GetTenantContextResponseDTO struct {
 	Tenant         *entity.Tenant
 	TenantSettings *entity.Settings
-	RoleId         pgtype.UUID
+	Role         string
 }
 
 // UpdateTenantRequestDTO represents a partial update request for the tenant's setting(theme)
@@ -52,6 +51,5 @@ type UpdateTenantRequestDTO struct {
 
 // SettingsUpdateDTO for theme/config partial updates
 type SettingsUpdateDTO struct {
-	ThemeID string
 	Config  entity.ThemeConfig
 }

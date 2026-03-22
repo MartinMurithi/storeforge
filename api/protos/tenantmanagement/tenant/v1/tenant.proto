@@ -75,17 +75,17 @@ message GetTenantContextRequest {
 message GetTenantContextResponse {
   Tenant         tenant   = 1;
   TenantSettings settings = 2;
-  string         role  = 3; // caller's role in this tenant
+  string         role     = 3; // caller's role in this tenant
 }
 
 // All fields optional for patch-style update
 message UpdateTenantRequest {
-  string tenant_id = 1;
-  TenantSettingsUpdate settings = 2;
+  string               tenant_id = 1;
+  string               user_id   = 2;
+  TenantSettingsUpdate settings  = 3;
 }
 
 // Partial settings update (theme/config)
 message TenantSettingsUpdate {
-  string theme_id = 1;
-  google.protobuf.Struct theme_config = 2;
+  google.protobuf.Struct theme_config = 1;
 }

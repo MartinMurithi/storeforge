@@ -595,7 +595,8 @@ func (x *GetTenantContextResponse) GetRole() string {
 type UpdateTenantRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
-	Settings      *TenantSettingsUpdate  `protobuf:"bytes,2,opt,name=settings,proto3" json:"settings,omitempty"`
+	UserId        string                 `protobuf:"bytes,2,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Settings      *TenantSettingsUpdate  `protobuf:"bytes,3,opt,name=settings,proto3" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -637,6 +638,13 @@ func (x *UpdateTenantRequest) GetTenantId() string {
 	return ""
 }
 
+func (x *UpdateTenantRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
 func (x *UpdateTenantRequest) GetSettings() *TenantSettingsUpdate {
 	if x != nil {
 		return x.Settings
@@ -647,8 +655,7 @@ func (x *UpdateTenantRequest) GetSettings() *TenantSettingsUpdate {
 // Partial settings update (theme/config)
 type TenantSettingsUpdate struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ThemeId       string                 `protobuf:"bytes,1,opt,name=theme_id,json=themeId,proto3" json:"theme_id,omitempty"`
-	ThemeConfig   *structpb.Struct       `protobuf:"bytes,2,opt,name=theme_config,json=themeConfig,proto3" json:"theme_config,omitempty"`
+	ThemeConfig   *structpb.Struct       `protobuf:"bytes,1,opt,name=theme_config,json=themeConfig,proto3" json:"theme_config,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -681,13 +688,6 @@ func (x *TenantSettingsUpdate) ProtoReflect() protoreflect.Message {
 // Deprecated: Use TenantSettingsUpdate.ProtoReflect.Descriptor instead.
 func (*TenantSettingsUpdate) Descriptor() ([]byte, []int) {
 	return file_tenantmanagement_tenant_v1_tenant_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *TenantSettingsUpdate) GetThemeId() string {
-	if x != nil {
-		return x.ThemeId
-	}
-	return ""
 }
 
 func (x *TenantSettingsUpdate) GetThemeConfig() *structpb.Struct {
@@ -749,13 +749,13 @@ const file_tenantmanagement_tenant_v1_tenant_proto_rawDesc = "" +
 	"\x18GetTenantContextResponse\x12)\n" +
 	"\x06tenant\x18\x01 \x01(\v2\x11.tenant.v1.TenantR\x06tenant\x125\n" +
 	"\bsettings\x18\x02 \x01(\v2\x19.tenant.v1.TenantSettingsR\bsettings\x12\x12\n" +
-	"\x04role\x18\x03 \x01(\tR\x04role\"o\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\"\x88\x01\n" +
 	"\x13UpdateTenantRequest\x12\x1b\n" +
-	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12;\n" +
-	"\bsettings\x18\x02 \x01(\v2\x1f.tenant.v1.TenantSettingsUpdateR\bsettings\"m\n" +
-	"\x14TenantSettingsUpdate\x12\x19\n" +
-	"\btheme_id\x18\x01 \x01(\tR\athemeId\x12:\n" +
-	"\ftheme_config\x18\x02 \x01(\v2\x17.google.protobuf.StructR\vthemeConfig2\xda\x02\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x17\n" +
+	"\auser_id\x18\x02 \x01(\tR\x06userId\x12;\n" +
+	"\bsettings\x18\x03 \x01(\v2\x1f.tenant.v1.TenantSettingsUpdateR\bsettings\"R\n" +
+	"\x14TenantSettingsUpdate\x12:\n" +
+	"\ftheme_config\x18\x01 \x01(\v2\x17.google.protobuf.StructR\vthemeConfig2\xda\x02\n" +
 	"\rTenantService\x12O\n" +
 	"\fCreateTenant\x12\x1e.tenant.v1.CreateTenantRequest\x1a\x1f.tenant.v1.CreateTenantResponse\x12[\n" +
 	"\x10GetTenantContext\x12\".tenant.v1.GetTenantContextRequest\x1a#.tenant.v1.GetTenantContextResponse\x12S\n" +

@@ -40,3 +40,27 @@ func MapCreateTenantResponseProtoToDTO(pbRes *tenantv1.CreateTenantResponse) dto
 		},
 	}
 }
+
+// ToProtoGetContextTenantResponse composes multiple entity mappers into a single response DTO.
+func MapGetTenantTenantContextResponse(pbRes *tenantv1.GetTenantContextResponse) dto.TenantContextResponseDTO {
+	return dto.TenantContextResponseDTO{
+		Tenant: dto.TenantDTO{
+			ID:           pbRes.Tenant.Id,
+			StoreName:    pbRes.Tenant.StoreName,
+			Slug:         pbRes.Tenant.Slug,
+			SubDomain:    pbRes.Tenant.SubDomain,
+			Domain:       pbRes.Tenant.Domain,
+			BusinessType: pbRes.Tenant.BusinessType,
+			Status:       pbRes.Tenant.Status,
+			CreatedAt:    pbRes.Tenant.CreatedAt.AsTime(),
+		},
+		Settings: dto.SettingsDTO{
+			TenantID:    pbRes.Settings.TenantId,
+			ThemeID:     pbRes.Settings.ThemeId,
+			ThemeConfig: pbRes.Settings.ThemeConfig,
+			Version:     pbRes.Settings.Version,
+			UpdatedAt:   pbRes.Settings.Updated.AsTime(),
+		},
+		Role: pbRes.Role,
+	}
+}

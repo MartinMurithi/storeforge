@@ -34,10 +34,12 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			user.PATCH("/me", userHandler.UpdateMe)
 		}
 
-		stores := api.Group("/stores/new")
+		stores := api.Group("/stores")
 		stores.Use(authMiddleware)
 		{
-			stores.POST("/", tenantHandler.CreateTenant)
+			stores.POST("/new", tenantHandler.CreateTenant)
+			stores.GET("/:id", tenantHandler.GetTenantContext)
+			stores.PATCH("/:id", tenantHandler.UpdateTenant)
 		}
 
 		roles := api.Group("/roles")
