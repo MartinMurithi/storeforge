@@ -36,3 +36,9 @@ type SettingsDTO struct {
 	Version     int32       `json:"version"`
 	UpdatedAt   time.Time   `json:"updated_at"`
 }
+
+type TenantContextResponseDTO struct {
+	Tenant   TenantDTO   `json:"tenant"`
+	Settings SettingsDTO `json:"settings"`
+	Role     string      `string:"role"`
+}

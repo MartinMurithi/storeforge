@@ -185,10 +185,7 @@ func (s *TenantService) GetTenantContext(ctx context.Context, req dtos.GetTenant
 	}, nil
 }
 
-func (s *TenantService) UpdateTenant(
-	ctx context.Context,
-	req *dtos.UpdateTenantRequestDTO,
-) (*tenantv1.GetTenantContextResponse, error) {
+func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenantRequestDTO) (*tenantv1.GetTenantContextResponse, error) {
 
 	const op = "TenantService.UpdateTenant"
 

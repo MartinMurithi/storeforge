@@ -97,7 +97,6 @@ func (h *TenantGrpcHandler) UpdateTenant(ctx context.Context, req *tenantv1.Upda
 
 	if req.Settings != nil {
 		dtoReq.Settings = &dtos.SettingsUpdateDTO{
-			ThemeID: req.Settings.ThemeId,
 			Config:  req.Settings.ThemeConfig.AsMap(),
 		}
 	}

@@ -39,3 +39,31 @@ func (c *TenantClient) CreateTenant(ctx context.Context, req *tenantv1.CreateTen
 
 	return res, nil
 }
+
+func (c *TenantClient) GetTenantContext(ctx context.Context, req *tenantv1.GetTenantContextRequest) (*tenantv1.GetTenantContextResponse, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	res, err := c.Service.GetTenantContext(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+func (c *TenantClient) UpdateTenant(ctx context.Context, req *tenantv1.UpdateTenantRequest) (*tenantv1.GetTenantContextResponse, error) {
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	res, err := c.Service.UpdateTenant(ctx, req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}

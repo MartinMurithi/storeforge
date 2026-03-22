@@ -27,29 +27,28 @@ func ToProtoTenant(t *entity.Tenant) *tenantv1.Tenant {
 	}
 }
 
-
 // ToProtoCreateTenantResponse composes multiple entity mappers into a single response DTO.
 func ToProtoCreateTenantResponse(data *dtos.CreateTenantResponseDTO) *tenantv1.CreateTenantResponse {
-    if data == nil || data.Tenant == nil {
-        return nil
-    }
+	if data == nil || data.Tenant == nil {
+		return nil
+	}
 
-    resp := &tenantv1.CreateTenantResponse{
-        Tenant:   ToProtoTenant(data.Tenant),
-        Theme:    ToProtoTheme(data.Theme),
-        Settings: ToProtoSettings(data.Tenant.Settings),
-    }
+	resp := &tenantv1.CreateTenantResponse{
+		Tenant:   ToProtoTenant(data.Tenant),
+		Theme:    ToProtoTheme(data.Theme),
+		Settings: ToProtoSettings(data.Tenant.Settings),
+	}
 
-    if data.Token != nil {
-        resp.Token = &authv1.Token{
-            AccessToken: data.Token.AccessToken,
-            TokenType:   data.Token.TokenType,
-            ExpiresIn:   data.Token.ExpiresIn,
-            ExpiresAt:   timestamppb.New(data.Token.ExpiresAt),
-        }
-    }
+	if data.Token != nil {
+		resp.Token = &authv1.Token{
+			AccessToken: data.Token.AccessToken,
+			TokenType:   data.Token.TokenType,
+			ExpiresIn:   data.Token.ExpiresIn,
+			ExpiresAt:   timestamppb.New(data.Token.ExpiresAt),
+		}
+	}
 
-    return resp
+	return resp
 }
 
 // ToProtoSettings maps the Tenant's active configuration instance.
