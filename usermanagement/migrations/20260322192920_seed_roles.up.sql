@@ -1,0 +1,1 @@
+INSERT INTO roles (name, slug, description) VALUES('owner', 'owner', 'store owner'), ('system admin', 'system-admin', 'manages the entire system');

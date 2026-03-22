@@ -194,6 +194,8 @@ func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenant
 		return nil, fmt.Errorf("[%s]: invalid tenant id: %w", op, err)
 	}
 
+	log.Printf("[%s] service tenant id: %v", op, tenantID)
+
 	userID, err := value_object.NewUserID(req.UserID)
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: invalid user id: %w", op, err)
@@ -201,7 +203,8 @@ func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenant
 
 	tenantCtx, err := s.tenantRepo.GetTenantContext(ctx, tenantID, userID)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: failed to fetch tenant context: %w", op, err)
+		log.Printf("[%s] failed to fetch tenant context: %v",op, err)
+		return nil, err
 	}
 
 	if tenantCtx.Tenant == nil {

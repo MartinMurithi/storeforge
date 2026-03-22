@@ -11,7 +11,7 @@ func TranslateTenantRepoError(err error) error {
 	switch postgres.MapPostgresError(err) {
 
 	case postgres.ErrNotFound:
-		return apperrors.ErrThemeNotFound
+		return apperrors.ErrTenantNotFound
 
 	case postgres.ErrUniqueViolation:
 		return apperrors.ErrTenantAlreadyExists

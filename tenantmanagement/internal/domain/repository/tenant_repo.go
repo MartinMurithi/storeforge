@@ -157,6 +157,7 @@ func (r *TenantRepository) GetTenantContext(ctx context.Context, tenantID value_
 		&roleNameDB,
 	)
 	if err != nil {
+		log.Printf("RAW DB ERROR: %+v", err)
 		return nil, fmt.Errorf("[%s]: %w", op, domain.TranslateTenantRepoError(postgres.MapPostgresError(err)))
 	}
 
@@ -229,6 +230,8 @@ func (r *TenantRepository) UpdateTenantSettings(ctx context.Context, tenantID va
 
 	// get current config
 	var currentConfig entity.ThemeConfig
+
+	log.Printf("[%s] repo tenant id: %v", op, tenantID)
 
 	err = tx.QueryRow(ctx, `
         SELECT config

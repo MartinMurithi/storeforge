@@ -93,7 +93,7 @@ func (h *TenantHandler) GetTenantContext(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusCreated, mapper.MapGetTenantTenantContextResponse(resp))
+	response.JSON(c, http.StatusAccepted, mapper.MapGetTenantTenantContextResponse(resp))
 }
 
 func (h *TenantHandler) UpdateTenant(c *gin.Context) {

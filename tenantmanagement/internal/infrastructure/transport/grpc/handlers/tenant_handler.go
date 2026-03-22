@@ -101,6 +101,8 @@ func (h *TenantGrpcHandler) UpdateTenant(ctx context.Context, req *tenantv1.Upda
 		}
 	}
 
+	log.Printf("[%s] tenant id : %v", op, dtoReq.TenantID)
+
 	resp, err := h.TenantService.UpdateTenant(ctx, dtoReq)
 	if err != nil {
 		log.Printf("[%s] service error: %v", op, err)
