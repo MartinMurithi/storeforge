@@ -1,5 +1,4 @@
 INSERT INTO themes (
-        id,
         name,
         description,
         is_active,
@@ -7,7 +6,6 @@ INSERT INTO themes (
         created_at
     )
 VALUES (
-        '00000000-0000-0000-0000-000000000001',
         'Midnight Modern',
         'A sleek, dark-themed template optimized for electronics and high-end fashion.',
         true,
@@ -19,7 +17,6 @@ VALUES (
         NOW()
     ),
     (
-        '00000000-0000-0000-0000-000000000002',
         'Artisan Bloom',
         'Soft palettes and elegant serif fonts, perfect for handmade crafts and florists.',
         true,
