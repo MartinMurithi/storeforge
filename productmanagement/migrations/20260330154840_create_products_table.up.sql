@@ -13,10 +13,10 @@ CREATE TYPE product_status AS ENUM ('draft', 'active', 'archived', 'out_of_stock
 CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(255) UNIQUE NOT NULL,
     description TEXT NOT NULL,
     price NUMERIC(12, 2) NOT NULL,
-    sku VARCHAR(100),
+    sku VARCHAR(100) UNIQUE NOT NULL,
     stock_quantity INT DEFAULT 0,
     product_properties JSONB NOT NULL DEFAULT '{}',
     product_status product_status NOT NULL DEFAULT 'draft',

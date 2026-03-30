@@ -10,6 +10,7 @@ import (
 
 type ProductID struct{ value pgtype.UUID }
 type TenantID struct { value pgtype.UUID }
+type ProductImageID struct{ value pgtype.UUID}
 
 // ---------------------------------------------------------
 // Constructors
@@ -42,6 +43,20 @@ func NewTenantIDFromUUID(u uuid.UUID) TenantID {
 	return TenantID{value: pgtype.UUID{Bytes: u, Valid: true}}
 }
 
+
+func NewProductImageID(id string) (ProductImageID, error) {
+	var u pgtype.UUID
+	err := u.Scan(id) // pgtype.UUID handles string parsing natively
+	if err != nil {
+		return ProductImageID{}, fmt.Errorf("invalid product image id: %w", err)
+	}
+	return ProductImageID{value: u}, nil
+}
+
+func NewProductImageIDFromUUID(u uuid.UUID) TenantID {
+	return TenantID{value: pgtype.UUID{Bytes: u, Valid: true}}
+}
+
 // ---------------------------------------------------------
 // Accessors
 // ---------------------------------------------------------
@@ -58,6 +73,16 @@ func (t ProductID) String() string {
 
 func (t TenantID) Raw() pgtype.UUID { return t.value }
 func (t TenantID) String() string {
+	if !t.value.Valid {
+		return ""
+	}
+	// Converts [16]byte to string format
+	u := uuid.UUID(t.value.Bytes)
+	return u.String()
+}
+
+func (t ProductImageID) Raw() pgtype.UUID { return t.value }
+func (t ProductImageID) String() string {
 	if !t.value.Valid {
 		return ""
 	}

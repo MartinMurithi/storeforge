@@ -9,17 +9,32 @@ import (
 
 // GetUserIDFromMetadata extracts the user-id from gRPC incoming context.
 func GetUserIDFromMetadata(ctx context.Context) (string, error) {
-    md, ok := metadata.FromIncomingContext(ctx)
-    if !ok {
-        return "", errors.New("metadata is not provided")
-    }
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", errors.New("metadata is not provided")
+	}
 
-    // gRPC metadata keys are always lowercase
-    values := md.Get("user-id")
-    if len(values) == 0 {
-        return "", errors.New("user-id not found in metadata")
-    }
+	// gRPC metadata keys are always lowercase
+	values := md.Get("user-id")
+	if len(values) == 0 {
+		return "", errors.New("user-id not found in metadata")
+	}
 
-    return values[0], nil
+	return values[0], nil
 }
 
+// GetTenantIDFromMetadata extracts the tenant-id from gRPC incoming context.
+func GetTenantIDFromMetadata(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", errors.New("metadata is not provided")
+	}
+
+	// gRPC metadata keys are always lowercase
+	values := md.Get("tenant-id")
+	if len(values) == 0 {
+		return "", errors.New("tenant-id not found in metadata")
+	}
+
+	return values[0], nil
+}

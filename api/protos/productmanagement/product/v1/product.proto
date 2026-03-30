@@ -14,31 +14,49 @@ service ProductService {
 }
 
 message Product {
-  string id = 1;
-  string tenant_id = 2;
-  string name = 3;
-  string description = 4;
-  int64 price = 5;
-  string sku = 6;
-  int64 stock = 7;
-  string status = 8;
-  google.protobuf.Struct properties = 9;
-  google.protobuf.Timestamp created_at = 10;
-  google.protobuf.Timestamp updated_at = 11;
-  google.protobuf.Timestamp deleted_at = 12;
+  string                    id          = 1;
+  string                    tenant_id   = 2;
+  string                    name        = 3;
+  string                    description = 4;
+  int64                     price       = 5;
+  string                    sku         = 6;
+  int64                     stock       = 7;
+  string                    status      = 8;
+  repeated ProductImages    images      = 9;
+  google.protobuf.Struct    properties  = 10;
+  google.protobuf.Timestamp created_at  = 11;
+  google.protobuf.Timestamp updated_at  = 12;
+  google.protobuf.Timestamp deleted_at  = 13;
+}
+
+message ProductImages{
+  string                    id         = 1;
+  string                    product_id = 2;
+  string                    image_url  = 3;
+  bool                      is_primary = 4;
+  int32                     sort_order = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp deleted_at = 7;
+}
+
+message ProductImageInput{
+  string product_id = 1;
+  string image_url  = 2;
 }
 
 message CreateProductRequest {
-  string tenant_id = 1;
-  string name = 2;
-  string description = 3;
-  string sku = 4;
-  int64 stock = 5;
-  string status = 6;
-   google.protobuf.Struct properties = 7;
+  string                 tenant_id   = 1;
+  string                 name        = 2;
+  string                 description = 3;
+  int64                  price       = 4;
+  string                 sku         = 5;
+  int64                  stock       = 6;
+  string                 status      = 7;
+  google.protobuf.Struct properties  = 8;
+  repeated ProductImageInput images = 9;
 }
 
 message CreateProductResponse {
-  Product Product = 1;
-  string message = 2;
+  Product product = 1;
+  string  message = 2;
 }
