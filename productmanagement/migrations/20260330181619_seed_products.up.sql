@@ -1,0 +1,43 @@
+INSERT INTO products (
+        tenant_id,
+        name,
+        description,
+        price,
+        sku,
+        stock_quantity,
+        product_properties,
+        product_status
+    )
+VALUES -- Product 1
+    (
+        'e0474efe-20f1-4ee5-99b9-e2a7e55c5597',
+        'Classic Red T-Shirt',
+        'Soft cotton t-shirt with a classic fit, perfect for everyday wear.',
+        19.99,
+        'TSHIRT-RED-001',
+        50,
+        '{"color": "red", "size": ["S", "M", "L", "XL"], "material": "cotton"}'::jsonb,
+        'active'
+    ),
+    -- Product 2
+    (
+        'e0474efe-20f1-4ee5-99b9-e2a7e55c5597',
+        'Wireless Bluetooth Headphones',
+        'High-quality over-ear headphones with noise cancellation and long battery life.',
+        129.99,
+        'HEADPHONES-BT-002',
+        25,
+        '{"color": "black", "battery_life_hours": 20, "connectivity": "bluetooth"}'::jsonb,
+        'active'
+    ),
+    -- Product 3
+    (
+        'e0474efe-20f1-4ee5-99b9-e2a7e55c5597',
+        'Ceramic Coffee Mug',
+        '350ml ceramic mug, dishwasher safe, perfect for coffee or tea.',
+        9.50,
+        'MUG-CERAMIC-003',
+        100,
+        '{"color": "white", "capacity_ml": 350, "material": "ceramic"}'::jsonb,
+        'draft'
+    );

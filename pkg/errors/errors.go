@@ -38,6 +38,12 @@ var (
 	ErrBusinessNameAlreadyExists = errors.New("business name already exists")
 )
 
+// Database & Resource State Errors For Products
+var (
+	ErrProductNotFound              = errors.New("product not found")
+	ErrProductAlreadyExists         = errors.New("product already exists")
+)
+
 // Security & Credentials Errors
 var (
 	ErrInvalidCredentials = errors.New("invalid credentials")

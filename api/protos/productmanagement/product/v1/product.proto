@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1";
+
+// TenantService, tenant service will handle all thenant related operations such creating, retrieving, updating and deleting a tenant.
+service ProductService {
+    // Product Creation
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+}
+
+message Product {
+  string id = 1;
+  string tenant_id = 2;
+  string name = 3;
+  string description = 4;
+  int64 price = 5;
+  string sku = 6;
+  int64 stock = 7;
+  string status = 8;
+  google.protobuf.Struct properties = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+  google.protobuf.Timestamp deleted_at = 12;
+}
+
+message CreateProductRequest {
+  string tenant_id = 1;
+  string name = 2;
+  string description = 3;
+  string sku = 4;
+  int64 stock = 5;
+  string status = 6;
+   google.protobuf.Struct properties = 7;
+}
+
+message CreateProductResponse {
+  Product Product = 1;
+  string message = 2;
+}
