@@ -20,17 +20,18 @@ const (
 type ProductProperties map[string]any
 
 type Product struct {
-	ID           value_object.ProductID
-	TenantID     value_object.TenantID
-	Name         string
-	Description  string
-	Price        int64
-	SKU          string
-	Stock        int64
-	Status       ProductStatus
-	Properties   ProductProperties
-	CreatedAt    time.Time
-	UpdatedAt    *time.Time
-	DeletedAt    *time.Time //for soft deletes
+	ID          value_object.ProductID
+	TenantID    value_object.TenantID
+	Name        string
+	Description string
+	Price       int64
+	SKU         string
+	Stock       int64
+	Status      *ProductStatus
+	Properties  *ProductProperties
+	CreatedAt   time.Time
+	UpdatedAt   *time.Time
+	DeletedAt   *time.Time //for soft deletes
 
+	ProductImages []ProductImage
 }
