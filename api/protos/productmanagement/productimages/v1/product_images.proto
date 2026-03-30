@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package product_images.v1;
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/productmanagement/productimages/v1;productImages1";

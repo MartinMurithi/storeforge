@@ -1,0 +1,5 @@
+.env
+.internal/keys/
+vendor/
+keys/
+third_party/
