@@ -9,7 +9,7 @@ type CreateProductRequestDTO struct {
 	Description string                    `json:"description"`
 	SKU         string                    `json:"sku"`
 	Stock       int64                     `json:"stock"`
-	Status      *entity.ProductStatus     `json:"status"`
+	Status      entity.ProductStatus     `json:"status"`
 	Properties  *entity.ProductProperties `json:"properties"`
 	Images      []ProductImageInputDTO    `json:"images"`
 }
@@ -19,10 +19,6 @@ type ProductImageInputDTO struct {
 	URL       string `json:"url"`                  // required: image URL
 	SortOrder int    `json:"sort_order,omitempty"` // optional, backend assigns if 0
 	IsPrimary bool   `json:"is_primary,omitempty"` // optional, backend sets first image as primary if missing
-}
-
-type ProductPropertiesInputDTO struct {
-	Properties *entity.ProductProperties `json:"properties"` // optional, backend sets first image as primary if missing
 }
 
 type CreateProductResponseDTO struct {

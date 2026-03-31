@@ -21,7 +21,6 @@ type DBConfig struct {
 
 type GRPCConfig struct {
 	Port        int
-	UserSvcAddr int
 }
 
 type Config struct {
@@ -39,8 +38,7 @@ func Load() (*Config, error) {
 	healthPeriod, _ := time.ParseDuration(env.GetEnv("DB_HEALTH_PERIOD", "1m"))
 	connectTimeout, _ := time.ParseDuration(env.GetEnv("DB_CONNECT_TIMEOUT", "10s"))
 
-	grpcPort, _ := strconv.Atoi(env.GetEnv("GRPC_PORT", "50052"))
-	userSvcClientPort, _ := strconv.Atoi(env.GetEnv("USERSVCADDRESS", "50051"))
+	grpcPort, _ := strconv.Atoi(env.GetEnv("GRPC_PORT", "50053"))
 
 	cfg := &Config{
 		DB: DBConfig{
@@ -55,7 +53,6 @@ func Load() (*Config, error) {
 		},
 		GRPC: GRPCConfig{
 			Port:        grpcPort,
-			UserSvcAddr: userSvcClientPort,
 		},
 		Env: "prod",
 	}

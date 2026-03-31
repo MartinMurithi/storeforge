@@ -29,7 +29,7 @@ var (
 var (
 	ErrUserNotFound              = errors.New("user not found")
 	ErrRoleNotFound              = errors.New("role not found")
-	ErrTenantNotFound             = errors.New("tenant not found")
+	ErrTenantNotFound            = errors.New("tenant not found")
 	ErrRoleAlreadyExists         = errors.New("role already exists")
 	ErrTenantAlreadyExists       = errors.New("tenant with that name already exists")
 	ErrUserAlreadyExists         = errors.New("user already exists")
@@ -40,8 +40,9 @@ var (
 
 // Database & Resource State Errors For Products
 var (
-	ErrProductNotFound              = errors.New("product not found")
-	ErrProductAlreadyExists         = errors.New("product already exists")
+	ErrProductNotFound         = errors.New("product not found")
+	ErrProductAlreadyExists    = errors.New("product already exists")
+	ErrProductSKUAlreadyExists = errors.New("product sku already exists")
 )
 
 // Security & Credentials Errors

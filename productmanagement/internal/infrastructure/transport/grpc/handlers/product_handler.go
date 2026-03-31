@@ -9,6 +9,7 @@ import (
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product/services"
+	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -42,13 +43,29 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 
 	log.Printf("extracted tenant id %s", tenantID)
 
+	var props *entity.ProductProperties
+
+	if req.Properties != nil {
+		m := entity.ProductProperties(req.Properties.AsMap())
+		props = &m
+	}
+
+	var prodStatus entity.ProductStatus
+
+	if req.Status != "" {
+		s := entity.ProductStatus(req.Status)
+		prodStatus = s
+	}
+
 	dtoReq := product.CreateProductRequestDTO{
-		TenantID:    req.TenantId,
+		TenantID:    tenantID,
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
 		SKU:         req.Sku,
 		Stock:       req.Stock,
+		Status:      prodStatus,
+		Properties:  props,
 		Images:      make([]product.ProductImageInputDTO, 0, len(req.Images)),
 	}
 	// Map repeated images

@@ -8,8 +8,10 @@ import (
 
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
+	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/value_object"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/database"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/database/postgres"
+	"github.com/google/uuid"
 )
 
 type ProductRepository struct {
@@ -61,6 +63,8 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 		RETURNING id, name, created_at
 	`
 
+	var id uuid.UUID
+
 	err = tx.QueryRow(
 		ctx,
 		productQuery,
@@ -72,7 +76,9 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 		product.Stock,
 		product.Properties,
 		product.Status,
-	).Scan(&product.ID, &product.Name, &product.CreatedAt)
+	).Scan(&id, &product.Name, &product.CreatedAt)
+
+	product.ID = value_object.NewProductIDFromUUID(id)
 
 	if err != nil {
 		log.Printf("[%s error]: %v", op, err)
@@ -101,10 +107,15 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 				is_primary
 			)
 			VALUES ($1,$2,$3,$4)
+			RETURNING id, product_id, created_at
 		`
 
 		for _, img := range product.ProductImages {
-			_, err = tx.Exec(ctx, imageQuery, product.ID, img.ImageUrl, img.SortOrder, img.IsPrimary)
+
+			var dbImgID uuid.UUID
+			var dbProdID uuid.UUID
+
+			err = tx.QueryRow(ctx, imageQuery, product.ID.Raw(), img.ImageUrl, img.SortOrder, img.IsPrimary).Scan(&dbImgID, &dbProdID, &img.CreatedAt)
 			if err != nil {
 				log.Printf("[%s error inserting image]: %v", op, err)
 				return fmt.Errorf(
@@ -112,6 +123,8 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 					domain.TranslateProductRepoError(postgres.MapPostgresError(err)),
 				)
 			}
+			img.ID = value_object.NewProductImageIDFromUUID(dbImgID)
+			img.ProductID = value_object.NewProductIDFromUUID(dbProdID)
 		}
 	}
 

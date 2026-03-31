@@ -11,10 +11,10 @@ func TranslateProductRepoError(err error) error {
 	switch postgres.MapPostgresError(err) {
 
 	case postgres.ErrNotFound:
-		return apperrors.ErrTenantNotFound
+		return apperrors.ErrProductNotFound
 
 	case postgres.ErrUniqueViolation:
-		return apperrors.ErrTenantAlreadyExists
+		return apperrors.ErrProductAlreadyExists
 
 	case postgres.ErrNotNull:
 		return apperrors.ErrInvalidInput
