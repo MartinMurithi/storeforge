@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net"
 
-	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
-	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/infrastructure/transport/grpc/handlers"
+	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
+	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product/services"
+	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/transport/grpc/handlers"
 	"google.golang.org/grpc"
 )
 
@@ -16,8 +16,8 @@ type Server struct {
 }
 
 // NewGRPCServer creates a gRPC server with all services and handlers registered.
-func NewGRPCServer(port int, tenantSrv *tenant.TenantService) (*Server, error) {
-	
+func NewGRPCServer(port int, productSrv *services.ProductService) (*Server, error) {
+
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 
 	if err != nil {
@@ -31,10 +31,10 @@ func NewGRPCServer(port int, tenantSrv *tenant.TenantService) (*Server, error) {
 	)
 
 	// Handlers
-	tenantHandler := handlers.NewTenantGrpcHandler(tenantSrv)
+	productHandler := handlers.NewProductGrpcHandler(productSrv)
 
 	// Register services
-	tenantv1.RegisterTenantServiceServer(grpcServer, tenantHandler)
+	productv1.RegisterProductServiceServer(grpcServer, productHandler)
 
 	return &Server{
 		GRPCServer: grpcServer,

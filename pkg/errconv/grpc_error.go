@@ -56,6 +56,7 @@ func ToGrpcError(err error) error {
 		errors.Is(err, apperrors.ErrUserEmailAlreadyExists),
 		errors.Is(err, apperrors.ErrTenantAlreadyExists),
 		errors.Is(err, apperrors.ErrUserMobileExists),
+		errors.Is(err, apperrors.ErrProductAlreadyExists),
 		errors.Is(err, apperrors.ErrBusinessNameAlreadyExists):
 		return status.Error(codes.AlreadyExists, err.Error())
 

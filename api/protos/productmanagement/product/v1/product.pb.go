@@ -33,7 +33,7 @@ type Product struct {
 	Sku           string                 `protobuf:"bytes,6,opt,name=sku,proto3" json:"sku,omitempty"`
 	Stock         int64                  `protobuf:"varint,7,opt,name=stock,proto3" json:"stock,omitempty"`
 	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
-	Images        []*ProductImages       `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
+	Images        []*ProductImage        `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
 	Properties    *structpb.Struct       `protobuf:"bytes,10,opt,name=properties,proto3" json:"properties,omitempty"`
 	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
@@ -128,7 +128,7 @@ func (x *Product) GetStatus() string {
 	return ""
 }
 
-func (x *Product) GetImages() []*ProductImages {
+func (x *Product) GetImages() []*ProductImage {
 	if x != nil {
 		return x.Images
 	}
@@ -163,7 +163,7 @@ func (x *Product) GetDeletedAt() *timestamppb.Timestamp {
 	return nil
 }
 
-type ProductImages struct {
+type ProductImage struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	ProductId     string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
@@ -176,20 +176,20 @@ type ProductImages struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProductImages) Reset() {
-	*x = ProductImages{}
+func (x *ProductImage) Reset() {
+	*x = ProductImage{}
 	mi := &file_productmanagement_product_v1_product_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProductImages) String() string {
+func (x *ProductImage) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProductImages) ProtoMessage() {}
+func (*ProductImage) ProtoMessage() {}
 
-func (x *ProductImages) ProtoReflect() protoreflect.Message {
+func (x *ProductImage) ProtoReflect() protoreflect.Message {
 	mi := &file_productmanagement_product_v1_product_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -201,54 +201,54 @@ func (x *ProductImages) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProductImages.ProtoReflect.Descriptor instead.
-func (*ProductImages) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProductImage.ProtoReflect.Descriptor instead.
+func (*ProductImage) Descriptor() ([]byte, []int) {
 	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ProductImages) GetId() string {
+func (x *ProductImage) GetId() string {
 	if x != nil {
 		return x.Id
 	}
 	return ""
 }
 
-func (x *ProductImages) GetProductId() string {
+func (x *ProductImage) GetProductId() string {
 	if x != nil {
 		return x.ProductId
 	}
 	return ""
 }
 
-func (x *ProductImages) GetImageUrl() string {
+func (x *ProductImage) GetImageUrl() string {
 	if x != nil {
 		return x.ImageUrl
 	}
 	return ""
 }
 
-func (x *ProductImages) GetIsPrimary() bool {
+func (x *ProductImage) GetIsPrimary() bool {
 	if x != nil {
 		return x.IsPrimary
 	}
 	return false
 }
 
-func (x *ProductImages) GetSortOrder() int32 {
+func (x *ProductImage) GetSortOrder() int32 {
 	if x != nil {
 		return x.SortOrder
 	}
 	return 0
 }
 
-func (x *ProductImages) GetCreatedAt() *timestamppb.Timestamp {
+func (x *ProductImage) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
 	}
 	return nil
 }
 
-func (x *ProductImages) GetDeletedAt() *timestamppb.Timestamp {
+func (x *ProductImage) GetDeletedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.DeletedAt
 	}
@@ -472,7 +472,7 @@ var File_productmanagement_product_v1_product_proto protoreflect.FileDescriptor
 const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\n" +
 	"*productmanagement/product/v1/product.proto\x12\n" +
-	"product.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xdf\x03\n" +
+	"product.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xde\x03\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
@@ -481,8 +481,8 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\x05price\x18\x05 \x01(\x03R\x05price\x12\x10\n" +
 	"\x03sku\x18\x06 \x01(\tR\x03sku\x12\x14\n" +
 	"\x05stock\x18\a \x01(\x03R\x05stock\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x121\n" +
-	"\x06images\x18\t \x03(\v2\x19.product.v1.ProductImagesR\x06images\x127\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x120\n" +
+	"\x06images\x18\t \x03(\v2\x18.product.v1.ProductImageR\x06images\x127\n" +
 	"\n" +
 	"properties\x18\n" +
 	" \x01(\v2\x17.google.protobuf.StructR\n" +
@@ -492,8 +492,8 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\n" +
 	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\x8f\x02\n" +
-	"\rProductImages\x12\x0e\n" +
+	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\x8e\x02\n" +
+	"\fProductImage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x02 \x01(\tR\tproductId\x12\x1b\n" +
@@ -543,7 +543,7 @@ func file_productmanagement_product_v1_product_proto_rawDescGZIP() []byte {
 var file_productmanagement_product_v1_product_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
 var file_productmanagement_product_v1_product_proto_goTypes = []any{
 	(*Product)(nil),               // 0: product.v1.Product
-	(*ProductImages)(nil),         // 1: product.v1.ProductImages
+	(*ProductImage)(nil),          // 1: product.v1.ProductImage
 	(*ProductImageInput)(nil),     // 2: product.v1.ProductImageInput
 	(*CreateProductRequest)(nil),  // 3: product.v1.CreateProductRequest
 	(*CreateProductResponse)(nil), // 4: product.v1.CreateProductResponse
@@ -551,13 +551,13 @@ var file_productmanagement_product_v1_product_proto_goTypes = []any{
 	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
 }
 var file_productmanagement_product_v1_product_proto_depIdxs = []int32{
-	1,  // 0: product.v1.Product.images:type_name -> product.v1.ProductImages
+	1,  // 0: product.v1.Product.images:type_name -> product.v1.ProductImage
 	5,  // 1: product.v1.Product.properties:type_name -> google.protobuf.Struct
 	6,  // 2: product.v1.Product.created_at:type_name -> google.protobuf.Timestamp
 	6,  // 3: product.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
 	6,  // 4: product.v1.Product.deleted_at:type_name -> google.protobuf.Timestamp
-	6,  // 5: product.v1.ProductImages.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 6: product.v1.ProductImages.deleted_at:type_name -> google.protobuf.Timestamp
+	6,  // 5: product.v1.ProductImage.created_at:type_name -> google.protobuf.Timestamp
+	6,  // 6: product.v1.ProductImage.deleted_at:type_name -> google.protobuf.Timestamp
 	5,  // 7: product.v1.CreateProductRequest.properties:type_name -> google.protobuf.Struct
 	2,  // 8: product.v1.CreateProductRequest.images:type_name -> product.v1.ProductImageInput
 	0,  // 9: product.v1.CreateProductResponse.product:type_name -> product.v1.Product

@@ -22,14 +22,14 @@ message Product {
   string                    sku         = 6;
   int64                     stock       = 7;
   string                    status      = 8;
-  repeated ProductImages    images      = 9;
+  repeated ProductImage    images      = 9;
   google.protobuf.Struct    properties  = 10;
   google.protobuf.Timestamp created_at  = 11;
   google.protobuf.Timestamp updated_at  = 12;
   google.protobuf.Timestamp deleted_at  = 13;
 }
 
-message ProductImages{
+message ProductImage{
   string                    id         = 1;
   string                    product_id = 2;
   string                    image_url  = 3;

@@ -1,6 +1,8 @@
 package product
 
 import (
+	"time"
+
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
 
@@ -15,9 +17,9 @@ func ToProtoProduct(p *entity.Product) *productv1.Product {
 	}
 
 	// Map images
-	var protoImages []*productv1.ProductImages
+	var protoImages []*productv1.ProductImage
 	for _, img := range p.ProductImages {
-		protoImages = append(protoImages, &productv1.ProductImages{
+		protoImages = append(protoImages, &productv1.ProductImage{
 			Id:        img.ID.String(),
 			ProductId: img.ProductID.String(),
 			ImageUrl:  img.ImageUrl,
@@ -41,10 +43,23 @@ func ToProtoProduct(p *entity.Product) *productv1.Product {
 		Price:       p.Price,
 		Sku:         p.SKU,
 		Stock:       p.Stock,
-		Status:      string(*p.Status),
+		Status:      string(p.Status),
 		Properties:  props,
 		Images:      protoImages,
-		CreatedAt:   timestamppb.New(p.CreatedAt),
-		UpdatedAt:   timestamppb.New(*p.UpdatedAt),
+		CreatedAt:   toProtoTimestamp(&p.CreatedAt),
+		UpdatedAt:   toProtoTimestamp(p.UpdatedAt),
 	}
+}
+
+// toProtoTimestamp converts an optional time.Time pointer into a protobuf Timestamp.
+//
+// A nil time value is preserved as nil, allowing optional timestamps
+// (e.g. updated_at, deleted_at) to remain unset in the wire representation.
+//
+// This helper avoids leaking protobuf concerns into the domain layer.
+func toProtoTimestamp(t *time.Time) *timestamppb.Timestamp {
+	if t == nil {
+		return nil
+	}
+	return timestamppb.New(*t)
 }

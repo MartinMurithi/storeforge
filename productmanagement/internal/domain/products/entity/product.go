@@ -9,10 +9,10 @@ import (
 type ProductStatus string
 
 const (
-	Draft      ProductStatus = "draft"
-	Active     ProductStatus = "active"
-	Archived   ProductStatus = "archived"
-	OutOfStock ProductStatus = "out_of_stock"
+	ProductStatusDraft      ProductStatus = "draft"
+	ProductStatusActive     ProductStatus = "active"
+	ProductStatusArchived   ProductStatus = "archived"
+	ProductStatusOutOfStock ProductStatus = "out_of_stock"
 )
 
 // ProductProperties is our "BSON" equivalent.
@@ -27,7 +27,7 @@ type Product struct {
 	Price       int64
 	SKU         string
 	Stock       int64
-	Status      *ProductStatus
+	Status      ProductStatus
 	Properties  *ProductProperties
 	CreatedAt   time.Time
 	UpdatedAt   *time.Time

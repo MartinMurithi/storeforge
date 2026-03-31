@@ -53,8 +53,8 @@ func NewProductImageID(id string) (ProductImageID, error) {
 	return ProductImageID{value: u}, nil
 }
 
-func NewProductImageIDFromUUID(u uuid.UUID) TenantID {
-	return TenantID{value: pgtype.UUID{Bytes: u, Valid: true}}
+func NewProductImageIDFromUUID(u uuid.UUID) ProductImageID {
+	return ProductImageID{value: pgtype.UUID{Bytes: u, Valid: true}}
 }
 
 // ---------------------------------------------------------
@@ -97,3 +97,11 @@ func (t ProductImageID) String() string {
 
 func (t *TenantID) Scan(value interface{}) error { return t.value.Scan(value) }
 func (t TenantID) Value() (driver.Value, error)  { return t.value.Value() }
+
+func (p *ProductID) Scan(value interface{}) error {
+    return p.value.Scan(value)
+}
+
+func (p *ProductImageID) Scan(value interface{}) error {
+    return p.value.Scan(value)
+}
