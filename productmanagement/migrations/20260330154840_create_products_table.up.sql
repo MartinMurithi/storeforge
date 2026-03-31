@@ -1,5 +1,4 @@
 --CREATE TYPE product_status AS ENUM ('draft', 'active', 'archived', 'out_of_stock');
-
 /*
  We are using JSONB for product_properties to allow each tenant
  to define custom attributes for their products without altering
@@ -13,9 +12,10 @@
 CREATE TABLE IF NOT EXISTS products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    name VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
-    price NUMERIC(12, 2) NOT NULL,
+    price_cents BIGINT NOT NULL CHECK (price_cents >= 0),
+    currency CHAR(3) NOT NULL DEFAULT 'KES',
     sku VARCHAR(100) UNIQUE NOT NULL,
     stock_quantity INT DEFAULT 0,
     product_properties JSONB NOT NULL DEFAULT '{}',
@@ -25,4 +25,4 @@ CREATE TABLE IF NOT EXISTS products (
     deleted_at TIMESTAMP
 );
 -- Index for fast tenant queries
---CREATE INDEX idx_products_tenant ON products(tenant_id);
+-- CREATE INDEX idx_products_tenant ON products(tenant_id);

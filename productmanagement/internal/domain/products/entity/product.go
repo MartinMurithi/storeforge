@@ -25,6 +25,7 @@ type Product struct {
 	Name        string
 	Description string
 	Price       int64
+	Currency    string
 	SKU         string
 	Stock       int64
 	Status      ProductStatus

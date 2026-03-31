@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/value_object"
@@ -20,6 +21,8 @@ type ProductRepository struct {
 
 type IProductRepository interface {
 	CreateProduct(ctx context.Context, product *entity.Product) error
+	GetProductsByTenant(ctx context.Context, tenantID value_object.TenantID, p product.Pagination) ([]*entity.Product, int, error)
+	GetProductByID(ctx context.Context, tenantID value_object.TenantID, productID value_object.ProductID) (*entity.Product, error)
 }
 
 func NewProductRepository(db database.DB) IProductRepository {
@@ -53,14 +56,15 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 			tenant_id,
 			name,
 			description,
-			price,
+			price_cents,
+			currency,
 			sku,
 			stock_quantity,
 			product_properties,
 			product_status
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		RETURNING id, name, created_at
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		RETURNING id, name, created_at;
 	`
 
 	var id uuid.UUID
@@ -68,14 +72,15 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 	err = tx.QueryRow(
 		ctx,
 		productQuery,
-		product.TenantID,
-		product.Name,
-		product.Description,
-		product.Price,
-		product.SKU,
-		product.Stock,
-		product.Properties,
-		product.Status,
+		product.TenantID,    // $1
+		product.Name,        // $2
+		product.Description, // $3
+		product.Price,       // $4 -> price_cents
+		product.Currency,    // $5
+		product.SKU,         // $6
+		product.Stock,       // $7 -> stock_quantity
+		product.Properties,  // $8 -> jsonb
+		product.Status,      // $9 -> enum
 	).Scan(&id, &product.Name, &product.CreatedAt)
 
 	product.ID = value_object.NewProductIDFromUUID(id)
@@ -129,4 +134,265 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 	}
 
 	return tx.Commit(ctx)
+}
+
+func (repo *ProductRepository) GetProductsByTenant(ctx context.Context, tenantID value_object.TenantID, p product.Pagination) ([]*entity.Product, int, error) {
+	const op = "ProductRepository.GetProductsByTenant"
+
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+
+	// --- Total products Count ---
+	var totalProducts int
+	if err := repo.DB.QueryRow(ctx, `SELECT COUNT(*) FROM products WHERE tenant_id = $1 AND deleted_at IS NULL`, tenantID.Raw()).Scan(&totalProducts); err != nil {
+		return nil, 0, domain.TranslateProductRepoError(postgres.MapPostgresError(err))
+	}
+
+	var maxLimit = p.Limit
+	if p.Page < 1 {
+		p.Page = 1
+	}
+	if p.Limit <= 0 || p.Limit > maxLimit {
+		p.Limit = maxLimit
+	}
+
+	offset := (p.Page - 1) * p.Limit
+
+	query := `
+	SELECT
+		p.id,
+		p.tenant_id,
+		p.name,
+		p.description,
+		p.price_cents,
+		p.currency,
+		p.sku,
+		p.stock_quantity,
+		p.product_properties,
+		p.product_status,
+		p.created_at,
+		p.updated_at,
+
+		i.id,
+		i.image_url,
+		i.sort_order,
+		i.is_primary,
+		i.created_at
+
+	FROM products p
+	LEFT JOIN product_images i
+		ON p.id = i.product_id
+
+	WHERE p.tenant_id = $1
+	AND p.deleted_at IS NULL
+
+	ORDER BY p.created_at DESC, i.sort_order ASC
+	LIMIT $2 OFFSET $3
+	`
+
+	rows, err := repo.DB.Query(ctx, query, tenantID.Raw(), p.Limit, offset)
+	if err != nil {
+		return nil, 0, fmt.Errorf("[%s]: %w", op, err)
+	}
+	defer rows.Close()
+
+	productMap := map[string]*entity.Product{}
+
+	for rows.Next() {
+
+		var (
+			productID  uuid.UUID
+			dbTenantID uuid.UUID
+
+			imageID        *uuid.UUID
+			imageURL       *string
+			sortOrder      *int
+			isPrimary      *bool
+			imageCreatedAt *time.Time
+
+			product entity.Product
+		)
+
+		err = rows.Scan(
+			&productID,
+			&dbTenantID,
+			&product.Name,
+			&product.Description,
+			&product.Price,
+			&product.Currency,
+			&product.SKU,
+			&product.Stock,
+			&product.Properties,
+			&product.Status,
+			&product.CreatedAt,
+			&product.UpdatedAt,
+
+			&imageID,
+			&imageURL,
+			&sortOrder,
+			&isPrimary,
+			&imageCreatedAt,
+		)
+
+		if err != nil {
+			return nil, 0, fmt.Errorf("[%s scan]: %w", op, err)
+		}
+
+		pID := productID.String()
+
+		if _, exists := productMap[pID]; !exists {
+
+			product.ID = value_object.NewProductIDFromUUID(productID)
+			product.TenantID = value_object.NewTenantIDFromUUID(dbTenantID)
+
+			product.ProductImages = []entity.ProductImage{}
+
+			productMap[pID] = &product
+		}
+
+		if imageID != nil {
+
+			img := entity.ProductImage{
+				ID:        value_object.NewProductImageIDFromUUID(*imageID),
+				ProductID: value_object.NewProductIDFromUUID(productID),
+				ImageUrl:  *imageURL,
+				SortOrder: *sortOrder,
+				IsPrimary: *isPrimary,
+				CreatedAt: *imageCreatedAt,
+			}
+
+			productMap[pID].ProductImages =
+				append(productMap[pID].ProductImages, img)
+		}
+	}
+
+	result := make([]*entity.Product, 0, len(productMap))
+
+	for _, p := range productMap {
+		result = append(result, p)
+	}
+
+	return result, totalProducts, nil
+}
+
+func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID value_object.TenantID, productID value_object.ProductID) (*entity.Product, error) {
+	const op = "ProductRepository.GetProductByID"
+
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	query := `
+	SELECT
+		p.id,
+		p.tenant_id,
+		p.name,
+		p.description,
+		p.price,
+		p.sku,
+		p.stock_quantity,
+		p.product_properties,
+		p.product_status,
+		p.created_at,
+		p.updated_at,
+
+		i.id,
+		i.image_url,
+		i.sort_order,
+		i.is_primary,
+		i.created_at
+
+	FROM products p
+	LEFT JOIN product_images i
+		ON p.id = i.product_id
+
+	WHERE p.id = $1
+	AND p.tenant_id = $2
+	AND p.deleted_at IS NULL
+
+	ORDER BY i.sort_order ASC
+	`
+
+	rows, err := repo.DB.Query(
+		ctx,
+		query,
+		productID.Raw(),
+		tenantID.Raw(),
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: %w", op, err)
+	}
+
+	defer rows.Close()
+
+	var product *entity.Product
+
+	for rows.Next() {
+
+		var (
+			dbProductID uuid.UUID
+			dbTenantID  uuid.UUID
+
+			imageID        *uuid.UUID
+			imageURL       *string
+			sortOrder      *int
+			isPrimary      *bool
+			imageCreatedAt *time.Time
+		)
+
+		if product == nil {
+			product = &entity.Product{}
+		}
+
+		err = rows.Scan(
+			&dbProductID,
+			&dbTenantID,
+			&product.Name,
+			&product.Description,
+			&product.Price,
+			&product.SKU,
+			&product.Stock,
+			&product.Properties,
+			&product.Status,
+			&product.CreatedAt,
+			&product.UpdatedAt,
+
+			&imageID,
+			&imageURL,
+			&sortOrder,
+			&isPrimary,
+			&imageCreatedAt,
+		)
+
+		if err != nil {
+			return nil, fmt.Errorf("[%s scan]: %w", op, err)
+		}
+
+		product.ID =
+			value_object.NewProductIDFromUUID(dbProductID)
+
+		product.TenantID =
+			value_object.NewTenantIDFromUUID(dbTenantID)
+
+		if imageID != nil {
+
+			img := entity.ProductImage{
+				ID:        value_object.NewProductImageIDFromUUID(*imageID),
+				ProductID: product.ID,
+				ImageUrl:  *imageURL,
+				SortOrder: *sortOrder,
+				IsPrimary: *isPrimary,
+				CreatedAt: *imageCreatedAt,
+			}
+
+			product.ProductImages =
+				append(product.ProductImages, img)
+		}
+	}
+
+	if product == nil {
+		return nil, nil
+	}
+
+	return product, nil
 }

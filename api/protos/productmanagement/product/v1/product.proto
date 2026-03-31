@@ -11,6 +11,7 @@ option go_package = "github.com/MartinMurithi/storeforge/api/protos/productmanag
 service ProductService {
     // Product Creation
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc GetTenantProducts(GetTenantProductsRequest) returns (GetTenantProductsResponse) {};
 }
 
 message Product {
@@ -19,14 +20,15 @@ message Product {
   string                    name        = 3;
   string                    description = 4;
   int64                     price       = 5;
-  string                    sku         = 6;
-  int64                     stock       = 7;
-  string                    status      = 8;
-  repeated ProductImage    images      = 9;
-  google.protobuf.Struct    properties  = 10;
-  google.protobuf.Timestamp created_at  = 11;
-  google.protobuf.Timestamp updated_at  = 12;
-  google.protobuf.Timestamp deleted_at  = 13;
+  string                    currency    = 6;
+  string                    sku         = 7;
+  int64                     stock       = 8;
+  string                    status      = 9;
+  repeated ProductImage     images      = 10;
+  google.protobuf.Struct    properties  = 11;
+  google.protobuf.Timestamp created_at  = 12;
+  google.protobuf.Timestamp updated_at  = 13;
+  google.protobuf.Timestamp deleted_at  = 14;
 }
 
 message ProductImage{
@@ -45,18 +47,44 @@ message ProductImageInput{
 }
 
 message CreateProductRequest {
-  string                 tenant_id   = 1;
-  string                 name        = 2;
-  string                 description = 3;
-  int64                  price       = 4;
-  string                 sku         = 5;
-  int64                  stock       = 6;
-  string                 status      = 7;
-  google.protobuf.Struct properties  = 8;
-  repeated ProductImageInput images = 9;
+  string                     tenant_id   = 1;
+  string                     name        = 2;
+  string                     description = 3;
+  int64                      price       = 4;
+  string                     sku         = 5;
+  int64                      stock       = 6;
+  string                     status      = 7;
+  google.protobuf.Struct     properties  = 8;
+  repeated ProductImageInput images      = 9;
 }
 
 message CreateProductResponse {
   Product product = 1;
   string  message = 2;
+}
+
+message Pagination{
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+// Meta info for paginated response
+message PaginationMeta {
+  int32 page        = 1;
+  int32 limit       = 2;
+  int32 total       = 3;
+  int32 total_pages = 4;
+  bool  has_next    = 5;
+  bool  has_prev    = 6;
+}
+
+message GetTenantProductsRequest{
+  string tenant_id = 1;
+  int32  page      = 2;
+  int32  limit     = 3;
+}
+
+message GetTenantProductsResponse{
+  repeated Product products = 1;
+  PaginationMeta   meta     = 2;
 }

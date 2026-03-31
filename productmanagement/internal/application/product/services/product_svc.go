@@ -102,3 +102,54 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 
 	return res, nil
 }
+
+func (s *ProductService) GetProductsByTenant(ctx context.Context, tenantID string, p product.Pagination) ([]*entity.Product, product.PaginationMeta, error) {
+	id, err := value_object.NewTenantID(tenantID)
+	if err != nil {
+		return nil, product.PaginationMeta{}, err
+	}
+
+	products, total, err := s.ProductRepo.GetProductsByTenant(ctx, id, p)
+	if err != nil {
+		return nil, product.PaginationMeta{}, err
+	}
+
+	totalPages := 0
+	if total > 0 {
+		totalPages = (total + p.Limit - 1) / p.Limit
+	}
+
+	meta := product.PaginationMeta{
+		Page:       p.Page,
+		Limit:      p.Limit,
+		Total:      total,
+		TotalPages: totalPages,
+		HasNext:    p.Page < totalPages,
+		HasPrev:    p.Page > 1,
+	}
+
+	return products, meta, nil
+}
+
+// func (s *ProductService) GetProductByID(ctx context.Context, tenantID string, productID string) (*product.ProductResponseDTO, error) {
+
+// 	tID, err := value_object.NewTenantID(tenantID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	pID, err := value_object.NewProductID(productID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	productEntity, err := s.ProductRepo.GetProductByID(ctx, tID, pID)
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	dto := mapper.ToProductResponse(productEntity)
+
+// 	return &dto, nil
+// }

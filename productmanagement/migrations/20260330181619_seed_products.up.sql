@@ -2,7 +2,7 @@ INSERT INTO products (
         tenant_id,
         name,
         description,
-        price,
+        price_cents,
         sku,
         stock_quantity,
         product_properties,
