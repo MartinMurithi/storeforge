@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
@@ -82,4 +83,31 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 	}
 
 	return result, nil
+}
+
+func (h *ProductGrpcHandler) GetTenantProducts(ctx context.Context, req *productv1.GetTenantProductsRequest) (*productv1.GetTenantProductsResponse, error) {
+	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+
+	log.Printf("extracted tenant id from metadata %s", tenantID)
+
+	if err != nil {
+		log.Printf("failed to extract tenant id from metadata %s", err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	pagination := &product.Pagination{
+		Page:  int(req.Page),
+		Limit: int(req.Limit),
+	}
+
+	products, meta, err := h.ProductService.GetProductsByTenant(ctx, tenantID, *pagination)
+
+	log.Printf("metadata %v", meta.Total)
+
+	if err != nil {
+		fmt.Printf("[PRODUCTGRPCHANDLER]: failed to fetch products %s\n", err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return product.ToProtoFetchTenantProductsResponse(products, &meta), nil
 }

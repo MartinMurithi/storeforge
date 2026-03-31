@@ -30,14 +30,15 @@ type Product struct {
 	Name          string                 `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
 	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	Price         int64                  `protobuf:"varint,5,opt,name=price,proto3" json:"price,omitempty"`
-	Sku           string                 `protobuf:"bytes,6,opt,name=sku,proto3" json:"sku,omitempty"`
-	Stock         int64                  `protobuf:"varint,7,opt,name=stock,proto3" json:"stock,omitempty"`
-	Status        string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"`
-	Images        []*ProductImage        `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
-	Properties    *structpb.Struct       `protobuf:"bytes,10,opt,name=properties,proto3" json:"properties,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,11,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
-	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
+	Sku           string                 `protobuf:"bytes,7,opt,name=sku,proto3" json:"sku,omitempty"`
+	Stock         int64                  `protobuf:"varint,8,opt,name=stock,proto3" json:"stock,omitempty"`
+	Status        string                 `protobuf:"bytes,9,opt,name=status,proto3" json:"status,omitempty"`
+	Images        []*ProductImage        `protobuf:"bytes,10,rep,name=images,proto3" json:"images,omitempty"`
+	Properties    *structpb.Struct       `protobuf:"bytes,11,opt,name=properties,proto3" json:"properties,omitempty"`
+	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	UpdatedAt     *timestamppb.Timestamp `protobuf:"bytes,13,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	DeletedAt     *timestamppb.Timestamp `protobuf:"bytes,14,opt,name=deleted_at,json=deletedAt,proto3" json:"deleted_at,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -105,6 +106,13 @@ func (x *Product) GetPrice() int64 {
 		return x.Price
 	}
 	return 0
+}
+
+func (x *Product) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
 }
 
 func (x *Product) GetSku() string {
@@ -467,32 +475,282 @@ func (x *CreateProductResponse) GetMessage() string {
 	return ""
 }
 
+type Pagination struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Pagination) Reset() {
+	*x = Pagination{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Pagination) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Pagination) ProtoMessage() {}
+
+func (x *Pagination) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Pagination.ProtoReflect.Descriptor instead.
+func (*Pagination) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Pagination) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *Pagination) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+// Meta info for paginated response
+type PaginationMeta struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Page          int32                  `protobuf:"varint,1,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,2,opt,name=limit,proto3" json:"limit,omitempty"`
+	Total         int32                  `protobuf:"varint,3,opt,name=total,proto3" json:"total,omitempty"`
+	TotalPages    int32                  `protobuf:"varint,4,opt,name=total_pages,json=totalPages,proto3" json:"total_pages,omitempty"`
+	HasNext       bool                   `protobuf:"varint,5,opt,name=has_next,json=hasNext,proto3" json:"has_next,omitempty"`
+	HasPrev       bool                   `protobuf:"varint,6,opt,name=has_prev,json=hasPrev,proto3" json:"has_prev,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaginationMeta) Reset() {
+	*x = PaginationMeta{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaginationMeta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaginationMeta) ProtoMessage() {}
+
+func (x *PaginationMeta) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaginationMeta.ProtoReflect.Descriptor instead.
+func (*PaginationMeta) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *PaginationMeta) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetTotal() int32 {
+	if x != nil {
+		return x.Total
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetTotalPages() int32 {
+	if x != nil {
+		return x.TotalPages
+	}
+	return 0
+}
+
+func (x *PaginationMeta) GetHasNext() bool {
+	if x != nil {
+		return x.HasNext
+	}
+	return false
+}
+
+func (x *PaginationMeta) GetHasPrev() bool {
+	if x != nil {
+		return x.HasPrev
+	}
+	return false
+}
+
+type GetTenantProductsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	Page          int32                  `protobuf:"varint,2,opt,name=page,proto3" json:"page,omitempty"`
+	Limit         int32                  `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTenantProductsRequest) Reset() {
+	*x = GetTenantProductsRequest{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTenantProductsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTenantProductsRequest) ProtoMessage() {}
+
+func (x *GetTenantProductsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTenantProductsRequest.ProtoReflect.Descriptor instead.
+func (*GetTenantProductsRequest) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *GetTenantProductsRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *GetTenantProductsRequest) GetPage() int32 {
+	if x != nil {
+		return x.Page
+	}
+	return 0
+}
+
+func (x *GetTenantProductsRequest) GetLimit() int32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type GetTenantProductsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Products      []*Product             `protobuf:"bytes,1,rep,name=products,proto3" json:"products,omitempty"`
+	Meta          *PaginationMeta        `protobuf:"bytes,2,opt,name=meta,proto3" json:"meta,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTenantProductsResponse) Reset() {
+	*x = GetTenantProductsResponse{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTenantProductsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTenantProductsResponse) ProtoMessage() {}
+
+func (x *GetTenantProductsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTenantProductsResponse.ProtoReflect.Descriptor instead.
+func (*GetTenantProductsResponse) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *GetTenantProductsResponse) GetProducts() []*Product {
+	if x != nil {
+		return x.Products
+	}
+	return nil
+}
+
+func (x *GetTenantProductsResponse) GetMeta() *PaginationMeta {
+	if x != nil {
+		return x.Meta
+	}
+	return nil
+}
+
 var File_productmanagement_product_v1_product_proto protoreflect.FileDescriptor
 
 const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\n" +
 	"*productmanagement/product/v1/product.proto\x12\n" +
-	"product.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xde\x03\n" +
+	"product.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/protobuf/struct.proto\"\xfa\x03\n" +
 	"\aProduct\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1b\n" +
 	"\ttenant_id\x18\x02 \x01(\tR\btenantId\x12\x12\n" +
 	"\x04name\x18\x03 \x01(\tR\x04name\x12 \n" +
 	"\vdescription\x18\x04 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05price\x18\x05 \x01(\x03R\x05price\x12\x10\n" +
-	"\x03sku\x18\x06 \x01(\tR\x03sku\x12\x14\n" +
-	"\x05stock\x18\a \x01(\x03R\x05stock\x12\x16\n" +
-	"\x06status\x18\b \x01(\tR\x06status\x120\n" +
-	"\x06images\x18\t \x03(\v2\x18.product.v1.ProductImageR\x06images\x127\n" +
+	"\x05price\x18\x05 \x01(\x03R\x05price\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12\x10\n" +
+	"\x03sku\x18\a \x01(\tR\x03sku\x12\x14\n" +
+	"\x05stock\x18\b \x01(\x03R\x05stock\x12\x16\n" +
+	"\x06status\x18\t \x01(\tR\x06status\x120\n" +
+	"\x06images\x18\n" +
+	" \x03(\v2\x18.product.v1.ProductImageR\x06images\x127\n" +
 	"\n" +
-	"properties\x18\n" +
-	" \x01(\v2\x17.google.protobuf.StructR\n" +
+	"properties\x18\v \x01(\v2\x17.google.protobuf.StructR\n" +
 	"properties\x129\n" +
 	"\n" +
-	"created_at\x18\v \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
+	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
-	"updated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
+	"updated_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tupdatedAt\x129\n" +
 	"\n" +
-	"deleted_at\x18\r \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\x8e\x02\n" +
+	"deleted_at\x18\x0e \x01(\v2\x1a.google.protobuf.TimestampR\tdeletedAt\"\x8e\x02\n" +
 	"\fProductImage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1d\n" +
 	"\n" +
@@ -524,9 +782,29 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\x06images\x18\t \x03(\v2\x1d.product.v1.ProductImageInputR\x06images\"`\n" +
 	"\x15CreateProductResponse\x12-\n" +
 	"\aproduct\x18\x01 \x01(\v2\x13.product.v1.ProductR\aproduct\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2f\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"6\n" +
+	"\n" +
+	"Pagination\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\"\xa7\x01\n" +
+	"\x0ePaginationMeta\x12\x12\n" +
+	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12\x14\n" +
+	"\x05total\x18\x03 \x01(\x05R\x05total\x12\x1f\n" +
+	"\vtotal_pages\x18\x04 \x01(\x05R\n" +
+	"totalPages\x12\x19\n" +
+	"\bhas_next\x18\x05 \x01(\bR\ahasNext\x12\x19\n" +
+	"\bhas_prev\x18\x06 \x01(\bR\ahasPrev\"a\n" +
+	"\x18GetTenantProductsRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x12\n" +
+	"\x04page\x18\x02 \x01(\x05R\x04page\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\x05R\x05limit\"|\n" +
+	"\x19GetTenantProductsResponse\x12/\n" +
+	"\bproducts\x18\x01 \x03(\v2\x13.product.v1.ProductR\bproducts\x12.\n" +
+	"\x04meta\x18\x02 \x01(\v2\x1a.product.v1.PaginationMetaR\x04meta2\xca\x01\n" +
 	"\x0eProductService\x12T\n" +
-	"\rCreateProduct\x12 .product.v1.CreateProductRequest\x1a!.product.v1.CreateProductResponseBWZUgithub.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1b\x06proto3"
+	"\rCreateProduct\x12 .product.v1.CreateProductRequest\x1a!.product.v1.CreateProductResponse\x12b\n" +
+	"\x11GetTenantProducts\x12$.product.v1.GetTenantProductsRequest\x1a%.product.v1.GetTenantProductsResponse\"\x00BWZUgithub.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1b\x06proto3"
 
 var (
 	file_productmanagement_product_v1_product_proto_rawDescOnce sync.Once
@@ -540,34 +818,42 @@ func file_productmanagement_product_v1_product_proto_rawDescGZIP() []byte {
 	return file_productmanagement_product_v1_product_proto_rawDescData
 }
 
-var file_productmanagement_product_v1_product_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_productmanagement_product_v1_product_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_productmanagement_product_v1_product_proto_goTypes = []any{
-	(*Product)(nil),               // 0: product.v1.Product
-	(*ProductImage)(nil),          // 1: product.v1.ProductImage
-	(*ProductImageInput)(nil),     // 2: product.v1.ProductImageInput
-	(*CreateProductRequest)(nil),  // 3: product.v1.CreateProductRequest
-	(*CreateProductResponse)(nil), // 4: product.v1.CreateProductResponse
-	(*structpb.Struct)(nil),       // 5: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil), // 6: google.protobuf.Timestamp
+	(*Product)(nil),                   // 0: product.v1.Product
+	(*ProductImage)(nil),              // 1: product.v1.ProductImage
+	(*ProductImageInput)(nil),         // 2: product.v1.ProductImageInput
+	(*CreateProductRequest)(nil),      // 3: product.v1.CreateProductRequest
+	(*CreateProductResponse)(nil),     // 4: product.v1.CreateProductResponse
+	(*Pagination)(nil),                // 5: product.v1.Pagination
+	(*PaginationMeta)(nil),            // 6: product.v1.PaginationMeta
+	(*GetTenantProductsRequest)(nil),  // 7: product.v1.GetTenantProductsRequest
+	(*GetTenantProductsResponse)(nil), // 8: product.v1.GetTenantProductsResponse
+	(*structpb.Struct)(nil),           // 9: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),     // 10: google.protobuf.Timestamp
 }
 var file_productmanagement_product_v1_product_proto_depIdxs = []int32{
 	1,  // 0: product.v1.Product.images:type_name -> product.v1.ProductImage
-	5,  // 1: product.v1.Product.properties:type_name -> google.protobuf.Struct
-	6,  // 2: product.v1.Product.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 3: product.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
-	6,  // 4: product.v1.Product.deleted_at:type_name -> google.protobuf.Timestamp
-	6,  // 5: product.v1.ProductImage.created_at:type_name -> google.protobuf.Timestamp
-	6,  // 6: product.v1.ProductImage.deleted_at:type_name -> google.protobuf.Timestamp
-	5,  // 7: product.v1.CreateProductRequest.properties:type_name -> google.protobuf.Struct
+	9,  // 1: product.v1.Product.properties:type_name -> google.protobuf.Struct
+	10, // 2: product.v1.Product.created_at:type_name -> google.protobuf.Timestamp
+	10, // 3: product.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
+	10, // 4: product.v1.Product.deleted_at:type_name -> google.protobuf.Timestamp
+	10, // 5: product.v1.ProductImage.created_at:type_name -> google.protobuf.Timestamp
+	10, // 6: product.v1.ProductImage.deleted_at:type_name -> google.protobuf.Timestamp
+	9,  // 7: product.v1.CreateProductRequest.properties:type_name -> google.protobuf.Struct
 	2,  // 8: product.v1.CreateProductRequest.images:type_name -> product.v1.ProductImageInput
 	0,  // 9: product.v1.CreateProductResponse.product:type_name -> product.v1.Product
-	3,  // 10: product.v1.ProductService.CreateProduct:input_type -> product.v1.CreateProductRequest
-	4,  // 11: product.v1.ProductService.CreateProduct:output_type -> product.v1.CreateProductResponse
-	11, // [11:12] is the sub-list for method output_type
-	10, // [10:11] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	0,  // 10: product.v1.GetTenantProductsResponse.products:type_name -> product.v1.Product
+	6,  // 11: product.v1.GetTenantProductsResponse.meta:type_name -> product.v1.PaginationMeta
+	3,  // 12: product.v1.ProductService.CreateProduct:input_type -> product.v1.CreateProductRequest
+	7,  // 13: product.v1.ProductService.GetTenantProducts:input_type -> product.v1.GetTenantProductsRequest
+	4,  // 14: product.v1.ProductService.CreateProduct:output_type -> product.v1.CreateProductResponse
+	8,  // 15: product.v1.ProductService.GetTenantProducts:output_type -> product.v1.GetTenantProductsResponse
+	14, // [14:16] is the sub-list for method output_type
+	12, // [12:14] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_productmanagement_product_v1_product_proto_init() }
@@ -581,7 +867,7 @@ func file_productmanagement_product_v1_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_productmanagement_product_v1_product_proto_rawDesc), len(file_productmanagement_product_v1_product_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   5,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

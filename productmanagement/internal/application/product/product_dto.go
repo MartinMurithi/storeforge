@@ -9,7 +9,7 @@ type CreateProductRequestDTO struct {
 	Description string                    `json:"description"`
 	SKU         string                    `json:"sku"`
 	Stock       int64                     `json:"stock"`
-	Status      entity.ProductStatus     `json:"status"`
+	Status      entity.ProductStatus      `json:"status"`
 	Properties  *entity.ProductProperties `json:"properties"`
 	Images      []ProductImageInputDTO    `json:"images"`
 }
@@ -24,4 +24,10 @@ type ProductImageInputDTO struct {
 type CreateProductResponseDTO struct {
 	Product *entity.Product `json:"product"`
 	Message string          `json:"message"`
+}
+
+type GetTenantProductsRequestDTO struct {
+	TenantID string `json:"tenant_id"`
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
 }

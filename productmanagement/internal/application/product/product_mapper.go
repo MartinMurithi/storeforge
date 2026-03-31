@@ -41,6 +41,7 @@ func ToProtoProduct(p *entity.Product) *productv1.Product {
 		Name:        p.Name,
 		Description: p.Description,
 		Price:       p.Price,
+		Currency:    p.Currency,
 		Sku:         p.SKU,
 		Stock:       p.Stock,
 		Status:      string(p.Status),
@@ -62,4 +63,34 @@ func toProtoTimestamp(t *time.Time) *timestamppb.Timestamp {
 		return nil
 	}
 	return timestamppb.New(*t)
+}
+
+// ToProtoPaginationMeta converts internal pagination metadata to gRPC proto.
+func ToProtoPaginationMeta(meta *PaginationMeta) *productv1.PaginationMeta {
+	if meta == nil {
+		return nil
+	}
+
+	return &productv1.PaginationMeta{
+		Page:       int32(meta.Page),
+		Limit:      int32(meta.Limit),
+		Total:      int32(meta.Total),
+		TotalPages: int32(meta.TotalPages),
+		HasNext:    meta.HasNext,
+		HasPrev:    meta.HasPrev,
+	}
+}
+
+// ToProtoFetchTenantProductsResponse maps service-layer products + pagination → gRPC response
+func ToProtoFetchTenantProductsResponse(products []*entity.Product, meta *PaginationMeta) *productv1.GetTenantProductsResponse {
+	protoProducts := make([]*productv1.Product, len(products))
+
+	for i, u := range products {
+		protoProducts[i] = ToProtoProduct(u)
+	}
+
+	return &productv1.GetTenantProductsResponse{
+		Products: protoProducts,
+		Meta:     ToProtoPaginationMeta(meta),
+	}
 }
