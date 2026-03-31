@@ -90,6 +90,12 @@ func (h *TenantGrpcHandler) UpdateTenant(ctx context.Context, req *tenantv1.Upda
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
+	// tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	// if err != nil {
+	// 	log.Printf("[%s] failed to extract tenant id: %v", op, err)
+	// 	return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	// }
+
 	dtoReq := &dtos.UpdateTenantRequestDTO{
 		TenantID: req.TenantId,
 		UserID:   userID,

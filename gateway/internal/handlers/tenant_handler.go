@@ -128,8 +128,9 @@ func (h *TenantHandler) UpdateTenant(c *gin.Context) {
 	tenantID, err := request.GetParamId(c)
 
 	if err != nil {
-		code, slug, msg := errconv.FromGrpcToHttp(err)
-		response.Error(c, code, slug, msg)
+		// code, slug, msg := errconv.FromGrpcToHttp(err)
+		fmt.Println("error getting tenant ID: %w", err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant ID not found")
 		return
 	}
 
