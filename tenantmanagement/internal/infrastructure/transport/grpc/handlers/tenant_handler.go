@@ -68,9 +68,17 @@ func (h *TenantGrpcHandler) GetTenantContext(ctx context.Context, req *tenantv1.
 
 	log.Printf("extracted user id %s", userID)
 
+	tenantD, err := auth.GetTenantIDFromMetadata(ctx)
+	if err != nil {
+		log.Printf("[%s] failed to extract tenant id from metadata: %v", "GetTenantContext", err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	log.Printf("extracted tenant id %s", tenantD)
+
 	dtoReq := dtos.GetTenantContextRequestDTO{
 		UserId:   userID,
-		TenantId: req.TenantId,
+		TenantId: tenantD,
 	}
 
 	tenantCtxResp, err := h.TenantService.GetTenantContext(ctx, dtoReq)
@@ -90,20 +98,20 @@ func (h *TenantGrpcHandler) UpdateTenant(ctx context.Context, req *tenantv1.Upda
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
-	// tenantID, err := auth.GetTenantIDFromMetadata(ctx)
-	// if err != nil {
-	// 	log.Printf("[%s] failed to extract tenant id: %v", op, err)
-	// 	return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
-	// }
+	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	if err != nil {
+		log.Printf("[%s] failed to extract tenant id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
 
 	dtoReq := &dtos.UpdateTenantRequestDTO{
-		TenantID: req.TenantId,
+		TenantID: tenantID,
 		UserID:   userID,
 	}
 
 	if req.Settings != nil {
 		dtoReq.Settings = &dtos.SettingsUpdateDTO{
-			Config:  req.Settings.ThemeConfig.AsMap(),
+			Config: req.Settings.ThemeConfig.AsMap(),
 		}
 	}
 

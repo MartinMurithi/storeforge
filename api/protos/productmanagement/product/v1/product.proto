@@ -57,6 +57,7 @@ message CreateProductRequest {
   string                     status      = 7;
   google.protobuf.Struct     properties  = 8;
   repeated ProductImageInput images      = 9;
+  string user_id = 10;
 }
 
 message CreateProductResponse {

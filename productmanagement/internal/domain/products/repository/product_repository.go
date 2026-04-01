@@ -112,7 +112,7 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 				is_primary
 			)
 			VALUES ($1,$2,$3,$4)
-			RETURNING id, product_id, created_at
+			RETURNING id, product_id, created_at, sort_order, is_primary
 		`
 
 		for _, img := range product.ProductImages {
@@ -120,7 +120,10 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 			var dbImgID uuid.UUID
 			var dbProdID uuid.UUID
 
-			err = tx.QueryRow(ctx, imageQuery, product.ID.Raw(), img.ImageUrl, img.SortOrder, img.IsPrimary).Scan(&dbImgID, &dbProdID, &img.CreatedAt)
+			img.ID = value_object.NewProductImageIDFromUUID(dbImgID)
+			img.ProductID = value_object.NewProductIDFromUUID(dbProdID)
+
+			err = tx.QueryRow(ctx, imageQuery, product.ID.Raw(), img.ImageUrl, img.SortOrder, img.IsPrimary).Scan(&img.ID, &img.ProductID, &img.CreatedAt, &img.SortOrder, &img.IsPrimary)
 			if err != nil {
 				log.Printf("[%s error inserting image]: %v", op, err)
 				return fmt.Errorf(
@@ -128,8 +131,6 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 					domain.TranslateProductRepoError(postgres.MapPostgresError(err)),
 				)
 			}
-			img.ID = value_object.NewProductImageIDFromUUID(dbImgID)
-			img.ProductID = value_object.NewProductIDFromUUID(dbProdID)
 		}
 	}
 
@@ -275,7 +276,12 @@ func (repo *ProductRepository) GetProductsByTenant(ctx context.Context, tenantID
 	return result, totalProducts, nil
 }
 
-func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID value_object.TenantID, productID value_object.ProductID) (*entity.Product, error) {
+func (repo *ProductRepository) GetProductByID(
+	ctx context.Context,
+	tenantID value_object.TenantID,
+	productID value_object.ProductID,
+) (*entity.Product, error) {
+
 	const op = "ProductRepository.GetProductByID"
 
 	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
@@ -287,7 +293,8 @@ func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID valu
 		p.tenant_id,
 		p.name,
 		p.description,
-		p.price,
+		p.price_cents,
+		p.currency,
 		p.sku,
 		p.stock_quantity,
 		p.product_properties,
@@ -308,8 +315,6 @@ func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID valu
 	WHERE p.id = $1
 	AND p.tenant_id = $2
 	AND p.deleted_at IS NULL
-
-	ORDER BY i.sort_order ASC
 	`
 
 	rows, err := repo.DB.Query(
@@ -318,44 +323,42 @@ func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID valu
 		productID.Raw(),
 		tenantID.Raw(),
 	)
-
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
-
 	defer rows.Close()
 
-	var product *entity.Product
+	var prod *entity.Product
 
 	for rows.Next() {
 
-		var (
-			dbProductID uuid.UUID
-			dbTenantID  uuid.UUID
+		// nullable image fields because of LEFT JOIN
+		var imageID *uuid.UUID
+		var imageURL *string
+		var sortOrder *int
+		var isPrimary *bool
+		var imageCreatedAt *time.Time
 
-			imageID        *uuid.UUID
-			imageURL       *string
-			sortOrder      *int
-			isPrimary      *bool
-			imageCreatedAt *time.Time
-		)
-
-		if product == nil {
-			product = &entity.Product{}
+		// initialize once
+		if prod == nil {
+			prod = &entity.Product{
+				ProductImages: make([]entity.ProductImage, 0),
+			}
 		}
 
-		err = rows.Scan(
-			&dbProductID,
-			&dbTenantID,
-			&product.Name,
-			&product.Description,
-			&product.Price,
-			&product.SKU,
-			&product.Stock,
-			&product.Properties,
-			&product.Status,
-			&product.CreatedAt,
-			&product.UpdatedAt,
+		err := rows.Scan(
+			&prod.ID,
+			&prod.TenantID,
+			&prod.Name,
+			&prod.Description,
+			&prod.Price,
+			&prod.Currency,
+			&prod.SKU,
+			&prod.Stock,
+			&prod.Properties,
+			&prod.Status,
+			&prod.CreatedAt,
+			&prod.UpdatedAt,
 
 			&imageID,
 			&imageURL,
@@ -365,34 +368,32 @@ func (repo *ProductRepository) GetProductByID(ctx context.Context, tenantID valu
 		)
 
 		if err != nil {
-			return nil, fmt.Errorf("[%s scan]: %w", op, err)
+			return nil, fmt.Errorf("[%s]: %w", op, err)
 		}
 
-		product.ID =
-			value_object.NewProductIDFromUUID(dbProductID)
-
-		product.TenantID =
-			value_object.NewTenantIDFromUUID(dbTenantID)
-
+		// append image if present
 		if imageID != nil {
 
 			img := entity.ProductImage{
 				ID:        value_object.NewProductImageIDFromUUID(*imageID),
-				ProductID: product.ID,
+				ProductID: value_object.NewProductIDFromUUID(prod.ID.Raw().Bytes),
 				ImageUrl:  *imageURL,
-				SortOrder: *sortOrder,
+				SortOrder: int(*sortOrder),
 				IsPrimary: *isPrimary,
 				CreatedAt: *imageCreatedAt,
 			}
 
-			product.ProductImages =
-				append(product.ProductImages, img)
+			prod.ProductImages = append(prod.ProductImages, img)
 		}
 	}
 
-	if product == nil {
-		return nil, nil
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("[%s]: %w", op, err)
 	}
 
-	return product, nil
+	if prod == nil {
+		return nil, fmt.Errorf("[%s]: product not found", op)
+	}
+
+	return prod, nil
 }

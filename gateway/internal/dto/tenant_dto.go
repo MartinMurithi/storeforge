@@ -3,7 +3,7 @@ package dto
 import "time"
 
 type CreateTenantResponseDTO struct {
-	Message  string      `json:"message`
+	Message  string      `json:"message"`
 	Tenant   TenantDTO   `json:"tenant"`
 	Theme    ThemeDTO    `json:"theme"`
 	Settings SettingsDTO `json:"settings"`

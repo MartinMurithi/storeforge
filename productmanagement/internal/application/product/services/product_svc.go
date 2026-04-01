@@ -33,9 +33,11 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 	// -------------------------
 	// Validate required fields
 	// -------------------------
-	if req.Name == "" || req.TenantID == "" || req.SKU == "" {
-		return nil, fmt.Errorf("[%s]: tenant_id, sku and name are required", op)
+	if req.Name == "" || req.TenantID == "" || req.UserID == "" || req.SKU == "" {
+		return nil, fmt.Errorf("[%s]: tenant_id, user_id, sku and name are required", op)
 	}
+
+	if req.
 
 	if req.Stock < 0 {
 		return nil, fmt.Errorf("[%s]: stock cannot be negative", op)
