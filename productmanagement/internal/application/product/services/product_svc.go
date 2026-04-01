@@ -53,9 +53,6 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
 	}
 
-	// Convert price from shillings to cents
-	priceCents := req.Price * 100
-
 	newProduct := &entity.Product{
 		TenantID:    tenantID,
 		Name:        req.Name,
@@ -64,7 +61,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		Stock:       req.Stock,
 		Status:      req.Status,
 		Properties:  req.Properties,
-		Price:       priceCents,
+		Price:       req.Price,
 	}
 
 	// -------------------------
