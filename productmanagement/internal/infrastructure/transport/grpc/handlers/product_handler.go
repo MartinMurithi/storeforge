@@ -116,3 +116,23 @@ func (h *ProductGrpcHandler) GetTenantProducts(ctx context.Context, req *product
 
 	return product.ToProtoFetchTenantProductsResponse(products, &meta), nil
 }
+
+func (h *ProductGrpcHandler) GetProductByID(ctx context.Context, req *productv1.GetProductByIDRequest) (*productv1.GetProductByIDResponse, error) {
+	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+
+	log.Printf("extracted tenant id from metadata %s", tenantID)
+
+	if err != nil {
+		log.Printf("failed to extract tenant id from metadata %s", err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	prod, err := h.ProductService.GetProductByID(ctx, tenantID, req.ProductId)
+
+	if err != nil {
+		fmt.Printf("[PRODUCTGRPCHANDLER]: failed to fetch product %s\n", err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &productv1.GetProductByIDResponse{Product: product.ToProtoProduct(prod)}, nil
+}

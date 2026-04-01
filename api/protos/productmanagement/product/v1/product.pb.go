@@ -724,6 +724,102 @@ func (x *GetTenantProductsResponse) GetMeta() *PaginationMeta {
 	return nil
 }
 
+type GetProductByIDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TenantId      string                 `protobuf:"bytes,1,opt,name=tenant_id,json=tenantId,proto3" json:"tenant_id,omitempty"`
+	ProductId     string                 `protobuf:"bytes,2,opt,name=product_id,json=productId,proto3" json:"product_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetProductByIDRequest) Reset() {
+	*x = GetProductByIDRequest{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetProductByIDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProductByIDRequest) ProtoMessage() {}
+
+func (x *GetProductByIDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProductByIDRequest.ProtoReflect.Descriptor instead.
+func (*GetProductByIDRequest) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetProductByIDRequest) GetTenantId() string {
+	if x != nil {
+		return x.TenantId
+	}
+	return ""
+}
+
+func (x *GetProductByIDRequest) GetProductId() string {
+	if x != nil {
+		return x.ProductId
+	}
+	return ""
+}
+
+type GetProductByIDResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Product       *Product               `protobuf:"bytes,1,opt,name=product,proto3" json:"product,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetProductByIDResponse) Reset() {
+	*x = GetProductByIDResponse{}
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetProductByIDResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetProductByIDResponse) ProtoMessage() {}
+
+func (x *GetProductByIDResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_productmanagement_product_v1_product_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetProductByIDResponse.ProtoReflect.Descriptor instead.
+func (*GetProductByIDResponse) Descriptor() ([]byte, []int) {
+	return file_productmanagement_product_v1_product_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetProductByIDResponse) GetProduct() *Product {
+	if x != nil {
+		return x.Product
+	}
+	return nil
+}
+
 var File_productmanagement_product_v1_product_proto protoreflect.FileDescriptor
 
 const file_productmanagement_product_v1_product_proto_rawDesc = "" +
@@ -801,10 +897,17 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\x05limit\x18\x03 \x01(\x05R\x05limit\"|\n" +
 	"\x19GetTenantProductsResponse\x12/\n" +
 	"\bproducts\x18\x01 \x03(\v2\x13.product.v1.ProductR\bproducts\x12.\n" +
-	"\x04meta\x18\x02 \x01(\v2\x1a.product.v1.PaginationMetaR\x04meta2\xca\x01\n" +
+	"\x04meta\x18\x02 \x01(\v2\x1a.product.v1.PaginationMetaR\x04meta\"S\n" +
+	"\x15GetProductByIDRequest\x12\x1b\n" +
+	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x1d\n" +
+	"\n" +
+	"product_id\x18\x02 \x01(\tR\tproductId\"G\n" +
+	"\x16GetProductByIDResponse\x12-\n" +
+	"\aproduct\x18\x01 \x01(\v2\x13.product.v1.ProductR\aproduct2\xa5\x02\n" +
 	"\x0eProductService\x12T\n" +
 	"\rCreateProduct\x12 .product.v1.CreateProductRequest\x1a!.product.v1.CreateProductResponse\x12b\n" +
-	"\x11GetTenantProducts\x12$.product.v1.GetTenantProductsRequest\x1a%.product.v1.GetTenantProductsResponse\"\x00BWZUgithub.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1b\x06proto3"
+	"\x11GetTenantProducts\x12$.product.v1.GetTenantProductsRequest\x1a%.product.v1.GetTenantProductsResponse\"\x00\x12Y\n" +
+	"\x0eGetProductByID\x12!.product.v1.GetProductByIDRequest\x1a\".product.v1.GetProductByIDResponse\"\x00BWZUgithub.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1b\x06proto3"
 
 var (
 	file_productmanagement_product_v1_product_proto_rawDescOnce sync.Once
@@ -818,7 +921,7 @@ func file_productmanagement_product_v1_product_proto_rawDescGZIP() []byte {
 	return file_productmanagement_product_v1_product_proto_rawDescData
 }
 
-var file_productmanagement_product_v1_product_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_productmanagement_product_v1_product_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_productmanagement_product_v1_product_proto_goTypes = []any{
 	(*Product)(nil),                   // 0: product.v1.Product
 	(*ProductImage)(nil),              // 1: product.v1.ProductImage
@@ -829,31 +932,36 @@ var file_productmanagement_product_v1_product_proto_goTypes = []any{
 	(*PaginationMeta)(nil),            // 6: product.v1.PaginationMeta
 	(*GetTenantProductsRequest)(nil),  // 7: product.v1.GetTenantProductsRequest
 	(*GetTenantProductsResponse)(nil), // 8: product.v1.GetTenantProductsResponse
-	(*structpb.Struct)(nil),           // 9: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil),     // 10: google.protobuf.Timestamp
+	(*GetProductByIDRequest)(nil),     // 9: product.v1.GetProductByIDRequest
+	(*GetProductByIDResponse)(nil),    // 10: product.v1.GetProductByIDResponse
+	(*structpb.Struct)(nil),           // 11: google.protobuf.Struct
+	(*timestamppb.Timestamp)(nil),     // 12: google.protobuf.Timestamp
 }
 var file_productmanagement_product_v1_product_proto_depIdxs = []int32{
 	1,  // 0: product.v1.Product.images:type_name -> product.v1.ProductImage
-	9,  // 1: product.v1.Product.properties:type_name -> google.protobuf.Struct
-	10, // 2: product.v1.Product.created_at:type_name -> google.protobuf.Timestamp
-	10, // 3: product.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
-	10, // 4: product.v1.Product.deleted_at:type_name -> google.protobuf.Timestamp
-	10, // 5: product.v1.ProductImage.created_at:type_name -> google.protobuf.Timestamp
-	10, // 6: product.v1.ProductImage.deleted_at:type_name -> google.protobuf.Timestamp
-	9,  // 7: product.v1.CreateProductRequest.properties:type_name -> google.protobuf.Struct
+	11, // 1: product.v1.Product.properties:type_name -> google.protobuf.Struct
+	12, // 2: product.v1.Product.created_at:type_name -> google.protobuf.Timestamp
+	12, // 3: product.v1.Product.updated_at:type_name -> google.protobuf.Timestamp
+	12, // 4: product.v1.Product.deleted_at:type_name -> google.protobuf.Timestamp
+	12, // 5: product.v1.ProductImage.created_at:type_name -> google.protobuf.Timestamp
+	12, // 6: product.v1.ProductImage.deleted_at:type_name -> google.protobuf.Timestamp
+	11, // 7: product.v1.CreateProductRequest.properties:type_name -> google.protobuf.Struct
 	2,  // 8: product.v1.CreateProductRequest.images:type_name -> product.v1.ProductImageInput
 	0,  // 9: product.v1.CreateProductResponse.product:type_name -> product.v1.Product
 	0,  // 10: product.v1.GetTenantProductsResponse.products:type_name -> product.v1.Product
 	6,  // 11: product.v1.GetTenantProductsResponse.meta:type_name -> product.v1.PaginationMeta
-	3,  // 12: product.v1.ProductService.CreateProduct:input_type -> product.v1.CreateProductRequest
-	7,  // 13: product.v1.ProductService.GetTenantProducts:input_type -> product.v1.GetTenantProductsRequest
-	4,  // 14: product.v1.ProductService.CreateProduct:output_type -> product.v1.CreateProductResponse
-	8,  // 15: product.v1.ProductService.GetTenantProducts:output_type -> product.v1.GetTenantProductsResponse
-	14, // [14:16] is the sub-list for method output_type
-	12, // [12:14] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	0,  // 12: product.v1.GetProductByIDResponse.product:type_name -> product.v1.Product
+	3,  // 13: product.v1.ProductService.CreateProduct:input_type -> product.v1.CreateProductRequest
+	7,  // 14: product.v1.ProductService.GetTenantProducts:input_type -> product.v1.GetTenantProductsRequest
+	9,  // 15: product.v1.ProductService.GetProductByID:input_type -> product.v1.GetProductByIDRequest
+	4,  // 16: product.v1.ProductService.CreateProduct:output_type -> product.v1.CreateProductResponse
+	8,  // 17: product.v1.ProductService.GetTenantProducts:output_type -> product.v1.GetTenantProductsResponse
+	10, // 18: product.v1.ProductService.GetProductByID:output_type -> product.v1.GetProductByIDResponse
+	16, // [16:19] is the sub-list for method output_type
+	13, // [13:16] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_productmanagement_product_v1_product_proto_init() }
@@ -867,7 +975,7 @@ func file_productmanagement_product_v1_product_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_productmanagement_product_v1_product_proto_rawDesc), len(file_productmanagement_product_v1_product_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
