@@ -123,25 +123,22 @@ func (s *ProductService) GetProductsByTenant(ctx context.Context, tenantID strin
 	return products, meta, nil
 }
 
-// func (s *ProductService) GetProductByID(ctx context.Context, tenantID string, productID string) (*product.ProductResponseDTO, error) {
+func (s *ProductService) GetProductByID(ctx context.Context, tenantID string, productID string) (*entity.Product, error) {
+	tID, err := value_object.NewTenantID(tenantID)
+	if err != nil {
+		return nil, err
+	}
 
-// 	tID, err := value_object.NewTenantID(tenantID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	pID, err := value_object.NewProductID(productID)
+	if err != nil {
+		return nil, err
+	}
 
-// 	pID, err := value_object.NewProductID(productID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	product, err := s.ProductRepo.GetProductByID(ctx, tID, pID)
 
-// 	productEntity, err := s.ProductRepo.GetProductByID(ctx, tID, pID)
+	if err != nil {
+		return nil, err
+	}
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	dto := mapper.ToProductResponse(productEntity)
-
-// 	return &dto, nil
-// }
+	return product, nil
+}

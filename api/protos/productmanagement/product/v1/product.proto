@@ -12,6 +12,7 @@ service ProductService {
     // Product Creation
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
   rpc GetTenantProducts(GetTenantProductsRequest) returns (GetTenantProductsResponse) {};
+  rpc GetProductByID(GetProductByIDRequest) returns (GetProductByIDResponse) {};
 }
 
 message Product {
@@ -87,4 +88,13 @@ message GetTenantProductsRequest{
 message GetTenantProductsResponse{
   repeated Product products = 1;
   PaginationMeta   meta     = 2;
+}
+
+message GetProductByIDRequest{
+  string tenant_id = 1;
+  string product_id      = 2;
+}
+
+message GetProductByIDResponse{
+  Product product = 1;
 }
