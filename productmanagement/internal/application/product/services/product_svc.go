@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/repository"
@@ -26,7 +25,7 @@ func NewProductService(pr repository.IProductRepository) *ProductService {
 // CreateProduct orchestrates creation of a new product and its images.
 // Handles stock/price validation, image normalization (first image = primary),
 // and persists everything atomically.
-func (s *ProductService) CreateProduct(ctx context.Context, req product.CreateProductRequestDTO) (*productv1.CreateProductResponse, error) {
+func (s *ProductService) CreateProduct(ctx context.Context, req product.CreateProductRequestDTO) (*entity.Product, error) {
 	const op = "ProductService.CreateProduct"
 
 	log.Printf("[%s]: request received: %+v", op, req)
@@ -54,6 +53,9 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
 	}
 
+	// Convert price from shillings to cents
+	priceCents := req.Price * 100
+
 	newProduct := &entity.Product{
 		TenantID:    tenantID,
 		Name:        req.Name,
@@ -62,7 +64,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		Stock:       req.Stock,
 		Status:      req.Status,
 		Properties:  req.Properties,
-		Price:       req.Price,
+		Price:       priceCents,
 	}
 
 	// -------------------------
@@ -93,14 +95,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 
 	log.Printf("[%s]: product created successfully: id=%s, name=%s", op, newProduct.ID.String(), newProduct.Name)
 
-	productResp := product.ToProtoProduct(newProduct)
-
-	res := &productv1.CreateProductResponse{
-		Product: productResp,
-		Message: "Product Created Successfully",
-	}
-
-	return res, nil
+	return newProduct, nil
 }
 
 func (s *ProductService) GetProductsByTenant(ctx context.Context, tenantID string, p product.Pagination) ([]*entity.Product, product.PaginationMeta, error) {

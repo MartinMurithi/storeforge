@@ -64,7 +64,7 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 			product_status
 		)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		RETURNING id, name, created_at;
+		RETURNING id, name, currency, created_at;
 	`
 
 	var id uuid.UUID
@@ -81,7 +81,7 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 		product.Stock,       // $7 -> stock_quantity
 		product.Properties,  // $8 -> jsonb
 		product.Status,      // $9 -> enum
-	).Scan(&id, &product.Name, &product.CreatedAt)
+	).Scan(&id, &product.Name, &product.Currency, &product.CreatedAt)
 
 	product.ID = value_object.NewProductIDFromUUID(id)
 
