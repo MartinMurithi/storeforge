@@ -82,7 +82,12 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 		return nil, errconv.ToGrpcError(err)
 	}
 
-	return result, nil
+	res := &productv1.CreateProductResponse{
+		Product: product.ToProtoProduct(result),
+		Message: "Product Created Successfully",
+	}
+
+	return res, nil
 }
 
 func (h *ProductGrpcHandler) GetTenantProducts(ctx context.Context, req *productv1.GetTenantProductsRequest) (*productv1.GetTenantProductsResponse, error) {
