@@ -4,6 +4,7 @@ import "github.com/MartinMurithi/storeforge/productmanagement/internal/domain/pr
 
 type CreateProductRequestDTO struct {
 	TenantID    string                    `json:"tenant_id"`
+	UserID      string                    `json:"user_id"`
 	Name        string                    `json:"name"`
 	Price       int64                     `json:"price"`
 	Description string                    `json:"description"`
