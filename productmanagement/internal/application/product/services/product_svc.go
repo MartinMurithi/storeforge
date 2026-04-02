@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"log"
 
+	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
+	"github.com/MartinMurithi/storeforge/pkg/rbac"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/repository"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/value_object"
+	grpcclient "github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/grpc_client"
 )
 
 type ProductService struct {
-	ProductRepo repository.IProductRepository
+	ProductRepo     repository.IProductRepository
+	TenantSvcClient grpcclient.TenantSvcClient
 }
 
 // NewProductService creates a new instance of the ProductService.
@@ -37,8 +41,6 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		return nil, fmt.Errorf("[%s]: tenant_id, user_id, sku and name are required", op)
 	}
 
-	if req.
-
 	if req.Stock < 0 {
 		return nil, fmt.Errorf("[%s]: stock cannot be negative", op)
 	}
@@ -53,6 +55,24 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 	tenantID, err := value_object.NewTenantID(req.TenantID)
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+	}
+
+	// Get tenant context, this wil return the current tenant and the currently loggedin entity
+	// Call service from tenant service via grpc clients
+
+	tenantCtxReq := &tenantv1.GetTenantContextRequest{
+		TenantId: tenantID.String(),
+		UserId:   req.UserID,
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, tenantCtxReq)
+
+	if tenantCtx == nil || tenantCtx.Tenant == nil {
+		return nil, fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return nil, fmt.Errorf("unauthorized, only admin and owner are allowed to create a product")
 	}
 
 	newProduct := &entity.Product{
