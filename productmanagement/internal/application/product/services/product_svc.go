@@ -20,9 +20,10 @@ type ProductService struct {
 }
 
 // NewProductService creates a new instance of the ProductService.
-func NewProductService(pr repository.IProductRepository) *ProductService {
+func NewProductService(pr repository.IProductRepository, tenantClientSvc *grpcclient.TenantSvcClient) *ProductService {
 	return &ProductService{
 		ProductRepo: pr,
+		TenantSvcClient: *tenantClientSvc,
 	}
 }
 
@@ -65,11 +66,14 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		UserId:   req.UserID,
 	}
 
+
 	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, tenantCtxReq)
 
 	if tenantCtx == nil || tenantCtx.Tenant == nil {
 		return nil, fmt.Errorf("[%s]: tenant context not found", op)
 	}
+
+	log.Printf("user role and status : %s, %s", tenantCtx.Role, tenantCtx.Tenant.StoreName)
 
 	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
 		return nil, fmt.Errorf("unauthorized, only admin and owner are allowed to create a product")

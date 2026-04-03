@@ -5,6 +5,7 @@ import (
 	"net"
 
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
+	// "github.com/MartinMurithi/storeforge/pkg/grpcx"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product/services"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/transport/grpc/handlers"
 	"google.golang.org/grpc"
@@ -54,16 +55,53 @@ func (s *Server) Stop() {
 	s.GRPCServer.GracefulStop()
 }
 
-// func loggingInterceptor(
-//     ctx context.Context,
-//     req interface{},
-//     info *grpc.UnaryServerInfo,
-//     handler grpc.UnaryHandler,
-// ) (interface{}, error) {
-//     logger.Infof("[gRPC] %s called", info.FullMethod)
-//     resp, err := handler(ctx, req)
-//     if err != nil {
-//         logger.Errorf("[gRPC] %s error: %v", info.FullMethod, err)
-//     }
-//     return resp, err
+// // func loggingInterceptor(
+// //     ctx context.Context,
+// //     req interface{},
+// //     info *grpc.UnaryServerInfo,
+// //     handler grpc.UnaryHandler,
+// // ) (interface{}, error) {
+// //     logger.Infof("[gRPC] %s called", info.FullMethod)
+// //     resp, err := handler(ctx, req)
+// //     if err != nil {
+// //         logger.Errorf("[gRPC] %s error: %v", info.FullMethod, err)
+// //     }
+// //     return resp, err
+// // }
+
+
+
+// func NewGRPCServer(
+// 	port int,
+// 	productSrv *services.ProductService,
+// ) (*Server, error) {
+
+// 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
+
+// 	if err != nil {
+// 		return nil, fmt.Errorf(
+// 			"failed to listen on port %d: %w",
+// 			port,
+// 			err,
+// 		)
+// 	}
+
+// 	grpcServer := grpc.NewServer(
+
+// 		grpc.ChainUnaryInterceptor(
+// 			grpcx.RecoveryInterceptor(),
+// 		),
+// 	)
+
+// 	productHandler := handlers.NewProductGrpcHandler(productSrv)
+
+// 	productv1.RegisterProductServiceServer(
+// 		grpcServer,
+// 		productHandler,
+// 	)
+
+// 	return &Server{
+// 		GRPCServer: grpcServer,
+// 		Listener:   lis,
+// 	}, nil
 // }
