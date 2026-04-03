@@ -20,7 +20,8 @@ type DBConfig struct {
 }
 
 type GRPCConfig struct {
-	Port        int
+	Port             int
+	TenantServerPort int
 }
 
 type Config struct {
@@ -39,6 +40,7 @@ func Load() (*Config, error) {
 	connectTimeout, _ := time.ParseDuration(env.GetEnv("DB_CONNECT_TIMEOUT", "10s"))
 
 	grpcPort, _ := strconv.Atoi(env.GetEnv("GRPC_PORT", "50053"))
+	tenantServerPort, _ := strconv.Atoi(env.GetEnv("TENANTSVCADDRESS", "50052"))
 
 	cfg := &Config{
 		DB: DBConfig{
@@ -52,7 +54,8 @@ func Load() (*Config, error) {
 			ConnectTimeout:    connectTimeout,
 		},
 		GRPC: GRPCConfig{
-			Port:        grpcPort,
+			Port:             grpcPort,
+			TenantServerPort: tenantServerPort,
 		},
 		Env: "prod",
 	}

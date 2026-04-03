@@ -22,5 +22,5 @@ func (c *TenantSvcClient) GetTenantContext(ctx context.Context, req *tenantv1.Ge
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
 
-	return c.GetTenantContext(ctx, req)
+	return c.TenantClient.GetTenantContext(ctx, req)
 }

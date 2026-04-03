@@ -9,8 +9,11 @@ import (
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/config"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/repository"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/database/postgres"
+	grpcclient "github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/grpc_client"
 	grpc_trans "github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/transport/grpc"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/infrastructure/transport/grpc/handlers"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type App struct {
@@ -42,6 +45,18 @@ func Init(cfg *config.Config) (*App, error) {
 	dbAdapter := postgres.NewAdapter(pool.Pool)
 
 	// -------------------------
+	// Tenant Service Client
+	// -------------------------
+	// Establish the connection to Tenant Service
+	tenantConn, err := grpc.NewClient(fmt.Sprintf("localhost:%d", cfg.GRPC.TenantServerPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to user service client: %w", err)
+	}
+
+	// 2. Initialize the Client Wrapper
+	tenantSvcClient := grpcclient.NewTenantSvcClient(tenantConn)
+
+	// -------------------------
 	// Repository
 	// --------------------------
 	productRepo := repository.NewProductRepository(dbAdapter)
@@ -49,7 +64,7 @@ func Init(cfg *config.Config) (*App, error) {
 	// -------------------------
 	// Application services
 	// -------------------------
-	productSvc := services.NewProductService(productRepo)
+	productSvc := services.NewProductService(productRepo, tenantSvcClient)
 
 	// -------------------------
 	// gRPC Handler

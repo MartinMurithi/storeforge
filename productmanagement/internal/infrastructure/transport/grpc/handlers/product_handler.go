@@ -42,7 +42,14 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
 	}
 
-	log.Printf("extracted tenant id %s", tenantID)
+	userID, err := auth.GetUserIDFromMetadata(ctx)
+
+	if err != nil {
+		log.Printf("failed to extract user id from metadata %s", err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	log.Printf("extracted user id %s", userID)
 
 	var props *entity.ProductProperties
 
@@ -60,6 +67,7 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 
 	dtoReq := product.CreateProductRequestDTO{
 		TenantID:    tenantID,
+		UserID:      userID,
 		Name:        req.Name,
 		Description: req.Description,
 		Price:       req.Price,
