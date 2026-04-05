@@ -6,8 +6,8 @@ import (
 	"log"
 
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
-	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
+	"github.com/MartinMurithi/storeforge/pkg/grpcx"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product/services"
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/domain/products/entity"
@@ -34,22 +34,29 @@ func NewProductGrpcHandler(s *services.ProductService) *ProductGrpcHandler {
 // CreateProduct converts the protobuf request into an internal DTO,
 // executes the creation logic, and returns a mapped protobuf response.
 func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.CreateProductRequest) (*productv1.CreateProductResponse, error) {
+	const op = "ProductHandler.CreateProduct"
 
-	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
+
+	log.Printf("[%s]: extracted tenant id %s", op, tenantID)
 
 	if err != nil {
-		log.Printf("failed to extract tenant id from metadata %s", err)
+		log.Printf("[%s]: failed to extract tenant id from metadata %s", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
 	}
 
-	userID, err := auth.GetUserIDFromMetadata(ctx)
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted user id %s", op, userID)
 
 	if err != nil {
-		log.Printf("failed to extract user id from metadata %s", err)
+		log.Printf("[%s]: failed to extract user id from metadata %s", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
-	log.Printf("extracted user id %s", userID)
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	// Set the tenant and user ID in the grpc metadata and send them to tenant service
+	ctx = grpcx.ForwardMetadata(ctx)
 
 	var props *entity.ProductProperties
 
@@ -99,7 +106,7 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 }
 
 func (h *ProductGrpcHandler) GetTenantProducts(ctx context.Context, req *productv1.GetTenantProductsRequest) (*productv1.GetTenantProductsResponse, error) {
-	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
 
 	log.Printf("extracted tenant id from metadata %s", tenantID)
 
@@ -126,7 +133,7 @@ func (h *ProductGrpcHandler) GetTenantProducts(ctx context.Context, req *product
 }
 
 func (h *ProductGrpcHandler) GetProductByID(ctx context.Context, req *productv1.GetProductByIDRequest) (*productv1.GetProductByIDResponse, error) {
-	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
 
 	log.Printf("extracted tenant id from metadata %s", tenantID)
 

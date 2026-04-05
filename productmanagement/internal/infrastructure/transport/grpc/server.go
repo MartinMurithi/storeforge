@@ -69,8 +69,6 @@ func (s *Server) Stop() {
 // //     return resp, err
 // // }
 
-
-
 // func NewGRPCServer(
 // 	port int,
 // 	productSrv *services.ProductService,
