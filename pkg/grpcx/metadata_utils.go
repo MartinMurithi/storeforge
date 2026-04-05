@@ -1,4 +1,4 @@
-package auth
+package grpcx
 
 import (
 	"context"
@@ -37,4 +37,13 @@ func GetTenantIDFromMetadata(ctx context.Context) (string, error) {
 	}
 
 	return values[0], nil
+}
+
+// ForwardMetadata takes incoming metadata from the current context 
+// and prepares it to be sent to the next microservice.
+func ForwardMetadata(ctx context.Context) context.Context {
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		return metadata.NewOutgoingContext(ctx, md)
+	}
+	return ctx
 }

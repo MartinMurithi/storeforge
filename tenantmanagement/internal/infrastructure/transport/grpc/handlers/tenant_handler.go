@@ -5,8 +5,8 @@ import (
 	"log"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
-	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
+	"github.com/MartinMurithi/storeforge/pkg/grpcx"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/dtos"
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/application/services/tenant"
 
@@ -33,7 +33,7 @@ func NewTenantGrpcHandler(s *tenant.TenantService) *TenantGrpcHandler {
 // executes the creation logic, and returns a mapped protobuf response.
 func (h *TenantGrpcHandler) CreateTenant(ctx context.Context, req *tenantv1.CreateTenantRequest) (*tenantv1.CreateTenantResponse, error) {
 
-	userID, err := auth.GetUserIDFromMetadata(ctx)
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
 
 	if err != nil {
 		log.Printf("failed to extract user id from metadata %s", err)
@@ -59,22 +59,23 @@ func (h *TenantGrpcHandler) CreateTenant(ctx context.Context, req *tenantv1.Crea
 }
 
 func (h *TenantGrpcHandler) GetTenantContext(ctx context.Context, req *tenantv1.GetTenantContextRequest) (*tenantv1.GetTenantContextResponse, error) {
+	const op = "TenantHandler.GetTenantContext"
 	// Extract authenticated user from metadata
-	userID, err := auth.GetUserIDFromMetadata(ctx)
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
 	if err != nil {
-		log.Printf("[%s] failed to extract user id from metadata: %v", "GetTenantContext", err)
+		log.Printf("[%s] failed to extract user id from metadata: %v", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
-	log.Printf("extracted user id %s", userID)
+	log.Printf("[%s]: extracted user id %s", op,userID)
 
-	tenantD, err := auth.GetTenantIDFromMetadata(ctx)
+	tenantD, err := grpcx.GetTenantIDFromMetadata(ctx)
 	if err != nil {
-		log.Printf("[%s] failed to extract tenant id from metadata: %v", "GetTenantContext", err)
+		log.Printf("[%s]: failed to extract tenant id from metadata: %v", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
 	}
 
-	log.Printf("extracted tenant id %s", tenantD)
+	log.Printf("[%s]: extracted tenant id %s", op,tenantD)
 
 	dtoReq := dtos.GetTenantContextRequestDTO{
 		UserId:   userID,
@@ -92,13 +93,13 @@ func (h *TenantGrpcHandler) GetTenantContext(ctx context.Context, req *tenantv1.
 func (h *TenantGrpcHandler) UpdateTenant(ctx context.Context, req *tenantv1.UpdateTenantRequest) (*tenantv1.GetTenantContextResponse, error) {
 	const op = "TenantGrpcHandler.UpdateTenant"
 
-	userID, err := auth.GetUserIDFromMetadata(ctx)
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
 	if err != nil {
 		log.Printf("[%s] failed to extract user id: %v", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
-	tenantID, err := auth.GetTenantIDFromMetadata(ctx)
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
 	if err != nil {
 		log.Printf("[%s] failed to extract tenant id: %v", op, err)
 		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)

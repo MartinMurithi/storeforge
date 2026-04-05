@@ -53,6 +53,7 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 	// -------------------------
 	// TenantID value object
 	// -------------------------
+	log.Printf("received tenant id %s", req.TenantID)
 	tenantID, err := value_object.NewTenantID(req.TenantID)
 	if err != nil {
 		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
