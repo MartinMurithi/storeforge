@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/MartinMurithi/storeforge/productmanagement/internal/application/product"
@@ -137,6 +138,17 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 	return tx.Commit(ctx)
 }
 
+// GetProductsByTenant fetches a paginated list of products for a given tenant.
+//
+// PURPOSE:
+//   - Retrieve all non-deleted products for a tenant with optional pagination.
+//   - Includes associated product images for each product.
+//   - Supports ordering by product creation date and image sort order.
+//
+// RETURNS:
+//   - A slice of fully hydrated Product entities including images.
+//   - Total number of products for the tenant (ignoring pagination).
+//   - Error if the query fails or scanning fails.
 func (repo *ProductRepository) GetProductsByTenant(ctx context.Context, tenantID value_object.TenantID, p product.Pagination) ([]*entity.Product, int, error) {
 	const op = "ProductRepository.GetProductsByTenant"
 
@@ -276,6 +288,16 @@ func (repo *ProductRepository) GetProductsByTenant(ctx context.Context, tenantID
 	return result, totalProducts, nil
 }
 
+// GetProductByID fetches a single product by its ID for a given tenant.
+//
+// PURPOSE:
+//   - Retrieve a fully hydrated product entity, including all associated images.
+//   - Ensures only non-deleted products are returned.
+//   - Handles nullable image fields due to LEFT JOIN.
+//
+// RETURNS:
+//   - Pointer to Product entity including images.
+//   - Error if product not found or query fails.
 func (repo *ProductRepository) GetProductByID(
 	ctx context.Context,
 	tenantID value_object.TenantID,
@@ -396,4 +418,286 @@ func (repo *ProductRepository) GetProductByID(
 	}
 
 	return prod, nil
+}
+
+// UpdateProductWithImages performs an atomic update of a product and its images.
+//
+// PURPOSE:
+//   - Allows partial updates to product fields without overwriting unspecified fields.
+//   - Performs deep merge for ProductProperties JSONB.
+//   - Inserts, updates, and soft-deletes associated product images.
+//   - Maintains a single primary image per product.
+//   - Ensures transactional safety and consistency.
+//
+// PARAMETERS:
+//   - incoming: fields to update (pointers indicate optional updates).
+//   - incomingImages: list of images to upsert; missing images are soft-deleted.
+//
+// RETURNS:
+//   - Fully hydrated Product entity with updated images.
+//   - Error if any database operation fails.
+func (r *ProductRepository) UpdateProductWithImages(
+	ctx context.Context,
+	tenantID value_object.TenantID,
+	productID value_object.ProductID,
+	incoming entity.ProductUpdate,
+	incomingImages []entity.ProductImage,
+) (*entity.Product, error) {
+
+	const op = "ProductRepository.UpdateProductWithImages"
+
+	tx, err := r.DB.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to begin tx: %w", op, err)
+	}
+	defer tx.Rollback(ctx)
+
+	// Fetch current product
+	var current entity.Product
+	err = tx.QueryRow(ctx, `
+        SELECT id, tenant_id, name, description, price_cents, currency, sku, stock_quantity, product_properties, product_status
+        FROM products
+        WHERE id = $1 AND tenant_id = $2 AND deleted_at IS NULL
+        FOR UPDATE
+    `, productID, tenantID).Scan(
+		&current.ID, &current.TenantID, &current.Name, &current.Description,
+		&current.Price, &current.Currency, &current.SKU, &current.Stock,
+		&current.Properties, &current.Status,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to fetch current product: %w", op, err)
+	}
+
+	if current.Properties == nil {
+		current.Properties = &entity.ProductProperties{}
+	}
+	if incoming.Properties == nil {
+		incoming.Properties = &entity.ProductProperties{}
+	}
+
+	// Deep merge properties
+	mergedProps := deepMerge(*current.Properties, *incoming.Properties)
+
+	// Apply other updates if provided
+	if incoming.Name != nil {
+		current.Name = *incoming.Name
+	}
+	if incoming.Description != nil {
+		current.Description = *incoming.Description
+	}
+	if incoming.PriceCents != nil {
+		current.Price = *incoming.PriceCents
+	}
+	if incoming.Currency != nil {
+		current.Currency = *incoming.Currency
+	}
+	if incoming.SKU != nil {
+		current.SKU = *incoming.SKU
+	}
+	if incoming.StockQuantity != nil {
+		current.Stock = *incoming.StockQuantity
+	}
+	if incoming.Status != nil {
+		current.Status = *incoming.Status
+	}
+
+	// Update product row
+	_, err = tx.Exec(ctx, `
+        UPDATE products
+        SET name=$1, description=$2, price_cents=$3, currency=$4,
+            sku=$5, stock_quantity=$6, product_properties=$7,
+            product_status=$8, updated_at=NOW()
+        WHERE id=$9
+    `, current.Name, current.Description, current.Price, current.Currency, current.SKU,
+		current.Stock, mergedProps, current.Status, current.ID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to update product: %w", op, err)
+	}
+
+	// If any incoming image is primary, unset all others
+	primaryExists := false
+	for _, img := range incomingImages {
+		if img.IsPrimary {
+			primaryExists = true
+			break
+		}
+	}
+	if primaryExists {
+		_, err := tx.Exec(ctx, `
+            UPDATE product_images
+            SET is_primary = FALSE
+            WHERE product_id = $1
+        `, current.ID)
+		if err != nil {
+			return nil, fmt.Errorf("[%s]: failed to unset existing primary images: %w", op, err)
+		}
+	}
+
+	// Insert/update incoming images
+	for _, img := range incomingImages {
+		if img.ID.String() == "" {
+			_, err := tx.Exec(ctx, `
+                INSERT INTO product_images (product_id, image_url, sort_order, is_primary)
+                VALUES ($1, $2, $3, $4)
+            `, current.ID, img.ImageUrl, img.SortOrder, img.IsPrimary)
+			if err != nil {
+				return nil, fmt.Errorf("[%s]: failed to insert product image: %w", op, err)
+			}
+		} else {
+			_, err := tx.Exec(ctx, `
+                UPDATE product_images
+                SET image_url=$1, sort_order=$2, is_primary=$3
+                WHERE id=$4 AND product_id=$5
+            `, img.ImageUrl, img.SortOrder, img.IsPrimary, img.ID, current.ID)
+			if err != nil {
+				return nil, fmt.Errorf("[%s]: failed to update product image: %w", op, err)
+			}
+		}
+	}
+
+	// Soft-delete images not in incomingImages
+	imageIDs := make([]interface{}, 0, len(incomingImages))
+	for _, img := range incomingImages {
+		if img.ID != "" {
+			imageIDs = append(imageIDs, img.ID)
+		}
+	}
+	if len(imageIDs) > 0 {
+		query := fmt.Sprintf(`
+            UPDATE product_images
+            SET deleted_at = NOW()
+            WHERE product_id = $1 AND id NOT IN (%s)
+        `, placeholders(len(imageIDs), 2))
+		args := append([]interface{}{current.ID}, imageIDs...)
+		if _, err := tx.Exec(ctx, query, args...); err != nil {
+			return nil, fmt.Errorf("[%s]: failed to soft-delete removed images: %w", op, err)
+		}
+	}
+
+	// Commit transaction
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("[%s]: failed to commit tx: %w", op, err)
+	}
+
+	// Return full product with images
+	return r.GetProductByID(ctx, current.TenantID, current.ID)
+}
+
+// deepMerge recursively merges two ProductProperties maps.
+//
+// PURPOSE:
+//   - Used to merge incoming ProductProperties into existing product properties.
+//   - Preserves existing nested keys not provided in incoming map.
+//
+// RETURNS:
+//   - A new ProductProperties map containing the merged result.
+func deepMerge(existing, incoming entity.ProductProperties) entity.ProductProperties {
+	merged := make(entity.ProductProperties)
+	for k, v := range existing {
+		merged[k] = v
+	}
+	for k, v := range incoming {
+		if existingMap, ok1 := merged[k].(map[string]any); ok1 {
+			if incomingMap, ok2 := v.(map[string]any); ok2 {
+				merged[k] = deepMerge(existingMap, incomingMap)
+				continue
+			}
+		}
+		merged[k] = v
+	}
+	return merged
+}
+
+// placeholders generates SQL placeholders for an IN clause.
+//
+// PURPOSE:
+//   - Generates "$2,$3,$4..." style placeholders for variable-length SQL queries.
+//   - Useful when building dynamic IN clauses in queries like soft-deleting images.
+//
+// PARAMETERS:
+//   - n: number of placeholders to generate.
+//   - startIdx: starting index for the first placeholder.
+//
+// RETURNS:
+//   - A comma-separated string of placeholders, e.g., "$2,$3,$4".
+func placeholders(n int, startIdx int) string {
+	parts := make([]string, n)
+	for i := 0; i < n; i++ {
+		parts[i] = fmt.Sprintf("$%d", startIdx+i)
+	}
+	return strings.Join(parts, ",")
+}
+
+// SoftDeleteProduct performs an atomic soft-delete of a product and its images.
+//
+// PURPOSE:
+//   - Marks a product and all associated images as deleted without removing data.
+//   - Ensures transactional safety and consistency.
+//
+// HOW IT WORKS:
+//  1. Begins a transaction.
+//  2. Locks the product row using FOR UPDATE.
+//  3. Sets deleted_at for the product.
+//  4. Sets deleted_at for all associated images.
+//  5. Commits the transaction.
+//  6. Returns the full product context (with deleted_at timestamps populated).
+func (r *ProductRepository) SoftDeleteProduct(
+	ctx context.Context,
+	tenantID value_object.TenantID,
+	productID value_object.ProductID,
+) (*entity.Product, error) {
+
+	const op = "ProductRepository.SoftDeleteProduct"
+
+	tx, err := r.DB.Tx(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to begin tx: %w", op, err)
+	}
+	defer tx.Rollback(ctx)
+
+	// 1️⃣ Lock the product
+	var p entity.Product
+	err = tx.QueryRow(ctx, `
+        SELECT id, tenant_id, name, description, price_cents, currency, sku,
+               stock_quantity, product_properties, product_status, created_at, updated_at, deleted_at
+        FROM products
+        WHERE id = $1 AND tenant_id = $2 AND deleted_at IS NULL
+        FOR UPDATE
+    `, productID, tenantID).Scan(
+		&p.ID, &p.TenantID, &p.Name, &p.Description, &p.Price, &p.Currency, &p.SKU,
+		&p.Stock, &p.Properties, &p.Status, &p.CreatedAt, &p.UpdatedAt, &p.DeletedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to fetch product for deletion: %w", op, err)
+	}
+
+	now := time.Now()
+
+	// 2️⃣ Soft-delete product
+	_, err = tx.Exec(ctx, `
+        UPDATE products
+        SET deleted_at = $1, updated_at = $1
+        WHERE id = $2
+    `, now, p.ID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to soft-delete product: %w", op, err)
+	}
+
+	// 3️⃣ Soft-delete all associated images
+	_, err = tx.Exec(ctx, `
+        UPDATE product_images
+        SET deleted_at = $1
+        WHERE product_id = $2 AND deleted_at IS NULL
+    `, now, p.ID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: failed to soft-delete product images: %w", op, err)
+	}
+
+	// 4️⃣ Commit transaction
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("[%s]: failed to commit tx: %w", op, err)
+	}
+
+	// 5️⃣ Return the product context (deleted_at now populated)
+	return r.GetProductByID(ctx, p.TenantID, p.ID)
 }

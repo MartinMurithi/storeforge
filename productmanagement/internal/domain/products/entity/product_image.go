@@ -15,4 +15,3 @@ type ProductImage struct{
 	CreatedAt time.Time
 	DeletedAt *time.Time
 }
-
