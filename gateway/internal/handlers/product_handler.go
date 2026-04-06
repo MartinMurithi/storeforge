@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
+	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/request"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
@@ -65,4 +66,50 @@ func (h *ProductHandler) CreateProduct(c *gin.Context) {
 	}
 
 	response.JSON(c, http.StatusAccepted, mapper.MapCreateProductResponse(resp))
+}
+
+func (h *ProductHandler) GetTenantProducts(c *gin.Context) {
+	const op = "ProductHandler.GetTenantProducts"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs("tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	// Get pagination params
+	pagination, err := shared.ParsePagination(c)
+	if err != nil {
+		response.Error(c, http.StatusBadRequest, "INVALID_PAGINATION", err.Error())
+		return
+	}
+
+	resp, err := h.ProductClient.GetTenantProducts(ctx, &productv1.GetTenantProductsRequest{
+		TenantId: tenantID,
+		Page:     pagination.Page,
+		Limit:    pagination.Limit,
+	})
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusAccepted, &productv1.GetTenantProductsResponse{
+		Products: resp.Products,
+		Meta:     resp.Meta,
+	})
 }

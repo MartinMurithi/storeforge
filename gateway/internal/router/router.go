@@ -45,7 +45,7 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			products := stores.Group("/:id/products")
 			{
 				products.POST("", productHandler.CreateProduct) // POST /stores/:tenantID/products
-				// products.GET("", productHandler.GetProductsByTenant)                  // GET /stores/:tenantID/products
+				products.GET("", productHandler.GetTenantProducts)                  // GET /stores/:tenantID/products
 				// products.PATCH("/:productID", productHandler.UpdateProductWithImages) // PATCH /stores/:tenantID/products/:productID
 				// products.DELETE("/:productID", productHandler.SoftDeleteProduct)      // DELETE /stores/:tenantID/products/:productID
 			}
