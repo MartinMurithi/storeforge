@@ -48,6 +48,39 @@ func GetParamId(c *gin.Context) (string, error) {
 	return strID, nil
 }
 
+// GetNamedParamID extracts a named URL parameter from the request path
+// and validates that it conforms to UUID format.
+//
+// This is useful for routes containing multiple identifiers, such as:
+//
+//   /stores/:tenantID/products/:productID
+//
+// Example:
+//
+//   tenantID, err := request.GetNamedParamID(c, "tenantID")
+//   productID, err := request.GetNamedParamID(c, "productID")
+//
+// Returns:
+//   string → the validated UUID string
+//   error  → if the parameter is missing or not a valid UUID
+//
+// This function complements GetParamId by supporting explicit parameter names
+// instead of assuming the parameter key is always "id".
+func GetNamedParamID(c *gin.Context, paramName string) (string, error) {
+
+	strID := c.Param(paramName)
+
+	if strID == "" {
+		return "", fmt.Errorf("%s parameter is required", paramName)
+	}
+
+	if _, err := uuid.Parse(strID); err != nil {
+		return "", fmt.Errorf("invalid %s UUID format: %w", paramName, err)
+	}
+
+	return strID, nil
+}
+
 func GetUserRole(c *gin.Context) (string, error) {
 	val, exists := c.Get("role")
 	if !exists {

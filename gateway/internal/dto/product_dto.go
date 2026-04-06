@@ -1,6 +1,10 @@
 package dto
 
-import "time"
+import (
+	"time"
+
+	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
+)
 
 type ProductImageDTO struct {
 	ID        string     `json:"id"`
@@ -32,4 +36,9 @@ type ProductDTO struct {
 type CreateProductResponseDTO struct {
 	Message string     `json:"message"`
 	Product ProductDTO `json:"product"`
+}
+
+type GetTenantProductsResponseDTO struct {
+	Products []ProductDTO             `json:"products"`
+	Meta     shared.PaginationMetaDTO `meta:"meta"`
 }

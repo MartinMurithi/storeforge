@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
+	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto/shared"
 	"github.com/MartinMurithi/storeforge/gateway/internal/mapper"
 	"github.com/MartinMurithi/storeforge/gateway/internal/request"
@@ -108,8 +109,66 @@ func (h *ProductHandler) GetTenantProducts(c *gin.Context) {
 		return
 	}
 
-	response.JSON(c, http.StatusAccepted, &productv1.GetTenantProductsResponse{
-		Products: resp.Products,
-		Meta:     resp.Meta,
+	res := mapper.MapGetTenantProductsResponse(resp)
+
+	response.JSON(c, http.StatusAccepted, dto.GetTenantProductsResponseDTO{
+		Products: res,
+		Meta: shared.PaginationMetaDTO{
+			Page:       resp.Meta.Page,
+			Limit:      resp.Meta.Limit,
+			Total:      int64(resp.Meta.Total),
+			TotalPages: resp.Meta.TotalPages,
+			HasNext:    resp.Meta.HasNext,
+			HasPrev:    resp.Meta.HasPrev,
+		},
 	})
+}
+
+func (h *ProductHandler) GetProductByID(c *gin.Context) {
+	const op = "ProductHandler.GetProductByID"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// gET Tenant ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant ID not found")
+		return
+	}
+	log.Printf("[%s]: tenant ID : %s", op, tenantID)
+
+	// gET Product ID FROM PARAMS
+	productID, err := request.GetNamedParamID(c, "productID")
+	if err != nil {
+		log.Printf("[%s]: error getting product ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Product ID not found")
+		return
+	}
+	log.Printf("[%s]: product ID : %s", op, productID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"tenant-id", tenantID,
+		"product-id", productID,
+	)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	resp, err := h.ProductClient.GetProductByID(ctx, &productv1.GetProductByIDRequest{
+		TenantId:  tenantID,
+		ProductId: productID,
+	})
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	res := mapper.MapGetProductResponse(resp)
+
+	response.JSON(c, http.StatusAccepted, res)
 }

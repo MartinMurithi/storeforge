@@ -1,8 +1,10 @@
 package mapper
 
 import (
+
 	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
 	"github.com/MartinMurithi/storeforge/gateway/internal/dto"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func MapCreateProductResponse(pbRes *productv1.CreateProductResponse) dto.CreateProductResponseDTO {
@@ -55,4 +57,54 @@ func MapGetProductResponse(pbRes *productv1.GetProductByIDResponse) dto.ProductD
 		CreatedAt:   pbRes.Product.CreatedAt.AsTime(),
 		UpdatedAt:   pbRes.Product.UpdatedAt.AsTime(),
 	}
+}
+
+func MapGetTenantProductsResponse(pbRes *productv1.GetTenantProductsResponse) []dto.ProductDTO {
+
+	products := make([]dto.ProductDTO, 0, len(pbRes.Products))
+
+	for _, p := range pbRes.Products {
+
+		images := make([]dto.ProductImageDTO, 0, len(p.Images))
+
+		for _, img := range p.Images {
+			images = append(images, dto.ProductImageDTO{
+				ID:        img.Id,
+				ProductID: img.ProductId,
+				ImageURL:  img.ImageUrl,
+				IsPrimary: img.IsPrimary,
+				SortOrder: img.SortOrder,
+				CreatedAt: img.CreatedAt.AsTime(),
+			})
+		}
+
+		var updatedAt *timestamppb.Timestamp
+		if p.UpdatedAt != nil {
+			t := p.UpdatedAt
+			updatedAt = t
+		}
+
+		products = append(products, dto.ProductDTO{
+			ID:          p.Id,
+			TenantID:    p.TenantId,
+			Name:        p.Name,
+			Description: p.Description,
+
+			Price:       p.Price,
+			Currency:    p.Currency,
+			SKU:         p.Sku,
+			Stock:       p.Stock,
+
+			Status:      p.Status,
+
+			Images:      images,
+
+			Properties:  p.Properties.AsMap(),
+
+			CreatedAt:   p.CreatedAt.AsTime(),
+			UpdatedAt:   updatedAt.AsTime(),
+		})
+	}
+
+	return products
 }
