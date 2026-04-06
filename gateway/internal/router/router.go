@@ -44,8 +44,9 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			// All product routes are nested under /stores
 			products := stores.Group("/:id/products")
 			{
-				products.POST("", productHandler.CreateProduct) // POST /stores/:tenantID/products
-				products.GET("", productHandler.GetTenantProducts)                  // GET /stores/:tenantID/products
+				products.POST("", productHandler.CreateProduct)
+				products.GET("", productHandler.GetTenantProducts)
+				products.GET("/:productID", productHandler.GetProductByID)
 				// products.PATCH("/:productID", productHandler.UpdateProductWithImages) // PATCH /stores/:tenantID/products/:productID
 				// products.DELETE("/:productID", productHandler.SoftDeleteProduct)      // DELETE /stores/:tenantID/products/:productID
 			}
