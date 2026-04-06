@@ -70,10 +70,6 @@ func (h *TenantHandler) GetTenantContext(c *gin.Context) {
 		return
 	}
 
-	// Setting the Metadata
-	md := metadata.Pairs("user-id", userID)
-	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
-
 	// gET TENANT ID FROM PARAMS
 	tenantID, err := request.GetParamId(c)
 
@@ -82,6 +78,13 @@ func (h *TenantHandler) GetTenantContext(c *gin.Context) {
 		response.Error(c, code, slug, msg)
 		return
 	}
+
+	// Setting the Metadata for grpc tenant service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
 
 	resp, err := h.TenantClient.GetTenantContext(ctx, &tenantv1.GetTenantContextRequest{
 		TenantId: tenantID,
@@ -120,10 +123,6 @@ func (h *TenantHandler) UpdateTenant(c *gin.Context) {
 		return
 	}
 
-	// Setting the Metadata
-	md := metadata.Pairs("user-id", userID)
-	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
-
 	// gET TENANT ID FROM PARAMS
 	tenantID, err := request.GetParamId(c)
 
@@ -133,6 +132,12 @@ func (h *TenantHandler) UpdateTenant(c *gin.Context) {
 		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant ID not found")
 		return
 	}
+
+	// Setting the Metadata for grpc tenant service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
 
 	resp, err := h.TenantClient.UpdateTenant(ctx, &tenantv1.UpdateTenantRequest{
 		TenantId: tenantID,
