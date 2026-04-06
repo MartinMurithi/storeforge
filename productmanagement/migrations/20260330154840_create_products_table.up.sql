@@ -25,4 +25,4 @@ CREATE TABLE IF NOT EXISTS products (
     deleted_at TIMESTAMP
 );
 -- Index for fast tenant queries
--- CREATE INDEX idx_products_tenant ON products(tenant_id);
+CREATE INDEX idx_products_tenant ON products(tenant_id);
