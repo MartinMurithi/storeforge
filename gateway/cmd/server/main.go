@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	productv1 "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1"
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	authv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1"
 	rbacv1 "github.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1"
@@ -51,19 +52,31 @@ func main() {
 		return
 	}
 
-	defer tenantConn.Close()
+	// -------------- Product Management Client ------------
+	productServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.ProductSvcGrpcPort)
+
+	productConn, err := grpc.NewClient(productServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	if err != nil {
+		log.Fatalf("did not connect to the product management service %v", err)
+		return
+	}
+
+	defer productConn.Close()
 
 	// Initialize gRPC clients USING the connection
 	userClient := userv1.NewUserServiceClient(userConn)
 	authClient := authv1.NewAuthServiceClient(userConn)
 	tenantClient := tenantv1.NewTenantServiceClient(tenantConn)
 	rbacClient := rbacv1.NewRbacServiceClient(userConn)
+	productClient := productv1.NewProductServiceClient(productConn)
 
 	// Initialize user & auth handlers
 	userHandler := &handlers.UserHandler{UserClient: userClient}
 	authHandler := &handlers.AuthHandler{AuthClient: authClient}
 	tenantHandler := &handlers.TenantHandler{TenantClient: tenantClient}
 	rbacHandler := &handlers.RbacHandler{RbacClient: rbacClient}
+	productHandler := &handlers.ProductHandler{ProductClient: productClient}
 
 	// Load the pub rsa key
 	publicKey, err := jwt.LoadPublicKey(cfg.PublicKeyPath)
@@ -75,7 +88,7 @@ func main() {
 	authMiddleware := middleware.AuthMiddleware(publicKey, "storeforge-client", "storeforge-api")
 
 	// setup router
-	r := router.SetupRouter(userHandler, authHandler, tenantHandler, rbacHandler, authMiddleware)
+	r := router.SetupRouter(userHandler, authHandler, tenantHandler, rbacHandler, productHandler, authMiddleware)
 
 	log.Printf("Gateway running on port 9095\n")
 

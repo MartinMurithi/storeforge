@@ -44,10 +44,10 @@ func (r *TenantRepository) CreateTenant(ctx context.Context, t *entity.Tenant) e
 	}
 	defer tx.Rollback(ctx)
 
-	tenantQuery := `INSERT INTO tenants (store_name, business_type, slug, sub_domain, domain)
-                    VALUES($1, $2, $3, $4, $5) RETURNING id, store_name, sub_domain, domain, status, created_at`
+	tenantQuery := `INSERT INTO tenants (store_name, business_type, slug, sub_domain, domain, status)
+                    VALUES($1, $2, $3, $4, $5, $6) RETURNING id, store_name, sub_domain, domain, status, created_at`
 
-	err = tx.QueryRow(ctx, tenantQuery, t.StoreName, t.BusinessType, t.Slug, t.SubDomain, t.Domain).
+	err = tx.QueryRow(ctx, tenantQuery, t.StoreName, t.BusinessType, t.Slug, t.SubDomain, t.Domain, t.Status).
 		Scan(&t.ID,
 			&t.StoreName,
 			&t.SubDomain,
