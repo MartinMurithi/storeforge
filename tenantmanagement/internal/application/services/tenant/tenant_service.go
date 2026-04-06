@@ -72,6 +72,7 @@ func (s *TenantService) CreateTenant(ctx context.Context, req dtos.CreateTenantR
 		BusinessType: req.BusinessType,
 		SubDomain:    subDomain,
 		Domain:       domain,
+		Status:       "active",
 	}
 
 	tenantConfig := theme.DefaultConfig.Config
@@ -203,7 +204,7 @@ func (s *TenantService) UpdateTenant(ctx context.Context, req *dtos.UpdateTenant
 
 	tenantCtx, err := s.tenantRepo.GetTenantContext(ctx, tenantID, userID)
 	if err != nil {
-		log.Printf("[%s] failed to fetch tenant context: %v",op, err)
+		log.Printf("[%s] failed to fetch tenant context: %v", op, err)
 		return nil, err
 	}
 

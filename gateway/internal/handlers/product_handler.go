@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	// "fmt"
 	"log"
 	"net/http"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/MartinMurithi/storeforge/gateway/internal/request"
 	"github.com/MartinMurithi/storeforge/gateway/internal/response"
 	"github.com/MartinMurithi/storeforge/gateway/internal/util"
-	"github.com/MartinMurithi/storeforge/pkg/auth"
 	"github.com/MartinMurithi/storeforge/pkg/errconv"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc/metadata"
@@ -21,43 +19,41 @@ type ProductHandler struct {
 }
 
 func (h *ProductHandler) CreateProduct(c *gin.Context) {
+	const op = "ProductHandler.CreateProduct"
+
 	if h.ProductClient == nil {
 		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
 		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
 		return
 	}
 
-	// // Get logged in owner
-	// userID, err := request.GetUserId(c)
+	// Get logged in owner
+	userID, err := request.GetUserId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting user ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
+		return
+	}
+	log.Printf("[%s]: active user ID : %s", op, userID)
 
-	// fmt.Println("error getting user: %w", err)
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
 
-	// if err != nil {
-	// 	fmt.Println("error getting user ID: %w", err)
-	// 	response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
-	// 	return
-	// }
-
-	userID, _ := c.Get(auth.CtxUserID)
-
-	log.Printf("id of active user %s", userID)
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
 
 	var req productv1.CreateProductRequest
 
 	if !util.BindAndValidateJSON(c, &req) {
-		return
-	}
-
-// Setting the Metadata
-	md := metadata.Pairs("user-id",userID)
-	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
-
-	// gET TENANT ID FROM PARAMS
-	tenantID, err := request.GetParamId(c)
-
-	if err != nil {
-		code, slug, msg := errconv.FromGrpcToHttp(err)
-		response.Error(c, code, slug, msg)
 		return
 	}
 

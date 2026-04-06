@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, tenantHandler *handlers.TenantHandler, rbacHandler *handlers.RbacHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
+func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHandler, tenantHandler *handlers.TenantHandler, rbacHandler *handlers.RbacHandler, productHandler *handlers.ProductHandler, authMiddleware gin.HandlerFunc) *gin.Engine {
 	r := gin.Default()
 
 	// Global Middleware (Optional: CORS, Logging)
@@ -40,6 +40,15 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			stores.POST("/new", tenantHandler.CreateTenant)
 			stores.GET("/:id", tenantHandler.GetTenantContext)
 			stores.PATCH("/:id", tenantHandler.UpdateTenant)
+
+			// All product routes are nested under /stores
+			products := stores.Group("/:id/products")
+			{
+				products.POST("", productHandler.CreateProduct) // POST /stores/:tenantID/products
+				// products.GET("", productHandler.GetProductsByTenant)                  // GET /stores/:tenantID/products
+				// products.PATCH("/:productID", productHandler.UpdateProductWithImages) // PATCH /stores/:tenantID/products/:productID
+				// products.DELETE("/:productID", productHandler.SoftDeleteProduct)      // DELETE /stores/:tenantID/products/:productID
+			}
 		}
 
 		roles := api.Group("/roles")
@@ -49,6 +58,7 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 			roles.GET("/:id", rbacHandler.GetRoleById)
 			roles.PATCH("/:id", rbacHandler.UpdateRole)
 		}
+
 	}
 
 	return r
