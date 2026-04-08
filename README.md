@@ -5,40 +5,6 @@
 
 This repository serves as the reference for the StoreForge system architecture, design patterns, and technical implementation.
 
----
-
-## Table of Contents
-
-- [StoreForge](#storeforge)
-  - [Table of Contents](#table-of-contents)
-  - [Introduction](#introduction)
-  - [Architecture Overview](#architecture-overview)
-    - [Architectural Principles](#architectural-principles)
-    - [Communication Patterns](#communication-patterns)
-  - [Core Services](#core-services)
-    - [Onboarding Service](#onboarding-service)
-    - [Auth Service](#auth-service)
-  - [Supporting Services](#supporting-services)
-    - [Catalog Service](#catalog-service)
-    - [Payments Service](#payments-service)
-    - [Storefront / Provisioning Service](#storefront--provisioning-service)
-    - [Notifications Service](#notifications-service)
-    - [Analytics / Observability Service](#analytics--observability-service)
-    - [Subscription / Feature Flags Service](#subscription--feature-flags-service)
-    - [Extensions / Plugin Registry Service](#extensions--plugin-registry-service)
-  - [Operational / Supporting Entities](#operational--supporting-entities)
-    - [Orders Service](#orders-service)
-    - [Customers Service](#customers-service)
-  - [Databases \& Storage Strategy](#databases--storage-strategy)
-  - [Security Considerations](#security-considerations)
-  - [Key Design Principles](#key-design-principles)
-  - [Production Considerations](#production-considerations)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Running Locally](#running-locally)
-
----
-
 ## Introduction
 
 StoreForge is designed for **rapid merchant onboarding**, **scalable microservices**, and **direct merchant payouts** via platforms like **M-Pesa** and **Stripe**.  
