@@ -326,6 +326,7 @@ type CreateProductRequest struct {
 	Status        string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
 	Properties    *structpb.Struct       `protobuf:"bytes,8,opt,name=properties,proto3" json:"properties,omitempty"`
 	Images        []*ProductImageInput   `protobuf:"bytes,9,rep,name=images,proto3" json:"images,omitempty"`
+	UserId        string                 `protobuf:"bytes,10,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -421,6 +422,13 @@ func (x *CreateProductRequest) GetImages() []*ProductImageInput {
 		return x.Images
 	}
 	return nil
+}
+
+func (x *CreateProductRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
 }
 
 type CreateProductResponse struct {
@@ -863,7 +871,7 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\x11ProductImageInput\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\tR\tproductId\x12\x1b\n" +
-	"\timage_url\x18\x02 \x01(\tR\bimageUrl\"\xaf\x02\n" +
+	"\timage_url\x18\x02 \x01(\tR\bimageUrl\"\xc8\x02\n" +
 	"\x14CreateProductRequest\x12\x1b\n" +
 	"\ttenant_id\x18\x01 \x01(\tR\btenantId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -875,7 +883,9 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\n" +
 	"properties\x18\b \x01(\v2\x17.google.protobuf.StructR\n" +
 	"properties\x125\n" +
-	"\x06images\x18\t \x03(\v2\x1d.product.v1.ProductImageInputR\x06images\"`\n" +
+	"\x06images\x18\t \x03(\v2\x1d.product.v1.ProductImageInputR\x06images\x12\x17\n" +
+	"\auser_id\x18\n" +
+	" \x01(\tR\x06userId\"`\n" +
 	"\x15CreateProductResponse\x12-\n" +
 	"\aproduct\x18\x01 \x01(\v2\x13.product.v1.ProductR\aproduct\x12\x18\n" +
 	"\amessage\x18\x02 \x01(\tR\amessage\"6\n" +
