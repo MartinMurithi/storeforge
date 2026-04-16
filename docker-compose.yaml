@@ -1,0 +1,53 @@
+services:
+  # Database Layer
+  database:
+    image: postgres:16-alpine
+    container_name: storeforge-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: martin321! # Later, use a secret manager
+      POSTGRES_DB: storeforge
+    ports:
+      - "5433:5432"
+    volumes:
+      - database_data:/var/lib/postgresql/data # Persists data even if container is deleted
+
+  # ------ SERVICES LAYER ---------
+  user-svc:
+    build:
+      context: .
+      dockerfile: usermanagement/Dockerfile
+    container_name: storeforge-user-svc
+    depends_on:
+      - database
+    environment:
+      # Use the container name 'user-db' as the hostname
+      - DB_URL=postgres://postgres:martin321!@database:5432?sslmode=disable
+      - GRPC_PORT=50051
+      # This path must match the 'destination' in the volumes section below
+      - RSA_PRIVATE_KEY_PATH=/etc/storeforge/certs/jwt_private.pem
+    volumes:
+      # FORMAT: [Host Path] : [Container Path] : [Permissions]
+      - ./certs/jwt_private.pem:/etc/storeforge/certs/jwt_private.pem:ro
+    networks:
+      - storeforge-net
+
+  gateway:
+    build: ./
+    container_name: gateway-svc
+    ports:
+      - "9095:9095"
+    environment:
+      - RSA_PUBLIC_KEY_PATH=/etc/storeforge/certs/jwt_public.pem
+      - USER_SVC_ADDR=user-svc:50051
+    volumes:
+      - ./certs/jwt_public.pem:/etc/storeforge/certs/public.pem:ro
+    networks:
+      - storeforge-net
+
+networks:
+  storeforge-net:
+    driver: bridge
+
+volumes:
+  database_data:

@@ -1,6 +1,6 @@
 # ==== BUILDER STAGE ==========
 #  Use the official Go alpine image bcs it is lightweight
-FROM golang:1.24-apine AS builder
+FROM golang:1.25-alpine AS builder
 
 # Install git and build-base( required for fetching certain Go modules and CGO tasks)
 #  --no-cache does not store the index locally.
@@ -14,14 +14,19 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
+# COPY the REQUIRED shared directories first
+# These provide the packages like pkg/auth, pkg/env, etc.
+COPY pkg/ ./pkg/
+COPY api/ ./api/
+
 # Copy the rest of the source code
-COPY . .
+COPY usermanagement/ ./usermanagement/
 
 # Compile the binary
 # CGO_ENABLED=0 creates a statically linked binary(runs without external C libraries)
 # GOOS=linux ensures the binary is built for a linux environment
 # -ldflags="-s -w" strips debug information to reduce the binary size
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o usermanagement ./cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o usermanagement ./usermanagement/cmd/server/main.go
 
 # =========== RUNTIME ================================
 
@@ -38,10 +43,12 @@ WORKDIR /home/storeforgeuser/
 
 # Copy ONLY the compiled binary from the 'builder' stage.
 # This keeps the final image clean of source code and build tools.
-COPY --from=builder /app/usermanagement .
+COPY --from=builder /app/usermanagement ./usermanagement
 
 # Set ownership of the binary to the non-root user
-RUN chown storeforgeuser:storeforgeuser usermanagement
+RUN chown storeforgeuser:storeforgeuser ./usermanagement
+
+RUN chmod +x ./usermanagement
 
 # Switch to the non-root user
 USER storeforgeuser
@@ -50,4 +57,4 @@ USER storeforgeuser
 EXPOSE 50051
 
 # Run the service
-CMD ["./user-svc"]
+CMD ["./usermanagement"]
