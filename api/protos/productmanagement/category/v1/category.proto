@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package category.v1;
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/productmanagement/category/v1;categoryv1";

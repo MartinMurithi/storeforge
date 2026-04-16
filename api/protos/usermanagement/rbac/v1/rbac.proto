@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package rbac.v1;
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/usermanagement/rbac/v1;rbacv1";
+
+import "google/protobuf/timestamp.proto";
+
+service RbacService {
+  rpc CreateRole(CreateRoleRequest) returns (CreateRoleResponse){};
+  // GetRoles gets the roles of a user in their respective tenant
+  rpc GetRoles(GetRolesRequest) returns (GetRolesResponse){};
+  rpc GetRoleByID(GetRoleByIDRequest) returns (GetRoleByIDResponse){};
+  // UpdateRole updates the name, description, and permissions of an existing role
+  rpc UpdateRole(UpdateRoleRequest) returns (UpdateRoleResponse) {};
+}
+
+message Role {
+  string                    id          = 1;
+  string                    name        = 2;
+  string                    slug        = 3;
+  string                    description = 4;
+  bool                      is_system   = 5;
+  repeated Permission       permissions = 6;
+  google.protobuf.Timestamp created_at  = 7;
+}
+
+message Permission{
+  string                    id          = 1;
+  string                    slug        = 2;
+  string                    description = 3;
+  google.protobuf.Timestamp created_at  = 4;
+}
+
+message CreateRoleRequest{
+  string          name           = 1;
+  string          slug           = 2;
+  string          description    = 3;
+  repeated string permission_ids = 4;
+}
+
+message CreateRoleResponse{
+  bool success = 1;
+  Role role    = 2;
+}
+
+// UpdateRole request/response
+message UpdateRoleRequest {
+  string          role_id        = 1; // which role to update
+  string          name           = 2;
+  string          description    = 3;
+  repeated string permission_ids = 4; // final list of permission IDs
+}
+
+message UpdateRoleResponse {
+  bool success = 1;
+  Role role    = 2; // updated role with updated permissions
+}
+
+message GetRolesRequest{
+  string tenant_id = 1;
+}
+
+message GetRolesResponse{
+  bool          success = 1;
+  repeated Role roles   = 2;
+}
+
+message GetRoleByIDRequest{
+  string role_id = 1;
+}
+
+message GetRoleByIDResponse{
+  Role role = 1;
+}

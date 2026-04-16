@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package theme.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/theme/v1;themev1";
+
+// ThemeService, theme_service handls theme related operations such as theme creation, retrieval, deletion and updates.
+service ThemeService {
+  rpc GetThemeById(GetThemeByIdRequest) returns (GetThemeByIdResponse);
+}
+
+message Theme{
+  string                    id           = 1;
+  string                    name         = 2;
+  string                    description  = 3;
+  google.protobuf.Struct    theme_config = 4;
+  bool                      is_active    = 5;
+  google.protobuf.Timestamp created_at   = 6;
+
+}
+
+message GetThemeByIdRequest{
+    string id = 1;
+}
+
+message GetThemeByIdResponse{
+    Theme theme = 1;
+}

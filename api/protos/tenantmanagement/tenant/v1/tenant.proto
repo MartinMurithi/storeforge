@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package tenant.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+import "tenantmanagement/theme/v1/theme.proto";
+import "usermanagement/auth/v1/auth.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1;tenantv1";
+
+// TenantService, tenant service will handle all thenant related operations such creating, retrieving, updating and deleting a tenant.
+service TenantService {
+    // Identity & Onboarding
+  rpc CreateTenant(CreateTenantRequest) returns (CreateTenantResponse);
+   // Get the full tenant context for a user
+  rpc GetTenantContext(GetTenantContextRequest) returns (GetTenantContextResponse);
+  rpc UpdateTenant(UpdateTenantRequest) returns (GetTenantContextResponse);
+
+  rpc GetTenant(GetTenantRequest) returns (GetTenantResponse);
+}
+
+message Tenant {
+  string                    id            = 1;
+  string                    store_name    = 2;
+  string                    slug          = 3;
+  string                    sub_domain    = 4;
+  string                    domain        = 5;
+  string                    business_type = 6;
+  string                    status        = 7;
+  google.protobuf.Timestamp created_at    = 8;
+  google.protobuf.Timestamp updated_at    = 9;
+  google.protobuf.Timestamp deleted_at    = 10;
+}
+
+message TenantSettings{
+  string                    tenant_id    = 1;
+  string                    theme_id     = 2;
+  google.protobuf.Struct    theme_config = 3;
+  int32                     version      = 4;
+  google.protobuf.Timestamp updated      = 5;
+}
+
+message CreateTenantRequest {
+  string store_name    = 1;
+  string business_type = 2;
+  string theme_id      = 3;
+  string user_id       = 4;
+}
+
+message CreateTenantResponse {
+  Tenant            tenant   = 1;
+  theme.v1.Theme    theme    = 2;
+  TenantSettings    settings = 3;
+  api.auth.v1.Token token    = 4;
+}
+
+message GetTenantRequest {
+  oneof identifier {
+    string id   = 1;
+    string slug = 2;
+  }
+}
+
+message GetTenantResponse {
+  Tenant tenant = 1;
+}
+
+message GetTenantContextRequest {
+  string tenant_id = 1;
+  string user_id   = 2; // the caller whose context we resolve
+}
+
+message GetTenantContextResponse {
+  Tenant         tenant   = 1;
+  TenantSettings settings = 2;
+  string         role     = 3; // caller's role in this tenant
+}
+
+// All fields optional for patch-style update
+message UpdateTenantRequest {
+  string               tenant_id = 1;
+  string               user_id   = 2;
+  TenantSettingsUpdate settings  = 3;
+}
+
+// Partial settings update (theme/config)
+message TenantSettingsUpdate {
+  google.protobuf.Struct theme_config = 1;
+}

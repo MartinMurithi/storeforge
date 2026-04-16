@@ -1,0 +1,101 @@
+syntax = "proto3";
+
+package product.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/productmanagement/product/v1;productv1";
+
+// TenantService, tenant service will handle all thenant related operations such creating, retrieving, updating and deleting a tenant.
+service ProductService {
+    // Product Creation
+  rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
+  rpc GetTenantProducts(GetTenantProductsRequest) returns (GetTenantProductsResponse) {};
+  rpc GetProductByID(GetProductByIDRequest) returns (GetProductByIDResponse) {};
+}
+
+message Product {
+  string                    id          = 1;
+  string                    tenant_id   = 2;
+  string                    name        = 3;
+  string                    description = 4;
+  int64                     price       = 5;
+  string                    currency    = 6;
+  string                    sku         = 7;
+  int64                     stock       = 8;
+  string                    status      = 9;
+  repeated ProductImage     images      = 10;
+  google.protobuf.Struct    properties  = 11;
+  google.protobuf.Timestamp created_at  = 12;
+  google.protobuf.Timestamp updated_at  = 13;
+  google.protobuf.Timestamp deleted_at  = 14;
+}
+
+message ProductImage{
+  string                    id         = 1;
+  string                    product_id = 2;
+  string                    image_url  = 3;
+  bool                      is_primary = 4;
+  int32                     sort_order = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp deleted_at = 7;
+}
+
+message ProductImageInput{
+  string product_id = 1;
+  string image_url  = 2;
+}
+
+message CreateProductRequest {
+  string                     tenant_id   = 1;
+  string                     name        = 2;
+  string                     description = 3;
+  int64                      price       = 4;
+  string                     sku         = 5;
+  int64                      stock       = 6;
+  string                     status      = 7;
+  google.protobuf.Struct     properties  = 8;
+  repeated ProductImageInput images      = 9;
+  string user_id = 10;
+}
+
+message CreateProductResponse {
+  Product product = 1;
+  string  message = 2;
+}
+
+message Pagination{
+  int32 page  = 1;
+  int32 limit = 2;
+}
+
+// Meta info for paginated response
+message PaginationMeta {
+  int32 page        = 1;
+  int32 limit       = 2;
+  int32 total       = 3;
+  int32 total_pages = 4;
+  bool  has_next    = 5;
+  bool  has_prev    = 6;
+}
+
+message GetTenantProductsRequest{
+  string tenant_id = 1;
+  int32  page      = 2;
+  int32  limit     = 3;
+}
+
+message GetTenantProductsResponse{
+  repeated Product products = 1;
+  PaginationMeta   meta     = 2;
+}
+
+message GetProductByIDRequest{
+  string tenant_id = 1;
+  string product_id      = 2;
+}
+
+message GetProductByIDResponse{
+  Product product = 1;
+}

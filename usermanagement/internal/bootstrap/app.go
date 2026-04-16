@@ -1,0 +1,112 @@
+package bootstrap
+
+import (
+	"context"
+	"fmt"
+	"time"
+
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/membership"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/rbac"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/config"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/database/postgres"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/repository"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/token"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/grpc"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http"
+)
+
+type App struct {
+	DB                *postgres.Pool
+	UserRepo          repository.IUserRepository
+	AuthRepo          repository.IAuthRepository
+	MembershipRepo    repository.IMembershipRepository
+	RoleRepo          repository.IRoleRepository
+	UserService       *user.UserService
+	AuthService       *auth.AuthService
+	MembershipService *membership.MembershipService
+	RoleService       *rbac.RoleService
+	Handler           *http.UserHandler
+	JWTMaker          *token.JWTMaker
+	GRPCServer        *grpc.Server
+}
+
+// Init initializes the application with full dependency injection
+func Init(cfg *config.Config) (*App, error) {
+	// -------------------------
+	// JWT setup
+	// -------------------------
+	privateKey, err := token.LoadPrivateKey(cfg.JWT.PrivateKeyPath)
+	if err != nil {
+		return nil, fmt.Errorf("error loading JWT private key: %w", err)
+	}
+
+	// publicKey, err := token.LoadPublicKey(cfg.JWT.PublicKeyPath)
+
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error loading JWT public key: %w", err)
+	// }
+
+	jwtMaker, err := token.NewJWTMaker(privateKey)
+	if err != nil {
+		return nil, fmt.Errorf("error initializing JWT maker: %w", err)
+	}
+
+	// -------------------------
+	// Database setup
+	// -------------------------
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	pool, err := postgres.Connect(ctx, &cfg.DB)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to DB: %w", err)
+	}
+
+	dbAdapter := postgres.NewAdapter(pool.Pool)
+
+	// -------------------------
+	// Repository
+	// --------------------------
+	userRepo := repository.NewUserRepository(dbAdapter)
+	authRepo := repository.NewUAuthRepository(dbAdapter)
+	membershipRepo := repository.NewMembershipRepository(dbAdapter)
+	roleRepo := repository.NewRoleRepository(dbAdapter)
+	permissionRepo := repository.NewPermissionRepository(dbAdapter)
+
+	// -------------------------
+	// Application services
+	// -------------------------
+	userSrv := user.NewUserService(userRepo)
+	membershipSrv := membership.NewMembershipService(membershipRepo)
+	authSrv := auth.NewAuthService(userRepo, authRepo, roleRepo, jwtMaker)
+	rbacSrv := rbac.NewRoleService(roleRepo, permissionRepo)
+
+	handler := http.NewUserHandler(userSrv, authSrv, membershipSrv)
+
+	// -------------------------
+	// gRPC Server
+	// -------------------------
+	grpcSrv, err := grpc.NewGRPCServer(cfg.GRPC.Port, userSrv, authSrv, membershipSrv, rbacSrv)
+	if err != nil {
+		return nil, fmt.Errorf("failed to start gRPC server: %w", err)
+	}
+
+	// Expose JWKs for envoy JWT verification
+	// go jwks.ServeJWKS(publicKey)
+
+	return &App{
+		DB:          pool,
+		UserRepo:    userRepo,
+		AuthRepo:    authRepo,
+		RoleRepo:    roleRepo,
+		UserService: userSrv,
+		AuthService: authSrv,
+		RoleService: rbacSrv,
+		Handler:     handler,
+		JWTMaker:    jwtMaker,
+		GRPCServer:  grpcSrv,
+	}, nil
+}

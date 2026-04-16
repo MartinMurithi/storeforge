@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS users_tenants(
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    tenant_id UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    role_id UUID NOT NULL REFERENCES roles(id) ON DELETE CASCADE,
+    joined_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    PRIMARY KEY(user_id, tenant_id)
+);

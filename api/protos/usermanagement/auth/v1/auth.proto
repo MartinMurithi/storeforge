@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package api.auth.v1;
+
+import "google/protobuf/timestamp.proto";
+
+import "usermanagement/user/v1/user.proto";
+
+option go_package = "github.com/MartinMurithi/storeforge/api/protos/usermanagement/auth/v1;authv1";
+
+// AuthService provides operations for managing user authentication and authorization.
+service AuthService {
+
+  // Register creates a new user account with the provided credentials and business information.
+  rpc Register(RegisterRequest) returns (RegisterResponse){};
+  // Login authenticates a user and returns an access token.
+  rpc Login(LoginRequest) returns (LoginResponse){};
+  // RefreshToken refreshes user access token
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse){};
+  // Logout revokes refresh token in DB
+  rpc Logout(LogoutRequest) returns (LogoutResponse){};
+
+  // Updates a user's session after they create a tenant
+  // Issues a new JWT token with a tenant id and role.
+  rpc UpdateSessionContext(UpdateSessionContextRequest) returns (UpdateSessionContextResponse){}
+}
+
+message RegisterRequest {
+  string full_name     = 1;
+  string email         = 2;
+  string phone         = 3;
+  string password      = 4;
+}
+
+message RegisterResponse {
+  user.v1.User user    = 1;
+  string       message = 2;
+}
+
+message LoginRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  user.v1.User user  = 1;
+  Token        token = 2;
+}
+
+message RefreshTokenRequest{
+  string refresh_token = 1;
+}
+
+message RefreshTokenResponse{
+  Token token = 2;
+}
+
+message Token {
+  string                    access_token  = 1;
+  string                    refresh_token = 2;
+  google.protobuf.Timestamp expires_at    = 3;
+  int64                     expires_in    = 4; // seconds
+  google.protobuf.Timestamp issued_at     = 5;
+  string                    token_type    = 6; // "Bearer"
+}
+
+message LogoutRequest{
+  string refresh_token = 1;
+}
+
+message LogoutResponse{
+  bool success = 2;
+}
+
+message UpdateSessionContextRequest {
+    // The ID of the user whose session needs upgrading
+    string user_id = 1;
+    
+    // The ID of the newly created tenant (or the one they are switching to)
+    string tenant_id = 2;
+    
+    // The role assigned to the user for this specific tenant (e.g., "owner")
+    string role = 3;
+}
+
+message UpdateSessionContextResponse {
+    // The new "Upgraded" JWT containing the tenant_id and role claims
+    Token token = 1;
+}

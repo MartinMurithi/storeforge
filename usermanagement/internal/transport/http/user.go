@@ -1,0 +1,308 @@
+package http
+
+import (
+	"encoding/json"
+	"errors"
+	"log"
+	"net/http"
+
+	apperrors "github.com/MartinMurithi/storeforge/pkg/errors"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/auth"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/membership"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/application/user"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/domain/entity"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/dto"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/interface/mapper"
+	"github.com/MartinMurithi/storeforge/usermanagement/internal/transport/http/httpx"
+
+	"github.com/gin-gonic/gin"
+)
+
+type UserHandler struct {
+	UserService *user.UserService
+	AuthService *auth.AuthService
+	MembershipService *membership.MembershipService
+}
+
+func NewUserHandler(userService *user.UserService, authService *auth.AuthService, membershipService *membership.MembershipService) *UserHandler {
+	return &UserHandler{
+		UserService: userService,
+		AuthService: authService,
+		MembershipService: membershipService,
+	}
+}
+
+func (handler *UserHandler) RegisterUser(c *gin.Context) {
+
+	var req dto.RegisterUserRequestDTO
+
+	err := c.ShouldBindJSON(&req)
+
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[RegisterUser] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
+			return
+		}
+	}
+
+	user, err := handler.AuthService.RegisterUser(c.Request.Context(), &req)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrFullNameRequired),
+			errors.Is(err, apperrors.ErrEmailRequired),
+			errors.Is(err, apperrors.ErrPhoneRequired),
+			errors.Is(err, apperrors.ErrPasswordRequired),
+			errors.Is(err, apperrors.ErrBusinessTypeRequired),
+			errors.Is(err, apperrors.ErrBusinessNameRequired):
+			httpx.Error(c, http.StatusBadRequest, "ALL_FIELDS_REQUIRED", "all fields are required")
+		case errors.Is(err, apperrors.ErrInvalidEmailFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_EMAIL_FORMAT", "invalid email format")
+		case errors.Is(err, apperrors.ErrInvalidPhoneNumber):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_PHONE_NUMBER", "invalid phone number")
+		case errors.Is(err, apperrors.ErrUserAlreadyExists):
+			httpx.Error(c, http.StatusConflict, "USER_ALREADY_EXISTS", "user already registered")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	response := mapper.ToRegisterUserResponse(user)
+
+	httpx.JSON(c, http.StatusCreated, response)
+
+}
+
+func (handler *UserHandler) LoginUser(c *gin.Context) {
+	var req dto.LoginUserRequestDTO
+
+	err := c.ShouldBindJSON(&req)
+
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[LoginUser] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
+			return
+		}
+	}
+
+	user, token, err := handler.AuthService.LoginUser(c.Request.Context(), &req)
+
+	if err != nil {
+		switch {
+		case
+			errors.Is(err, apperrors.ErrEmailRequired),
+			errors.Is(err, apperrors.ErrPasswordRequired):
+			httpx.Error(c, http.StatusBadRequest, "EMAIL_AND_PASSWORD_REQUIRED", "both email and password are required")
+		case errors.Is(err, apperrors.ErrInvalidEmailFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_EMAIL_FORMAT", "invalid email format")
+		case errors.Is(err, apperrors.ErrInvalidCredentials):
+			httpx.Error(c, http.StatusUnauthorized, "INVALID_CREDENTIALS", "invalid email or password")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	response := mapper.ToLoginUserResponse(token, user)
+
+	httpx.JSON(c, http.StatusOK, response)
+
+}
+
+func (handler *UserHandler) FetchAllUsers(c *gin.Context) {
+
+	p, err := dto.ParsePagination(c)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrInvalidPageNumber):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_PAGE_NUMBER", "invalid page number")
+		case errors.Is(err, apperrors.ErrInvalidLimitNumber):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_LIMIT_NUMBER", "invalid limit number")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+	}
+
+	users, meta, err := handler.UserService.FetchAllUsers(c.Request.Context(), p)
+
+	if err != nil {
+		log.Printf("[FetchAllUsers] failed to fetch users: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	// convert []domain.User (value slice) to []*domain.User expected by mapper
+	var domainUsers []*entity.User
+	for i := range users {
+		u := users[i]
+		domainUsers = append(domainUsers, u)
+	}
+
+	response := mapper.ToFetchAllUsersResponse(domainUsers, meta)
+
+	httpx.JSON(c, http.StatusOK, response)
+
+}
+
+func (handler *UserHandler) GetCurrentUser(c *gin.Context) {
+
+	id, err := dto.GetUserId(c)
+
+	log.Printf("[HANDLER]: user id %v", id.Valid)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "id not found in context")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user id format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	user, err := handler.UserService.GetCurrentUserById(c.Request.Context(), id)
+
+	if err != nil {
+		log.Printf("[FetchUser] failed to fetch user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	response := mapper.ToFetchUserResponse(user)
+
+	httpx.JSON(c, http.StatusOK, response)
+
+}
+
+func (h *UserHandler) PatchMe(c *gin.Context) {
+	var req dto.PatchUserRequestDTO
+
+	err := c.ShouldBindJSON(&req)
+
+	if err != nil {
+		var syntaxErr *json.SyntaxError
+		var typeErr *json.UnmarshalTypeError
+
+		if errors.As(err, &syntaxErr) || errors.As(err, &typeErr) {
+			log.Printf("[PatchMe] malformed JSON: %v", err)
+			httpx.Error(c, http.StatusBadRequest, "MALFORMED_JSON", "malformed JSON")
+			return
+		}
+	}
+
+	id, err := dto.GetUserId(c)
+
+	log.Printf("[HANDLER]: user id %v", id.Valid)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "id not found")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user id format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	input := mapper.ToPatchUserRequest(id, &req)
+
+	updatedUser, err := h.UserService.UpdateCurrentUser(c.Request.Context(), input)
+
+	if err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[PatchMe] failed to update user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	response := mapper.ToFetchUserResponse(updatedUser)
+
+	httpx.JSON(c, http.StatusOK, response)
+}
+
+func (h *UserHandler) DeleteMe(c *gin.Context) {
+	// Get logged-in user ID from token
+	userID, err := dto.GetUserId(c)
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrIdIsRequired):
+			httpx.Error(c, http.StatusNotFound, "ID_NOT_FOUND", "user ID not found")
+		case errors.Is(err, apperrors.ErrInvalidUserIdFormat):
+			httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID_FORMAT", "invalid user ID format")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	// Call service to delete (soft delete)
+	if err := h.UserService.SoftDeleteUser(c.Request.Context(), userID); err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[DeleteMe] failed to delete user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	httpx.JSON(c, http.StatusNoContent, nil)
+}
+
+func (h *UserHandler) DeleteUserByID(c *gin.Context) {
+	// Get target user ID from URL param
+	targetID, err := dto.GetUserParamId(c)
+
+	if err != nil {
+		httpx.Error(c, http.StatusBadRequest, "INVALID_USER_ID", "invalid user id")
+		return
+	}
+
+	// Get logged-in user role from token
+	role, err := dto.GetUserRole(c)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, apperrors.ErrRoleIsRequired):
+			httpx.Error(c, http.StatusUnauthorized, "ROLE_NOT_FOUND", "role is required")
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		}
+		return
+	}
+
+	// Only allow admin or owner
+	if role != "admin" && role != "owner" {
+		httpx.Error(c, http.StatusForbidden, "FORBIDDEN", "you are not allowed to delete this user")
+		return
+	}
+
+	if err := h.UserService.SoftDeleteUser(c.Request.Context(), targetID); err != nil {
+		if errors.Is(err, apperrors.ErrUserNotFound) {
+			httpx.Error(c, http.StatusNotFound, "USER_NOT_FOUND", "user not found")
+			return
+		}
+		log.Printf("[DeleteUserByID] failed to delete user: %v", err)
+		httpx.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "internal server error")
+		return
+	}
+
+	httpx.JSON(c, http.StatusNoContent, nil)
+}
