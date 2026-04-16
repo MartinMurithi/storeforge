@@ -23,7 +23,7 @@ func Load() (*Config, error) {
 		UserSvcGrpcPort:    userSvcGrpcPort,
 		TenantSvcGrpcPort:  tenantSvcGrpcPort,
 		ProductSvcGrpcPort: productSvcGrpcPort,
-		PublicKeyPath:      env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/gateway/internal/certs/jwt_public.pem"),
+		PublicKeyPath:      env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/certs/jwt_public.pem"),
 	}
 
 	if cfg.UserSvcGrpcPort == "" {
