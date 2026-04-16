@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: usermanagement/Dockerfile
-    container_name: storeforge-user-svc
+    container_name: user-svc
     depends_on:
       - database
     ports:
@@ -36,6 +36,40 @@ services:
     networks:
       - storeforge-net
 
+  tenant-svc:
+    build:
+      context: .
+      dockerfile: tenantmanagement/Dockerfile
+    container_name: tenant-svc
+    depends_on:
+      - database
+      - user-svc
+    ports:
+      - "50052:50052"
+    environment:
+      # Use the container name 'user-db' as the hostname
+      - DATABASE_URL=postgres://postgres:martin321!@database:5432/storeforge?sslmode=disable
+      - GRPC_PORT=50052
+    networks:
+      - storeforge-net
+
+  product-svc:
+    build:
+      context: .
+      dockerfile: productmanagement/Dockerfile
+    container_name: product-svc
+    depends_on:
+      - database
+      - tenant-svc
+    ports:
+      - "50053:50053"
+    environment:
+      # Use the container name 'user-db' as the hostname
+      - DATABASE_URL=postgres://postgres:martin321!@database:5432/storeforge?sslmode=disable
+      - GRPC_PORT=50053
+    networks:
+      - storeforge-net
+
   gateway:
     build:
       context: .
@@ -47,15 +81,15 @@ services:
       - JWT_PUBLIC_KEY_PATH=/etc/storeforge/certs/jwt_public.pem
       # --- Service Discovery (Hosts) ---
       # These must match the top-level service keys in this YAML file
-      - USER_SVC_HOST=storeforge-user-svc
-      - TENANT_SVC_HOST=storeforge-tenant-svc
-      - PRODUCT_SVC_HOST=storeforge-product-svc
+      - USER_SVC_HOST=user-svc
+      - TENANT_SVC_HOST=tenant-svc
+      # - PRODUCT_SVC_HOST=product-svc
 
       # --- Service Ports ---
       - USER_SVC_GRPC_PORT=50051
       - TENANT_SVC_GRPC_PORT=50052
       - PRODUCT_SVC_GRPC_PORT=50053
-      
+
       # --- Gateway Settings ---
       - GATEWAY_PORT=9095
       - GIN_MODE=debug # Switch to 'release' for production
