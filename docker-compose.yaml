@@ -8,9 +8,11 @@ services:
       POSTGRES_PASSWORD: martin321! # Later, use a secret manager
       POSTGRES_DB: storeforge
     ports:
-      - "5433:5432"
+      - "5436:5432"
     volumes:
       - database_data:/var/lib/postgresql/data # Persists data even if container is deleted
+    networks:
+      - storeforge-net
 
   # ------ SERVICES LAYER ---------
   user-svc:
@@ -20,12 +22,14 @@ services:
     container_name: storeforge-user-svc
     depends_on:
       - database
+    ports:
+      - "50051:50051"
     environment:
       # Use the container name 'user-db' as the hostname
-      - DB_URL=postgres://postgres:martin321!@database:5432?sslmode=disable
+      - DATABASE_URL=postgres://postgres:martin321!@database:5432/storeforge?sslmode=disable
       - GRPC_PORT=50051
       # This path must match the 'destination' in the volumes section below
-      - RSA_PRIVATE_KEY_PATH=/etc/storeforge/certs/jwt_private.pem
+      - JWT_PRIVATE_KEY_PATH=/etc/storeforge/certs/jwt_private.pem
     volumes:
       # FORMAT: [Host Path] : [Container Path] : [Permissions]
       - ./certs/jwt_private.pem:/etc/storeforge/certs/jwt_private.pem:ro
@@ -33,15 +37,30 @@ services:
       - storeforge-net
 
   gateway:
-    build: ./
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
     container_name: gateway-svc
     ports:
       - "9095:9095"
     environment:
-      - RSA_PUBLIC_KEY_PATH=/etc/storeforge/certs/jwt_public.pem
-      - USER_SVC_ADDR=user-svc:50051
+      - JWT_PUBLIC_KEY_PATH=/etc/storeforge/certs/jwt_public.pem
+      # --- Service Discovery (Hosts) ---
+      # These must match the top-level service keys in this YAML file
+      - USER_SVC_HOST=storeforge-user-svc
+      - TENANT_SVC_HOST=storeforge-tenant-svc
+      - PRODUCT_SVC_HOST=storeforge-product-svc
+
+      # --- Service Ports ---
+      - USER_SVC_GRPC_PORT=50051
+      - TENANT_SVC_GRPC_PORT=50052
+      - PRODUCT_SVC_GRPC_PORT=50053
+      
+      # --- Gateway Settings ---
+      - GATEWAY_PORT=9095
+      - GIN_MODE=debug # Switch to 'release' for production
     volumes:
-      - ./certs/jwt_public.pem:/etc/storeforge/certs/public.pem:ro
+      - ./certs/jwt_public.pem:/etc/storeforge/certs/jwt_public.pem:ro
     networks:
       - storeforge-net
 

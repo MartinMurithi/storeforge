@@ -8,25 +8,33 @@ import (
 
 type Config struct {
 	PublicKeyPath      string
-	UserSvcGrpcPort    string
+	UserSvcHost        string
+	UserSvcPort        string
+	TenantSvcPort      string
+	ProductSvcPort     string
 	TenantSvcGrpcPort  string
 	ProductSvcGrpcPort string
+	GatewayPort        string
 }
 
 func Load() (*Config, error) {
 
-	userSvcGrpcPort := env.GetEnv("USER_SVC_GRPC_PORT", "50051")
+	userHost := env.GetEnv("USER_SVC_HOST", "storeforge-user-svc")
+	userPort := env.GetEnv("USER_SVC_GRPC_PORT", "50051")
 	tenantSvcGrpcPort := env.GetEnv("TENANT_SVC_GRPC_PORT", "50052")
 	productSvcGrpcPort := env.GetEnv("PRODUCT_SVC_GRPC_PORT", "50053")
+	gatewayPort := env.GetEnv("GATEWAY_PORT", "9095")
 
 	cfg := &Config{
-		UserSvcGrpcPort:    userSvcGrpcPort,
+		UserSvcHost:        userHost,
+		UserSvcPort:        userPort,
 		TenantSvcGrpcPort:  tenantSvcGrpcPort,
 		ProductSvcGrpcPort: productSvcGrpcPort,
+		GatewayPort:        gatewayPort,
 		PublicKeyPath:      env.GetEnv("JWT_PUBLIC_KEY_PATH", "/home/martin-wachira/Martin/storeforge/certs/jwt_public.pem"),
 	}
 
-	if cfg.UserSvcGrpcPort == "" {
+	if cfg.UserSvcPort == "" && cfg.UserSvcHost == "" {
 		return nil, fmt.Errorf("user service grpc port is required")
 	}
 
@@ -40,6 +48,10 @@ func Load() (*Config, error) {
 
 	if cfg.PublicKeyPath == "" {
 		return nil, fmt.Errorf("JWT_PUBLIC_KEY_PATH is required")
+	}
+
+	if cfg.GatewayPort == "" {
+		return nil, fmt.Errorf("gateway port is required")
 	}
 
 	return cfg, nil

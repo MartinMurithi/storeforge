@@ -1,4 +1,4 @@
---CREATE TYPE product_status AS ENUM ('draft', 'active', 'archived', 'out_of_stock');
+CREATE TYPE product_status AS ENUM ('draft', 'active', 'archived', 'out_of_stock');
 /*
  We are using JSONB for product_properties to allow each tenant
  to define custom attributes for their products without altering

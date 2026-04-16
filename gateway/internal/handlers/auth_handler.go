@@ -67,6 +67,7 @@ func (h *AuthHandler) LoginUser(c *gin.Context) {
 	if err != nil {
 		code, slug, msg := errconv.FromGrpcToHttp(err)
 		response.Error(c, code, slug, msg)
+
 		return
 	}
 
