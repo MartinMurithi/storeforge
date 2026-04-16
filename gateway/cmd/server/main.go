@@ -31,7 +31,8 @@ func main() {
 	}
 
 	// -------------- Usermanagement Client ------------
-	userServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.UserSvcGrpcPort)
+
+	userServerAddr := fmt.Sprintf("%s:%s", cfg.UserSvcHost, cfg.UserSvcPort)
 
 	userConn, err := grpc.NewClient(userServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -90,9 +91,9 @@ func main() {
 	// setup router
 	r := router.SetupRouter(userHandler, authHandler, tenantHandler, rbacHandler, productHandler, authMiddleware)
 
-	log.Printf("Gateway running on port 9095\n")
+	log.Printf("Gateway running on port %s\n", cfg.GatewayPort)
 
-	if err := r.Run(":9095"); err != nil {
+	if err := r.Run(":" + cfg.GatewayPort); err != nil {
 		log.Printf("an error when starting gateway server%v\n", err)
 	}
 }

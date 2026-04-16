@@ -20,14 +20,13 @@ COPY pkg/ ./pkg/
 COPY api/ ./api/
 
 # Copy the rest of the source code
-COPY usermanagement/ ./usermanagement/
+COPY gateway/ ./gateway/
 
 # Compile the binary
 # CGO_ENABLED=0 creates a statically linked binary(runs without external C libraries)
 # GOOS=linux ensures the binary is built for a linux environment
 # -ldflags="-s -w" strips debug information to reduce the binary size
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" \
-    -o user-app ./usermanagement/cmd/server/main.go
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o gateway-app ./gateway/cmd/server/main.go
 
 # =========== RUNTIME ================================
 
@@ -44,18 +43,18 @@ WORKDIR /home/storeforgeuser/
 
 # Copy ONLY the compiled binary from the 'builder' stage.
 # This keeps the final image clean of source code and build tools.
-COPY --from=builder /app/user-app ./user-app
+COPY --from=builder /app/gateway-app ./gateway-app
 
 # Set ownership of the binary to the non-root user
-RUN chown storeforgeuser:storeforgeuser ./user-app
+RUN chown storeforgeuser:storeforgeuser ./gateway-app
 
-RUN chmod +x ./user-app
+RUN chmod +x ./gateway-app
 
 # Switch to the non-root user
 USER storeforgeuser
 
-# Inform Docker that the service listens on the gRPC port
-EXPOSE 50051
+# Inform Docker that the service listens on the http port
+EXPOSE 9095
 
 # Run the service
-CMD ["./user-app"] 
+CMD ["./gateway-app"] 
