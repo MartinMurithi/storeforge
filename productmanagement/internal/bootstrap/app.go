@@ -44,7 +44,8 @@ func Init(cfg *config.Config) (*App, error) {
 	// Tenant Service Client
 	// -------------------------
 	// Establish the connection to Tenant Service
-	tenantConn, err := grpc.NewClient(fmt.Sprintf("localhost:%d", cfg.GRPC.TenantServerPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	tenantServerAddr := fmt.Sprintf("%s:%s", cfg.GRPC.TenantSvcHost, cfg.GRPC.TenantSvcPort)
+	tenantConn, err := grpc.NewClient(tenantServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to user service client: %w", err)
 	}

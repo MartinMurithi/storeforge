@@ -46,7 +46,8 @@ func Init(cfg *config.Config) (*App, error) {
 	// User Service Client
 	// -------------------------
 	// Establish the connection to User Service
-	userConn, err := grpc.NewClient(fmt.Sprintf("localhost:%d", cfg.GRPC.UserSvcAddr), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userServerAddr := fmt.Sprintf("%s:%s", cfg.GRPC.UserSvcHost, cfg.GRPC.UserSvcPort)
+	userConn, err := grpc.NewClient(userServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to user service client: %w", err)
 	}
