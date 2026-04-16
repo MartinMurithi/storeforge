@@ -38,10 +38,6 @@ func Init(cfg *config.Config) (*App, error) {
 		return nil, fmt.Errorf("failed to connect to DB: %w", err)
 	}
 
-	// if err := postgres.RunMigrations(cfg.DB.DSN); err != nil {
-	// 	return nil, fmt.Errorf("failed to run migrations: %w", err)
-	// }
-
 	dbAdapter := postgres.NewAdapter(pool.Pool)
 
 	// -------------------------

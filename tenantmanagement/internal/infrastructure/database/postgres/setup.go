@@ -2,13 +2,11 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 
 	"github.com/MartinMurithi/storeforge/tenantmanagement/internal/config"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
@@ -51,25 +49,4 @@ func Close() {
 // Reset is only for tests
 func Reset() {
 	dbPool = nil
-}
-
-func RunMigrations(databaseURL string) error {
-	m, err := migrate.New(
-		"file://migrations",
-		databaseURL,
-	)
-	if err != nil {
-		return fmt.Errorf("init migrate: %w", err)
-	}
-
-	if err := m.Up(); err != nil {
-		if err == migrate.ErrNoChange {
-			log.Println("no new migrations to apply")
-			return nil
-		}
-		return fmt.Errorf("apply migrations: %w", err)
-	}
-
-	log.Println("migrations applied successfully")
-	return nil
 }
