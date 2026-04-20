@@ -83,7 +83,7 @@ services:
       # These must match the top-level service keys in this YAML file
       - USER_SVC_HOST=user-svc
       - TENANT_SVC_HOST=tenant-svc
-      # - PRODUCT_SVC_HOST=product-svc
+      - PRODUCT_SVC_HOST=product-svc
 
       # --- Service Ports ---
       - USER_SVC_GRPC_PORT=50051
