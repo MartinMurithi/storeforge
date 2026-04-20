@@ -58,11 +58,28 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 	// Set the tenant and user ID in the grpc metadata and send them to tenant service
 	ctx = grpcx.ForwardMetadata(ctx)
 
+	// var props *entity.ProductProperties
+
+	// if req.Properties != nil {
+	// 	m := entity.ProductProperties(req.Properties.AsMap())
+	// 	props = &m
+	// }
+
 	var props *entity.ProductProperties
 
 	if req.Properties != nil {
-		m := entity.ProductProperties(req.Properties.AsMap())
-		props = &m
+		m := req.Properties.AsMap()
+
+		version := 1
+		if v, ok := m["version"].(float64); ok {
+			version = int(v)
+			delete(m, "version")
+		}
+
+		props = &entity.ProductProperties{
+			Version: version,
+			Data:    m,
+		}
 	}
 
 	var prodStatus entity.ProductStatus

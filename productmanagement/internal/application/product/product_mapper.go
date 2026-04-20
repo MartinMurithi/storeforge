@@ -29,10 +29,14 @@ func ToProtoProduct(p *entity.Product) *productv1.Product {
 		})
 	}
 
-	// Map product properties (entity.ProductProperties -> google.protobuf.Struct)
 	var props *structpb.Struct
 	if p.Properties != nil {
-		props, _ = structpb.NewStruct(*p.Properties)
+		propsMap := map[string]any{
+			"version": p.Properties.Version,
+			"data":    p.Properties.Data,
+		}
+
+		props, _ = structpb.NewStruct(propsMap)
 	}
 
 	return &productv1.Product{

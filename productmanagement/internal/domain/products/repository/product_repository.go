@@ -73,15 +73,15 @@ func (repo *ProductRepository) CreateProduct(ctx context.Context, product *entit
 	err = tx.QueryRow(
 		ctx,
 		productQuery,
-		product.TenantID,    // $1
-		product.Name,        // $2
-		product.Description, // $3
-		product.Price,       // $4 -> price_cents
-		product.Currency,    // $5
-		product.SKU,         // $6
-		product.Stock,       // $7 -> stock_quantity
-		product.Properties,  // $8 -> jsonb
-		product.Status,      // $9 -> enum
+		product.TenantID,    
+		product.Name,        
+		product.Description, 
+		product.Price,      
+		product.Currency,    
+		product.SKU,         
+		product.Stock,        
+		product.Properties,
+		product.Status,       
 	).Scan(&id, &product.Name, &product.Currency, &product.CreatedAt)
 
 	product.ID = value_object.NewProductIDFromUUID(id)

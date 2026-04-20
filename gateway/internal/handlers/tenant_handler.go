@@ -38,16 +38,23 @@ func (h *TenantHandler) CreateTenant(c *gin.Context) {
 		return
 	}
 
+	log.Printf("debug log 1 %v", &req)
+
 	// Setting the Metadata
 	md := metadata.Pairs("user-id", userID.(string))
 	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
 
+	log.Printf("debug log 2 %v", &req)
+
 	resp, err := h.TenantClient.CreateTenant(ctx, &req)
+
 	if err != nil {
 		code, slug, msg := errconv.FromGrpcToHttp(err)
 		response.Error(c, code, slug, msg)
+		log.Printf("error msg: %v", err)
 		return
 	}
+	log.Printf("debug log 3 %v", resp.Tenant)
 
 	response.JSON(c, http.StatusCreated, mapper.MapCreateTenantResponseProtoToDTO(resp))
 }

@@ -22,7 +22,7 @@ type ProductService struct {
 // NewProductService creates a new instance of the ProductService.
 func NewProductService(pr repository.IProductRepository, tenantClientSvc *grpcclient.TenantSvcClient) *ProductService {
 	return &ProductService{
-		ProductRepo: pr,
+		ProductRepo:     pr,
 		TenantSvcClient: *tenantClientSvc,
 	}
 }
@@ -47,7 +47,18 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 	}
 
 	if req.Properties == nil {
-		req.Properties = &entity.ProductProperties{} // empty properties map
+		req.Properties = &entity.ProductProperties{
+			Version: 1,
+			Data:    map[string]any{},
+		}
+	}
+
+	if req.Properties.Version == 0 {
+		req.Properties.Version = 1
+	}
+
+	if req.Properties.Data == nil {
+		req.Properties.Data = map[string]any{}
 	}
 
 	// -------------------------
@@ -66,7 +77,6 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		TenantId: tenantID.String(),
 		UserId:   req.UserID,
 	}
-
 
 	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, tenantCtxReq)
 

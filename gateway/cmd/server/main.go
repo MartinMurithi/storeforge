@@ -44,7 +44,9 @@ func main() {
 	defer userConn.Close()
 
 	// -------------- Tenant Management Client ------------
-	tenantServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.TenantSvcGrpcPort)
+	tenantServerAddr := fmt.Sprintf("%s:%s", cfg.TenantSvcHost, cfg.TenantSvcPort)
+
+	log.Printf("Connecting to Tenant Service at: %s", tenantServerAddr)
 
 	tenantConn, err := grpc.NewClient(tenantServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -54,7 +56,7 @@ func main() {
 	}
 
 	// -------------- Product Management Client ------------
-	productServerAddr := fmt.Sprintf("0.0.0.0:%s", cfg.ProductSvcGrpcPort)
+	productServerAddr := fmt.Sprintf("%s:%s", cfg.ProductSvcHost, cfg.ProductSvcPort)
 
 	productConn, err := grpc.NewClient(productServerAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 

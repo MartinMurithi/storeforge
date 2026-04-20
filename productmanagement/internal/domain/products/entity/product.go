@@ -17,7 +17,10 @@ const (
 
 // ProductProperties is our "BSON" equivalent.
 // It allows for infinite flexibility in product creation.
-type ProductProperties map[string]any
+type ProductProperties struct {
+	Version int
+	Data    map[string]any
+}
 
 type Product struct {
 	ID          value_object.ProductID

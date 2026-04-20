@@ -21,9 +21,12 @@ func NewTenantClient(addr string) *TenantClient {
 		log.Fatalf("did not connect to Tenant Service: %v", err)
 	}
 
+	log.Printf("connected to tenant svc successfully")
+
 	return &TenantClient{
 		Service: tenantv1.NewTenantServiceClient(conn),
 	}
+
 }
 
 func (c *TenantClient) CreateTenant(ctx context.Context, req *tenantv1.CreateTenantRequest) (*tenantv1.CreateTenantResponse, error) {
@@ -32,6 +35,8 @@ func (c *TenantClient) CreateTenant(ctx context.Context, req *tenantv1.CreateTen
 	defer cancel()
 
 	res, err := c.Service.CreateTenant(ctx, req)
+
+	log.Printf("tenant created successfully")
 
 	if err != nil {
 		return nil, err
