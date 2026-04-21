@@ -58,13 +58,6 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 	// Set the tenant and user ID in the grpc metadata and send them to tenant service
 	ctx = grpcx.ForwardMetadata(ctx)
 
-	// var props *entity.ProductProperties
-
-	// if req.Properties != nil {
-	// 	m := entity.ProductProperties(req.Properties.AsMap())
-	// 	props = &m
-	// }
-
 	var props *entity.ProductProperties
 
 	if req.Properties != nil {
@@ -99,13 +92,6 @@ func (h *ProductGrpcHandler) CreateProduct(ctx context.Context, req *productv1.C
 		Stock:       req.Stock,
 		Status:      prodStatus,
 		Properties:  props,
-		Images:      make([]product.ProductImageInputDTO, 0, len(req.Images)),
-	}
-	// Map repeated images
-	for _, img := range req.Images {
-		dtoReq.Images = append(dtoReq.Images, product.ProductImageInputDTO{
-			URL: img.ImageUrl,
-		})
 	}
 
 	// Call the service
@@ -167,4 +153,240 @@ func (h *ProductGrpcHandler) GetProductByID(ctx context.Context, req *productv1.
 	}
 
 	return &productv1.GetProductByIDResponse{Product: product.ToProtoProduct(prod)}, nil
+}
+
+func (h *ProductGrpcHandler) AddProductImages(
+	ctx context.Context,
+	req *productv1.AddProductImagesRequest,
+) (*productv1.AddProductImagesResponse, error) {
+
+	const op = "ProductGrpcHandler.AddProductImages"
+
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
+
+	log.Printf("[%s]: extracted tenant id %s", op, tenantID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract tenant id from metadata %s", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract user id from metadata %s", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	// Set the tenant and user ID in the grpc metadata and send them to tenant service
+	ctx = grpcx.ForwardMetadata(ctx)
+
+	// -------------------------
+	// Map request DTO
+	// -------------------------
+	dto := product.AddProductImagesRequestDTO{
+		ProductID: req.ProductId,
+		TenantID:  tenantID,
+		UserID:    userID,
+	}
+
+	for _, img := range req.Images {
+		dto.Images = append(dto.Images, product.AddProductImageInputDTO{
+			URL:       img.ImageUrl,
+			SortOrder: int(img.SortOrder),
+			IsPrimary: img.IsPrimary,
+		})
+	}
+
+	// -------------------------
+	// Service call
+	// -------------------------
+	err = h.ProductService.AddProductImages(ctx, dto)
+	if err != nil {
+		log.Printf("[%s]: failed to add images: %v", op, err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &productv1.AddProductImagesResponse{
+		Message: "images added successfully",
+	}, nil
+}
+
+func (h *ProductGrpcHandler) DeleteProductImages(
+	ctx context.Context,
+	req *productv1.DeleteProductImagesRequest,
+) (*productv1.DeleteProductImagesResponse, error) {
+
+	const op = "ProductGrpcHandler.DeleteProductImages"
+
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted tenant id %s", op, tenantID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract tenant id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract user id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	// -------------------------
+	// Map DTO
+	// -------------------------
+	dto := product.DeleteProductImagesRequestDTO{
+		ProductID: req.ProductId,
+		TenantID:  tenantID,
+		UserID:    userID,
+		ImageIDs:  req.ImageIds,
+	}
+
+	// -------------------------
+	// Service call
+	// -------------------------
+	err = h.ProductService.DeleteProductImages(ctx, dto)
+	if err != nil {
+		log.Printf("[%s]: failed to delete images: %v", op, err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &productv1.DeleteProductImagesResponse{
+		Message: "images deleted successfully",
+	}, nil
+}
+
+func (h *ProductGrpcHandler) UpdateProduct(
+	ctx context.Context,
+	req *productv1.UpdateProductRequest,
+) (*productv1.UpdateProductResponse, error) {
+
+	const op = "ProductGrpcHandler.UpdateProduct"
+
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted tenant id %s", op, tenantID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract tenant id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract user id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	// Set the tenant and user ID in the grpc metadata and send them to tenant service
+	ctx = grpcx.ForwardMetadata(ctx)
+
+	// -------------------------
+	// Map properties (protobuf Struct → domain)
+	// -------------------------
+	var props *entity.ProductProperties
+
+	if req.Input != nil && req.Input.ProductProperties != nil {
+		var dataMap map[string]any
+		if req.Input.ProductProperties.Properties != nil {
+			dataMap = req.Input.ProductProperties.Properties.AsMap()
+		}
+
+		props = &entity.ProductProperties{
+			Version: int(req.Input.ProductProperties.Version),
+			Data:    dataMap,
+		}
+	}
+
+	// -------------------------
+	// Map status
+	// -------------------------
+	var statusVal *entity.ProductStatus
+	if req.Input != nil && req.Input.Status != "" {
+		s := entity.ProductStatus(req.Input.Status)
+		statusVal = &s
+	}
+
+	dto := product.UpdateProductRequestDTO{
+		ProductID:  req.ProductId,
+		TenantID:   tenantID,
+		UserID:     userID,
+		Status:     statusVal,
+		Properties: props,
+	}
+
+	if req.Input != nil {
+		dto.Name = &req.Input.Name
+		dto.Description = &req.Input.Description
+		dto.Price = &req.Input.Price
+		dto.Currency = &req.Input.Currency
+		dto.SKU = &req.Input.Sku
+		dto.Stock = &req.Input.Stock
+	}
+
+	// -------------------------
+	// Service call
+	// -------------------------
+	updatedProduct, err := h.ProductService.UpdateProduct(ctx, dto)
+	if err != nil {
+		log.Printf("[%s]: failed to update product: %v", op, err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	return &productv1.UpdateProductResponse{
+		Message: "Product Updated Successfully",
+		Product: product.ToProtoProduct(updatedProduct),
+	}, nil
+}
+
+func (h *ProductGrpcHandler) SoftDeleteProduct(
+	ctx context.Context,
+	req *productv1.SoftDeleteProductRequest,
+) (*productv1.SoftDeleteProductResponse, error) {
+
+	const op = "ProductGrpcHandler.SoftDeleteProduct"
+
+	tenantID, err := grpcx.GetTenantIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted tenant id %s", op, tenantID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract tenant id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing tenant identity: %v", err)
+	}
+
+	userID, err := grpcx.GetUserIDFromMetadata(ctx)
+	log.Printf("[%s]: extracted user id %s", op, userID)
+
+	if err != nil {
+		log.Printf("[%s]: failed to extract user id: %v", op, err)
+		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
+	}
+
+	// -------------------------
+	// Call service
+	// -------------------------
+	dto := product.DeleteProductRequestDTO{
+		ProductID: req.ProductId,
+		TenantID:  tenantID,
+		UserID:    userID,
+	}
+
+	deletedProduct, err := h.ProductService.SoftDeleteProduct(ctx, dto)
+	if err != nil {
+		log.Printf("[%s]: failed to delete product: %v", op, err)
+		return nil, errconv.ToGrpcError(err)
+	}
+
+	log.Printf("deleted product: %v", deletedProduct)
+
+	return &productv1.SoftDeleteProductResponse{
+		Message: "product deleted successfully",
+	}, nil
 }
