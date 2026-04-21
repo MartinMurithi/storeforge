@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	tenantv1 "github.com/MartinMurithi/storeforge/api/protos/tenantmanagement/tenant/v1"
 	"github.com/MartinMurithi/storeforge/pkg/rbac"
@@ -27,9 +28,7 @@ func NewProductService(pr repository.IProductRepository, tenantClientSvc *grpccl
 	}
 }
 
-// CreateProduct orchestrates creation of a new product and its images.
-// Handles stock/price validation, image normalization (first image = primary),
-// and persists everything atomically.
+// CreateProduct orchestrates creation of a new product
 func (s *ProductService) CreateProduct(ctx context.Context, req product.CreateProductRequestDTO) (*entity.Product, error) {
 	const op = "ProductService.CreateProduct"
 
@@ -59,6 +58,10 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 
 	if req.Properties.Data == nil {
 		req.Properties.Data = map[string]any{}
+	}
+
+	if req.Status == "" {
+		req.Status = entity.ProductStatusActive
 	}
 
 	// -------------------------
@@ -99,27 +102,6 @@ func (s *ProductService) CreateProduct(ctx context.Context, req product.CreatePr
 		Status:      req.Status,
 		Properties:  req.Properties,
 		Price:       req.Price,
-	}
-
-	// -------------------------
-	// Map and normalize images
-	// -------------------------
-	for _, imgDTO := range req.Images {
-		newProduct.ProductImages = append(newProduct.ProductImages, entity.ProductImage{
-			ImageUrl:  imgDTO.URL,
-			SortOrder: imgDTO.SortOrder,
-			IsPrimary: imgDTO.IsPrimary,
-		})
-	}
-
-	if len(newProduct.ProductImages) > 0 {
-		for i := range newProduct.ProductImages {
-			if newProduct.ProductImages[i].SortOrder == 0 {
-				newProduct.ProductImages[i].SortOrder = i
-			}
-			newProduct.ProductImages[i].IsPrimary = false
-		}
-		newProduct.ProductImages[0].IsPrimary = true
 	}
 
 	if err := s.ProductRepo.CreateProduct(ctx, newProduct); err != nil {
@@ -176,6 +158,363 @@ func (s *ProductService) GetProductByID(ctx context.Context, tenantID string, pr
 	if err != nil {
 		return nil, err
 	}
+
+	return product, nil
+}
+
+// UpdateProduct handles business-level product updates.
+//
+// =========================
+// DESIGN INTENT
+// =========================
+//
+// This function acts as the application-layer gatekeeper for product updates.
+//
+// Responsibilities:
+//
+// 1. VALIDATION
+//   - Ensures required identifiers are present
+//   - Prevents invalid state (e.g., negative stock)
+//
+// 2. RBAC ENFORCEMENT
+//   - Only tenant owner/admin can update products
+//
+// 3. VERSION-SAFE PROPERTIES
+//   - Ensures ProductProperties always have valid version + data
+//
+// 5. DELEGATION
+//   - Calls repository for transactional update
+func (s *ProductService) UpdateProduct(
+	ctx context.Context,
+	req product.UpdateProductRequestDTO,
+) (*entity.Product, error) {
+
+	const op = "ProductService.UpdateProduct"
+
+	log.Printf("[%s]: request received: %+v", op, req)
+
+	// -------------------------
+	// Basic validation
+	// -------------------------
+	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
+		return nil, fmt.Errorf("[%s]: product_id, tenant_id and userID are required", op)
+	}
+
+	if req.Stock != nil && *req.Stock < 0 {
+		return nil, fmt.Errorf("[%s]: stock cannot be negative", op)
+	}
+
+	// -------------------------
+	// Normalize properties (version-safe)
+	// -------------------------
+	if req.Properties != nil {
+		if req.Properties.Version == 0 {
+			req.Properties.Version = 1
+		}
+		if req.Properties.Data == nil {
+			req.Properties.Data = map[string]any{}
+		}
+	}
+
+	// -------------------------
+	// Tenant context + RBAC
+	// -------------------------
+	tenantID, err := value_object.NewTenantID(req.TenantID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+	}
+
+	productID, err := value_object.NewProductID(req.ProductID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid product_id: %w", op, err)
+	}
+
+	tenantCtxReq := &tenantv1.GetTenantContextRequest{
+		TenantId: tenantID.String(),
+		UserId:   req.UserID,
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, tenantCtxReq)
+	if err != nil || tenantCtx == nil || tenantCtx.Tenant == nil {
+		return nil, fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return nil, fmt.Errorf("[%s]: unauthorized", op)
+	}
+
+	// -------------------------
+	// Map incoming update
+	// -------------------------
+	update := entity.Product{
+		Name:        *req.Name,
+		Description: *req.Description,
+		Price:       *req.Price,
+		Currency:    *req.Currency,
+		SKU:         *req.SKU,
+		Stock:       *req.Stock,
+		Status:      *req.Status,
+		Properties:  req.Properties,
+	}
+
+	// -------------------------
+	// Call repository
+	// -------------------------
+	updatedProduct, err := s.ProductRepo.UpdateProduct(
+		ctx,
+		tenantID,
+		productID,
+		update,
+	)
+	if err != nil {
+		log.Printf("[%s]: update failed: %v", op, err)
+		return nil, err
+	}
+
+	log.Printf("[%s]: product updated successfully: id=%s", op, updatedProduct.ID.String())
+
+	return updatedProduct, nil
+}
+
+// AddProductImages handles adding new images to a product.
+//
+// =========================
+// DESIGN INTENT
+// =========================
+//
+// - Allows incremental image addition
+// - Does NOT affect existing images
+// - Enforces RBAC (owner/admin)
+//
+// =========================
+// NOTES
+// =========================
+// - Primary image enforcement is handled at repo level
+func (s *ProductService) AddProductImages(
+	ctx context.Context,
+	req product.AddProductImagesRequestDTO,
+) error {
+
+	const op = "ProductService.AddProductImages"
+
+	log.Printf("[%s]: request received: %+v", op, req)
+
+	// -------------------------
+	// Validate input
+	// -------------------------
+	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
+		return fmt.Errorf("[%s]: product_id, tenant_id and user_id are required", op)
+	}
+
+	if len(req.Images) == 0 {
+		return fmt.Errorf("[%s]: no images provided", op)
+	}
+
+	for _, img := range req.Images {
+		if strings.TrimSpace(img.URL) == "" {
+			return fmt.Errorf("[%s]: image url cannot be empty", op)
+		}
+	}
+
+	// -------------------------
+	// Tenant + RBAC
+	// -------------------------
+	tenantID, err := value_object.NewTenantID(req.TenantID)
+	if err != nil {
+		return fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+	}
+
+	productID, err := value_object.NewProductID(req.ProductID)
+	if err != nil {
+		return fmt.Errorf("[%s]: invalid product_id: %w", op, err)
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, &tenantv1.GetTenantContextRequest{
+		TenantId: tenantID.String(),
+		UserId:   req.UserID,
+	})
+
+	if err != nil || tenantCtx == nil || tenantCtx.Tenant == nil {
+		return fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return fmt.Errorf("[%s]: unauthorized", op)
+	}
+
+	// -------------------------
+	// Map + normalize images
+	// -------------------------
+	var images []entity.ProductImage
+
+	for i, imgDTO := range req.Images {
+		sortOrder := imgDTO.SortOrder
+		if sortOrder == 0 {
+			sortOrder = i
+		}
+
+		images = append(images, entity.ProductImage{
+			ImageUrl:  imgDTO.URL,
+			SortOrder: sortOrder,
+			IsPrimary: imgDTO.IsPrimary,
+		})
+	}
+
+	// -------------------------
+	// Call repo
+	// -------------------------
+	if err := s.ProductRepo.AddProductImages(ctx, productID, images); err != nil {
+		log.Printf("[%s]: failed: %v", op, err)
+		return err
+	}
+
+	log.Printf("[%s]: images added successfully for product %s", op, productID.String())
+
+	return nil
+}
+
+// DeleteProductImages handles soft deletion of specific product images.
+//
+// =========================
+// DESIGN INTENT
+// =========================
+//
+// - Allows selective image deletion
+// - Does NOT affect other images
+// - Maintains soft delete semantics
+func (s *ProductService) DeleteProductImages(
+	ctx context.Context,
+	req product.DeleteProductImagesRequestDTO,
+) error {
+
+	const op = "ProductService.DeleteProductImages"
+
+	log.Printf("[%s]: request received: %+v", op, req)
+
+	// -------------------------
+	// Validate input
+	// -------------------------
+	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
+		return fmt.Errorf("[%s]: product_id, tenant_id and user_id are required", op)
+	}
+
+	if len(req.ImageIDs) == 0 {
+		return fmt.Errorf("[%s]: no image_ids provided", op)
+	}
+
+	// -------------------------
+	// Tenant + RBAC
+	// -------------------------
+	tenantID, err := value_object.NewTenantID(req.TenantID)
+	if err != nil {
+		return fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+	}
+
+	productID, err := value_object.NewProductID(req.ProductID)
+	if err != nil {
+		return fmt.Errorf("[%s]: invalid product_id: %w", op, err)
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, &tenantv1.GetTenantContextRequest{
+		TenantId: tenantID.String(),
+		UserId:   req.UserID,
+	})
+
+	if err != nil || tenantCtx == nil || tenantCtx.Tenant == nil {
+		return fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return fmt.Errorf("[%s]: unauthorized", op)
+	}
+
+	// -------------------------
+	// Map IDs
+	// -------------------------
+	var ids []value_object.ProductImageID
+
+	for _, idStr := range req.ImageIDs {
+		id, err := value_object.NewProductImageID(idStr)
+		if err != nil {
+			return fmt.Errorf("[%s]: invalid image_id: %w", op, err)
+		}
+		ids = append(ids, id)
+	}
+
+	// -------------------------
+	// Call repo
+	// -------------------------
+	if err := s.ProductRepo.SoftDeleteProductImages(ctx, productID, ids); err != nil {
+		log.Printf("[%s]: failed: %v", op, err)
+		return err
+	}
+
+	log.Printf("[%s]: images deleted successfully for product %s", op, productID.String())
+
+	return nil
+}
+
+// SoftDeleteProduct handles product deletion (soft delete).
+//
+// =========================
+// DESIGN INTENT
+// =========================
+//
+// - Marks product as deleted
+// - Cascades to images (handled in repo)
+// - Enforces RBAC
+func (s *ProductService) SoftDeleteProduct(
+	ctx context.Context,
+	req product.DeleteProductRequestDTO,
+) (*entity.Product, error) {
+
+	const op = "ProductService.SoftDeleteProduct"
+
+	log.Printf("[%s]: request received: %+v", op, req)
+
+	// -------------------------
+	// Validate input
+	// -------------------------
+	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
+		return nil, fmt.Errorf("[%s]: product_id, tenant_id and user_id are required", op)
+	}
+
+	// -------------------------
+	// Tenant + RBAC
+	// -------------------------
+	tenantID, err := value_object.NewTenantID(req.TenantID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+	}
+
+	productID, err := value_object.NewProductID(req.ProductID)
+	if err != nil {
+		return nil, fmt.Errorf("[%s]: invalid product_id: %w", op, err)
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, &tenantv1.GetTenantContextRequest{
+		TenantId: tenantID.String(),
+		UserId:   req.UserID,
+	})
+
+	if err != nil || tenantCtx == nil || tenantCtx.Tenant == nil {
+		return nil, fmt.Errorf("[%s]: tenant context not found", op)
+	}
+
+	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
+		return nil, fmt.Errorf("[%s]: unauthorized", op)
+	}
+
+	// -------------------------
+	// Call repo
+	// -------------------------
+	product, err := s.ProductRepo.SoftDeleteProduct(ctx, tenantID, productID)
+	if err != nil {
+		log.Printf("[%s]: failed: %v", op, err)
+		return nil, err
+	}
+
+	log.Printf("[%s]: product deleted successfully: %s", op, productID.String())
 
 	return product, nil
 }

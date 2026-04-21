@@ -13,6 +13,10 @@ service ProductService {
   rpc CreateProduct(CreateProductRequest) returns (CreateProductResponse);
   rpc GetTenantProducts(GetTenantProductsRequest) returns (GetTenantProductsResponse) {};
   rpc GetProductByID(GetProductByIDRequest) returns (GetProductByIDResponse) {};
+  rpc AddProductImages(AddProductImagesRequest) returns (AddProductImagesResponse){};
+  rpc DeleteProductImages(DeleteProductImagesRequest) returns (DeleteProductImagesResponse) {};
+  rpc UpdateProduct(UpdateProductRequest) returns (UpdateProductResponse) {};
+  rpc SoftDeleteProduct(SoftDeleteProductRequest) returns (SoftDeleteProductResponse){};
 }
 
 message Product {
@@ -42,22 +46,27 @@ message ProductImage{
   google.protobuf.Timestamp deleted_at = 7;
 }
 
-message ProductImageInput{
-  string product_id = 1;
-  string image_url  = 2;
+message AddProductImagesRequest{
+  string                product_id = 1;
+  string                tenant_id  = 2;
+  string                user_id    = 3;
+  repeated ProductImage images     = 4;
+}
+
+message AddProductImagesResponse{
+  string message = 1;
 }
 
 message CreateProductRequest {
-  string                     tenant_id   = 1;
-  string                     name        = 2;
-  string                     description = 3;
-  int64                      price       = 4;
-  string                     sku         = 5;
-  int64                      stock       = 6;
-  string                     status      = 7;
-  google.protobuf.Struct     properties  = 8;
-  repeated ProductImageInput images      = 9;
-  string user_id = 10;
+  string                 tenant_id   = 1;
+  string                 name        = 2;
+  string                 description = 3;
+  int64                  price       = 4;
+  string                 sku         = 5;
+  int64                  stock       = 6;
+  string                 status      = 7;
+  google.protobuf.Struct properties  = 8;
+  string                 user_id     = 9;
 }
 
 message CreateProductResponse {
@@ -92,10 +101,64 @@ message GetTenantProductsResponse{
 }
 
 message GetProductByIDRequest{
-  string tenant_id = 1;
-  string product_id      = 2;
+  string tenant_id  = 1;
+  string product_id = 2;
 }
 
 message GetProductByIDResponse{
   Product product = 1;
 }
+
+message DeleteProductImagesRequest{
+  string          product_id = 1;
+  string          tenant_id  = 2;
+  string          user_id    = 3;
+  repeated string image_ids  = 4;
+}
+
+message DeleteProductImagesResponse{
+  string message = 1;
+}
+
+message ProductProperties{
+  int32                  version    = 1;
+  google.protobuf.Struct properties = 2;
+}
+
+message UpdateProductInput{
+  string            name               = 1;
+  string            description        = 2;
+  int64             price              = 3;
+  string            currency           = 4;
+  string            sku                = 5;
+  int64             stock              = 6;
+  string            status             = 7;
+  ProductProperties product_properties = 8;
+}
+
+message UpdateProductRequest{
+  string             product_id = 1;
+  string             tenant_id  = 2;
+  string             user_id    = 3;
+  UpdateProductInput input      = 4;
+}
+
+message UpdateProductResponse{
+  string  message = 1;
+  Product product = 2;
+}
+
+message SoftDeleteProductRequest {
+  string product_id = 1;
+  string tenant_id  = 2;
+  string user_id    = 3;
+}
+
+message SoftDeleteProductResponse {
+  string message = 1;
+}
+
+// Update product
+// SoftDelete product
+// Add product images
+// Delete product images
