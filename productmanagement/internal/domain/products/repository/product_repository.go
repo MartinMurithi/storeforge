@@ -39,7 +39,7 @@ type IProductRepository interface {
 		ctx context.Context,
 		tenantID value_object.TenantID,
 		productID value_object.ProductID,
-	) (*entity.Product, error)
+	) error
 	SoftDeleteProductImages(
 		ctx context.Context,
 		productID value_object.ProductID,
@@ -430,7 +430,9 @@ func (r *ProductRepository) UpdateProduct(
 	}
 	defer tx.Rollback(ctx)
 
-	// 1. Lock product
+	// -------------------------
+	// Lock product (tenant-safe)
+	// -------------------------
 	var current entity.Product
 
 	err = tx.QueryRow(ctx, `
@@ -456,33 +458,11 @@ func (r *ProductRepository) UpdateProduct(
 		return nil, fmt.Errorf("[%s]: fetch failed: %w", op, err)
 	}
 
-	// 2. Merge properties (version-aware)
+	// -------------------------
+	// Merge ONLY product properties
+	// -------------------------
 	current.Properties = deepMerge(current.Properties, incoming.Properties)
 
-	// 3. Apply patch updates
-	if incoming.Name != "" {
-		current.Name = incoming.Name
-	}
-	if incoming.Description != "" {
-		current.Description = incoming.Description
-	}
-	if incoming.Price != 0 {
-		current.Price = incoming.Price
-	}
-	if incoming.Currency != "" {
-		current.Currency = incoming.Currency
-	}
-	if incoming.SKU != "" {
-		current.SKU = incoming.SKU
-	}
-	if incoming.Stock != 0 {
-		current.Stock = incoming.Stock
-	}
-	if incoming.Status != "" {
-		current.Status = incoming.Status
-	}
-
-	// 4. Persist update
 	_, err = tx.Exec(ctx, `
 		UPDATE products
 		SET name=$1,
@@ -494,17 +474,18 @@ func (r *ProductRepository) UpdateProduct(
 		    product_properties=$7,
 		    product_status=$8,
 		    updated_at=NOW()
-		WHERE id=$9
+		WHERE id=$9 AND tenant_id=$10
 	`,
-		current.Name,
-		current.Description,
-		current.Price,
-		current.Currency,
-		current.SKU,
-		current.Stock,
+		incoming.Name,
+		incoming.Description,
+		incoming.Price,
+		incoming.Currency,
+		incoming.SKU,
+		incoming.Stock,
 		current.Properties,
-		current.Status,
-		current.ID,
+		incoming.Status,
+		productID,
+		tenantID,
 	)
 
 	if err != nil {
@@ -547,29 +528,39 @@ func (r *ProductRepository) UpdateProduct(
 // =========================
 // - Nil-safe (never panics)
 // - Non-mutating (returns new object)
-func deepMerge(existing, incoming *entity.ProductProperties) *entity.ProductProperties {
+func deepMerge(
+	existing, incoming *entity.ProductProperties,
+) *entity.ProductProperties {
 
-	// Handle nil cases
+	// -------------------------
+	// Nil handling
+	// -------------------------
 	if existing == nil && incoming == nil {
 		return &entity.ProductProperties{
 			Version: 1,
 			Data:    map[string]any{},
 		}
 	}
+
 	if existing == nil {
-		return incoming
+		return cloneProperties(incoming)
 	}
+
 	if incoming == nil {
-		return existing
+		return cloneProperties(existing)
 	}
 
-	// Version mismatch → replace entirely
+	// -------------------------
+	// Version mismatch → replace safely (CLONED)
+	// -------------------------
 	if existing.Version != incoming.Version {
-		return incoming
+		return cloneProperties(incoming)
 	}
 
-	// Safe merge
-	merged := make(map[string]any)
+	// -------------------------
+	// Deep merge data
+	// -------------------------
+	merged := make(map[string]any, len(existing.Data))
 
 	// copy existing
 	for k, v := range existing.Data {
@@ -578,21 +569,47 @@ func deepMerge(existing, incoming *entity.ProductProperties) *entity.ProductProp
 
 	// merge incoming
 	for k, v := range incoming.Data {
+
 		if existingMap, ok1 := merged[k].(map[string]any); ok1 {
 			if incomingMap, ok2 := v.(map[string]any); ok2 {
+
 				merged[k] = deepMerge(
-					&entity.ProductProperties{Version: existing.Version, Data: existingMap},
-					&entity.ProductProperties{Version: incoming.Version, Data: incomingMap},
+					&entity.ProductProperties{
+						Version: existing.Version,
+						Data:    existingMap,
+					},
+					&entity.ProductProperties{
+						Version: incoming.Version,
+						Data:    incomingMap,
+					},
 				).Data
+
 				continue
 			}
 		}
+
 		merged[k] = v
 	}
 
 	return &entity.ProductProperties{
 		Version: existing.Version,
 		Data:    merged,
+	}
+}
+
+func cloneProperties(p *entity.ProductProperties) *entity.ProductProperties {
+	if p == nil {
+		return nil
+	}
+
+	cloned := make(map[string]any, len(p.Data))
+	for k, v := range p.Data {
+		cloned[k] = v
+	}
+
+	return &entity.ProductProperties{
+		Version: p.Version,
+		Data:    cloned,
 	}
 }
 
@@ -695,17 +712,20 @@ func (r *ProductRepository) SoftDeleteProduct(
 	ctx context.Context,
 	tenantID value_object.TenantID,
 	productID value_object.ProductID,
-) (*entity.Product, error) {
+) error {
 
 	const op = "ProductRepository.SoftDeleteProduct"
 
 	tx, err := r.DB.Tx(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: %w", op, err)
+		return fmt.Errorf("[%s]: %w", op, err)
 	}
 	defer tx.Rollback(ctx)
 
-	var id value_object.ProductID
+	// -------------------------
+	// Lock product
+	// -------------------------
+	var id string
 
 	err = tx.QueryRow(ctx, `
 		SELECT id
@@ -715,34 +735,37 @@ func (r *ProductRepository) SoftDeleteProduct(
 	`, productID, tenantID).Scan(&id)
 
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: product not found: %w", op, err)
+		return fmt.Errorf("[%s]: product not found: %w", op, err)
 	}
+
+	log.Printf("[%s]: product locked id=%s", op, id)
 
 	now := time.Now()
 
-	_, err = tx.Exec(ctx, `
+	// -------------------------
+	// Soft delete
+	// -------------------------
+	result, err := tx.Exec(ctx, `
 		UPDATE products
-		SET deleted_at = $1, updated_at = $1
-		WHERE id = $2
-	`, now, id)
+		SET deleted_at = $1,
+		    updated_at = $1
+		WHERE id = $2 AND tenant_id = $3 AND deleted_at IS NULL
+	`, now, productID, tenantID)
+
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("[%s]: update failed: %w", op, err)
 	}
 
-	_, err = tx.Exec(ctx, `
-		UPDATE product_images
-		SET deleted_at = $1
-		WHERE product_id = $2 AND deleted_at IS NULL
-	`, now, id)
-	if err != nil {
-		return nil, err
+	rows := result.RowsAffected()
+	if rows == 0 {
+		return fmt.Errorf("[%s]: no rows updated", op)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
-		return nil, err
+		return fmt.Errorf("[%s]: commit failed: %w", op, err)
 	}
 
-	return r.GetProductByID(ctx, tenantID, id)
+	return nil
 }
 
 // SoftDeleteProductImages performs partial deletion of product images.
@@ -779,7 +802,6 @@ func (r *ProductRepository) SoftDeleteProductImages(
 		return nil
 	}
 
-	// 1. Soft delete selected images
 	_, err = tx.Exec(ctx, `
 		UPDATE product_images
 		SET deleted_at = NOW()
@@ -792,7 +814,6 @@ func (r *ProductRepository) SoftDeleteProductImages(
 		return fmt.Errorf("[%s]: delete failed: %w", op, err)
 	}
 
-	// 2. Ensure at least one primary image exists
 	var exists bool
 	err = tx.QueryRow(ctx, `
 		SELECT EXISTS (
@@ -807,7 +828,7 @@ func (r *ProductRepository) SoftDeleteProductImages(
 		return fmt.Errorf("[%s]: primary check failed: %w", op, err)
 	}
 
-	// 3. Reassign primary if needed
+	// Reassign primary if needed
 	if !exists {
 		_, err = tx.Exec(ctx, `
 			UPDATE product_images
