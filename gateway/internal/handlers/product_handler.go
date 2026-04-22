@@ -172,3 +172,208 @@ func (h *ProductHandler) GetProductByID(c *gin.Context) {
 
 	response.JSON(c, http.StatusAccepted, res)
 }
+
+func (h *ProductHandler) UpdateProduct(c *gin.Context) {
+	const op = "ProductHandler.UpdateProduct"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// Get logged in owner
+	userID, err := request.GetUserId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting user ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
+		return
+	}
+	log.Printf("[%s]: active user ID : %s", op, userID)
+
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	var req productv1.UpdateProductRequest
+
+	if !util.BindAndValidateJSON(c, &req) {
+		return
+	}
+
+	resp, err := h.ProductClient.UpdateProduct(ctx, &req)
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusAccepted, &productv1.UpdateProductResponse{
+		Message: "Product Updated Successfully",
+		Product: resp.Product,
+	})
+}
+
+func (h *ProductHandler) SoftDeleteProduct(c *gin.Context) {
+	const op = "ProductHandler.SoftDeleteProduct"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// Get logged in owner
+	userID, err := request.GetUserId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting user ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
+		return
+	}
+	log.Printf("[%s]: active user ID : %s", op, userID)
+
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	var req productv1.SoftDeleteProductRequest
+
+	if !util.BindAndValidateJSON(c, &req) {
+		return
+	}
+
+	resp, err := h.ProductClient.SoftDeleteProduct(ctx, &req)
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusAccepted, &productv1.SoftDeleteProductResponse{
+		Message: resp.Message,
+	})
+}
+
+func (h *ProductHandler) AddProductImages(c *gin.Context) {
+	const op = "ProductHandler.AddProductImages"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// Get logged in owner
+	userID, err := request.GetUserId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting user ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
+		return
+	}
+	log.Printf("[%s]: active user ID : %s", op, userID)
+
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	var req productv1.AddProductImagesRequest
+
+	if !util.BindAndValidateJSON(c, &req) {
+		return
+	}
+
+	resp, err := h.ProductClient.AddProductImages(ctx, &req)
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusAccepted, &productv1.AddProductImagesResponse{
+		Message: resp.Message,
+	})
+}
+
+func (h *ProductHandler) DeleteProductImages(c *gin.Context) {
+	const op = "ProductHandler.DeleteProductImages"
+
+	if h.ProductClient == nil {
+		log.Println("Internal Error: ProductClient not initialized in ProductHandler")
+		response.Error(c, http.StatusInternalServerError, "INTERNAL_ERROR", "Product service unavailable")
+		return
+	}
+
+	// Get logged in owner
+	userID, err := request.GetUserId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting user ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "User session not found")
+		return
+	}
+	log.Printf("[%s]: active user ID : %s", op, userID)
+
+	// gET TENANT ID FROM PARAMS
+	tenantID, err := request.GetParamId(c)
+	if err != nil {
+		log.Printf("[%s]: error getting tenant ID: %v", op, err)
+		response.Error(c, http.StatusUnauthorized, "UNAUTHORIZED", "Tenant identification not found")
+		return
+	}
+	log.Printf("[%s]: current tenant ID : %s", op, tenantID)
+
+	// Setting the Metadata for the product grpc service
+	md := metadata.Pairs(
+		"user-id", userID,
+		"tenant-id", tenantID)
+	ctx := metadata.NewOutgoingContext(c.Request.Context(), md)
+
+	var req productv1.DeleteProductImagesRequest
+
+	if !util.BindAndValidateJSON(c, &req) {
+		return
+	}
+
+	resp, err := h.ProductClient.DeleteProductImages(ctx, &req)
+	if err != nil {
+		code, slug, msg := errconv.FromGrpcToHttp(err)
+		response.Error(c, code, slug, msg)
+		return
+	}
+
+	response.JSON(c, http.StatusAccepted, &productv1.DeleteProductImagesResponse{
+		Message: resp.Message,
+	})
+}

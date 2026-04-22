@@ -47,8 +47,10 @@ func SetupRouter(userHandler *handlers.UserHandler, authHandler *handlers.AuthHa
 				products.POST("", productHandler.CreateProduct)
 				products.GET("", productHandler.GetTenantProducts)
 				products.GET("/:productID", productHandler.GetProductByID)
-				// products.PATCH("/:productID", productHandler.UpdateProductWithImages) // PATCH /stores/:tenantID/products/:productID
-				// products.DELETE("/:productID", productHandler.SoftDeleteProduct)      // DELETE /stores/:tenantID/products/:productID
+				products.PATCH("/update", productHandler.UpdateProduct)
+				products.DELETE("/soft-delete", productHandler.SoftDeleteProduct)
+				products.POST("/add-product-images", productHandler.AddProductImages)
+				products.DELETE("/delete-product-images", productHandler.DeleteProductImages)
 			}
 		}
 
