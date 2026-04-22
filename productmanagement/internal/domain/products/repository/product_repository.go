@@ -165,6 +165,7 @@ func (repo *ProductRepository) GetProductsByTenant(ctx context.Context, tenantID
 	FROM products p
 	LEFT JOIN product_images i
 		ON p.id = i.product_id
+		AND i.deleted_at IS NULL
 
 	WHERE p.tenant_id = $1
 	AND p.deleted_at IS NULL
@@ -303,6 +304,7 @@ func (repo *ProductRepository) GetProductByID(
 	FROM products p
 	LEFT JOIN product_images i
 		ON p.id = i.product_id
+		AND i.deleted_at IS NULL
 
 	WHERE p.id = $1
 	AND p.tenant_id = $2
