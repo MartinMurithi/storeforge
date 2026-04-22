@@ -193,9 +193,6 @@ func (s *ProductService) UpdateProduct(
 
 	log.Printf("[%s]: request received: %+v", op, req)
 
-	// -------------------------
-	// Basic validation
-	// -------------------------
 	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
 		return nil, fmt.Errorf("[%s]: product_id, tenant_id and userID are required", op)
 	}
@@ -204,8 +201,12 @@ func (s *ProductService) UpdateProduct(
 		return nil, fmt.Errorf("[%s]: stock cannot be negative", op)
 	}
 
+	if req.Price != nil && *req.Price < 0 {
+		return nil, fmt.Errorf("[%s]: price cannot be negative", op)
+	}
+
 	// -------------------------
-	// Normalize properties (version-safe)
+	// Normalize properties
 	// -------------------------
 	if req.Properties != nil {
 		if req.Properties.Version == 0 {
@@ -244,28 +245,50 @@ func (s *ProductService) UpdateProduct(
 	}
 
 	// -------------------------
-	// Map incoming update
+	// Fetch existing product
 	// -------------------------
-	update := entity.Product{
-		Name:        *req.Name,
-		Description: *req.Description,
-		Price:       *req.Price,
-		Currency:    *req.Currency,
-		SKU:         *req.SKU,
-		Stock:       *req.Stock,
-		Status:      *req.Status,
-		Properties:  req.Properties,
+	product, err := s.ProductRepo.GetProductByID(ctx, tenantID, productID)
+	if err != nil {
+		log.Printf("[%s]: failed to fetch product: %v", op, err)
+		return nil, err
 	}
 
 	// -------------------------
-	// Call repository
+	// Apply patch
 	// -------------------------
-	updatedProduct, err := s.ProductRepo.UpdateProduct(
-		ctx,
-		tenantID,
-		productID,
-		update,
-	)
+	if req.Name != nil {
+		product.Name = *req.Name
+	}
+
+	if req.Description != nil {
+		product.Description = *req.Description
+	}
+
+	if req.Price != nil {
+		product.Price = *req.Price
+	}
+
+	if req.Currency != nil {
+		product.Currency = *req.Currency
+	}
+
+	if req.SKU != nil {
+		product.SKU = *req.SKU
+	}
+
+	if req.Stock != nil {
+		product.Stock = *req.Stock
+	}
+
+	if req.Status != nil {
+		product.Status = *req.Status
+	}
+
+	if req.Properties != nil {
+		product.Properties = req.Properties
+	}
+
+	updatedProduct, err := s.ProductRepo.UpdateProduct(ctx, tenantID, productID, *product)
 	if err != nil {
 		log.Printf("[%s]: update failed: %v", op, err)
 		return nil, err
@@ -441,9 +464,6 @@ func (s *ProductService) DeleteProductImages(
 		ids = append(ids, id)
 	}
 
-	// -------------------------
-	// Call repo
-	// -------------------------
 	if err := s.ProductRepo.SoftDeleteProductImages(ctx, productID, ids); err != nil {
 		log.Printf("[%s]: failed: %v", op, err)
 		return err
@@ -466,17 +486,14 @@ func (s *ProductService) DeleteProductImages(
 func (s *ProductService) SoftDeleteProduct(
 	ctx context.Context,
 	req product.DeleteProductRequestDTO,
-) (*entity.Product, error) {
+) error {
 
 	const op = "ProductService.SoftDeleteProduct"
 
 	log.Printf("[%s]: request received: %+v", op, req)
 
-	// -------------------------
-	// Validate input
-	// -------------------------
 	if req.ProductID == "" || req.TenantID == "" || req.UserID == "" {
-		return nil, fmt.Errorf("[%s]: product_id, tenant_id and user_id are required", op)
+		return fmt.Errorf("[%s]: product_id, tenant_id and user_id are required", op)
 	}
 
 	// -------------------------
@@ -484,37 +501,35 @@ func (s *ProductService) SoftDeleteProduct(
 	// -------------------------
 	tenantID, err := value_object.NewTenantID(req.TenantID)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
+		return fmt.Errorf("[%s]: invalid tenant_id: %w", op, err)
 	}
 
 	productID, err := value_object.NewProductID(req.ProductID)
 	if err != nil {
-		return nil, fmt.Errorf("[%s]: invalid product_id: %w", op, err)
+		return fmt.Errorf("[%s]: invalid product_id: %w", op, err)
 	}
 
-	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, &tenantv1.GetTenantContextRequest{
+	tenantCtxReq := &tenantv1.GetTenantContextRequest{
 		TenantId: tenantID.String(),
 		UserId:   req.UserID,
-	})
+	}
+
+	tenantCtx, err := s.TenantSvcClient.GetTenantContext(ctx, tenantCtxReq)
 
 	if err != nil || tenantCtx == nil || tenantCtx.Tenant == nil {
-		return nil, fmt.Errorf("[%s]: tenant context not found", op)
+		return fmt.Errorf("[%s]: tenant context not found", op)
 	}
 
 	if tenantCtx.Role != rbac.RoleOwner && tenantCtx.Role != rbac.RoleAdmin {
-		return nil, fmt.Errorf("[%s]: unauthorized", op)
+		return fmt.Errorf("[%s]: unauthorized", op)
 	}
 
-	// -------------------------
-	// Call repo
-	// -------------------------
-	product, err := s.ProductRepo.SoftDeleteProduct(ctx, tenantID, productID)
-	if err != nil {
+	if err := s.ProductRepo.SoftDeleteProduct(ctx, tenantID, productID); err != nil {
 		log.Printf("[%s]: failed: %v", op, err)
-		return nil, err
+		return err
 	}
 
 	log.Printf("[%s]: product deleted successfully: %s", op, productID.String())
 
-	return product, nil
+	return nil
 }

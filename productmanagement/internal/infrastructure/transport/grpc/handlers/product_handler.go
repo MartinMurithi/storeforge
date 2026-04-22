@@ -238,6 +238,9 @@ func (h *ProductGrpcHandler) DeleteProductImages(
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
+	// Set the tenant and user ID in the grpc metadata and send them to tenant service
+	ctx = grpcx.ForwardMetadata(ctx)
+
 	// -------------------------
 	// Map DTO
 	// -------------------------
@@ -309,8 +312,8 @@ func (h *ProductGrpcHandler) UpdateProduct(
 	// Map status
 	// -------------------------
 	var statusVal *entity.ProductStatus
-	if req.Input != nil && req.Input.Status != "" {
-		s := entity.ProductStatus(req.Input.Status)
+	if req.Input != nil && req.Input.Status != nil {
+		s := entity.ProductStatus(*req.Input.Status)
 		statusVal = &s
 	}
 
@@ -323,17 +326,14 @@ func (h *ProductGrpcHandler) UpdateProduct(
 	}
 
 	if req.Input != nil {
-		dto.Name = &req.Input.Name
-		dto.Description = &req.Input.Description
-		dto.Price = &req.Input.Price
-		dto.Currency = &req.Input.Currency
-		dto.SKU = &req.Input.Sku
-		dto.Stock = &req.Input.Stock
+		dto.Name = req.Input.Name
+		dto.Description = req.Input.Description
+		dto.Price = req.Input.Price
+		dto.Currency = req.Input.Currency
+		dto.SKU = req.Input.Sku
+		dto.Stock = req.Input.Stock
 	}
 
-	// -------------------------
-	// Service call
-	// -------------------------
 	updatedProduct, err := h.ProductService.UpdateProduct(ctx, dto)
 	if err != nil {
 		log.Printf("[%s]: failed to update product: %v", op, err)
@@ -369,22 +369,19 @@ func (h *ProductGrpcHandler) SoftDeleteProduct(
 		return nil, status.Errorf(codes.Unauthenticated, "missing user identity: %v", err)
 	}
 
-	// -------------------------
-	// Call service
-	// -------------------------
+	// Set the tenant and user ID in the grpc metadata and send them to tenant service
+	ctx = grpcx.ForwardMetadata(ctx)
+
 	dto := product.DeleteProductRequestDTO{
 		ProductID: req.ProductId,
 		TenantID:  tenantID,
 		UserID:    userID,
 	}
 
-	deletedProduct, err := h.ProductService.SoftDeleteProduct(ctx, dto)
-	if err != nil {
+	if err := h.ProductService.SoftDeleteProduct(ctx, dto); err != nil {
 		log.Printf("[%s]: failed to delete product: %v", op, err)
 		return nil, errconv.ToGrpcError(err)
 	}
-
-	log.Printf("deleted product: %v", deletedProduct)
 
 	return &productv1.SoftDeleteProductResponse{
 		Message: "product deleted successfully",

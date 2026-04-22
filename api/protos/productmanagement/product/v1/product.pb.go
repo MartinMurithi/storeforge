@@ -1046,14 +1046,14 @@ func (x *ProductProperties) GetProperties() *structpb.Struct {
 
 type UpdateProductInput struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
-	Name              string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Description       string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
-	Price             int64                  `protobuf:"varint,3,opt,name=price,proto3" json:"price,omitempty"`
-	Currency          string                 `protobuf:"bytes,4,opt,name=currency,proto3" json:"currency,omitempty"`
-	Sku               string                 `protobuf:"bytes,5,opt,name=sku,proto3" json:"sku,omitempty"`
-	Stock             int64                  `protobuf:"varint,6,opt,name=stock,proto3" json:"stock,omitempty"`
-	Status            string                 `protobuf:"bytes,7,opt,name=status,proto3" json:"status,omitempty"`
-	ProductProperties *ProductProperties     `protobuf:"bytes,8,opt,name=product_properties,json=productProperties,proto3" json:"product_properties,omitempty"`
+	Name              *string                `protobuf:"bytes,1,opt,name=name,proto3,oneof" json:"name,omitempty"`
+	Description       *string                `protobuf:"bytes,2,opt,name=description,proto3,oneof" json:"description,omitempty"`
+	Price             *int64                 `protobuf:"varint,3,opt,name=price,proto3,oneof" json:"price,omitempty"`
+	Currency          *string                `protobuf:"bytes,4,opt,name=currency,proto3,oneof" json:"currency,omitempty"`
+	Sku               *string                `protobuf:"bytes,5,opt,name=sku,proto3,oneof" json:"sku,omitempty"`
+	Stock             *int64                 `protobuf:"varint,6,opt,name=stock,proto3,oneof" json:"stock,omitempty"`
+	Status            *string                `protobuf:"bytes,7,opt,name=status,proto3,oneof" json:"status,omitempty"`
+	ProductProperties *ProductProperties     `protobuf:"bytes,8,opt,name=product_properties,json=productProperties,proto3,oneof" json:"product_properties,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -1089,50 +1089,50 @@ func (*UpdateProductInput) Descriptor() ([]byte, []int) {
 }
 
 func (x *UpdateProductInput) GetName() string {
-	if x != nil {
-		return x.Name
+	if x != nil && x.Name != nil {
+		return *x.Name
 	}
 	return ""
 }
 
 func (x *UpdateProductInput) GetDescription() string {
-	if x != nil {
-		return x.Description
+	if x != nil && x.Description != nil {
+		return *x.Description
 	}
 	return ""
 }
 
 func (x *UpdateProductInput) GetPrice() int64 {
-	if x != nil {
-		return x.Price
+	if x != nil && x.Price != nil {
+		return *x.Price
 	}
 	return 0
 }
 
 func (x *UpdateProductInput) GetCurrency() string {
-	if x != nil {
-		return x.Currency
+	if x != nil && x.Currency != nil {
+		return *x.Currency
 	}
 	return ""
 }
 
 func (x *UpdateProductInput) GetSku() string {
-	if x != nil {
-		return x.Sku
+	if x != nil && x.Sku != nil {
+		return *x.Sku
 	}
 	return ""
 }
 
 func (x *UpdateProductInput) GetStock() int64 {
-	if x != nil {
-		return x.Stock
+	if x != nil && x.Stock != nil {
+		return *x.Stock
 	}
 	return 0
 }
 
 func (x *UpdateProductInput) GetStatus() string {
-	if x != nil {
-		return x.Status
+	if x != nil && x.Status != nil {
+		return *x.Status
 	}
 	return ""
 }
@@ -1468,16 +1468,24 @@ const file_productmanagement_product_v1_product_proto_rawDesc = "" +
 	"\aversion\x18\x01 \x01(\x05R\aversion\x127\n" +
 	"\n" +
 	"properties\x18\x02 \x01(\v2\x17.google.protobuf.StructR\n" +
-	"properties\"\x8a\x02\n" +
-	"\x12UpdateProductInput\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
-	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x14\n" +
-	"\x05price\x18\x03 \x01(\x03R\x05price\x12\x1a\n" +
-	"\bcurrency\x18\x04 \x01(\tR\bcurrency\x12\x10\n" +
-	"\x03sku\x18\x05 \x01(\tR\x03sku\x12\x14\n" +
-	"\x05stock\x18\x06 \x01(\x03R\x05stock\x12\x16\n" +
-	"\x06status\x18\a \x01(\tR\x06status\x12L\n" +
-	"\x12product_properties\x18\b \x01(\v2\x1d.product.v1.ProductPropertiesR\x11productProperties\"\xa1\x01\n" +
+	"properties\"\x96\x03\n" +
+	"\x12UpdateProductInput\x12\x17\n" +
+	"\x04name\x18\x01 \x01(\tH\x00R\x04name\x88\x01\x01\x12%\n" +
+	"\vdescription\x18\x02 \x01(\tH\x01R\vdescription\x88\x01\x01\x12\x19\n" +
+	"\x05price\x18\x03 \x01(\x03H\x02R\x05price\x88\x01\x01\x12\x1f\n" +
+	"\bcurrency\x18\x04 \x01(\tH\x03R\bcurrency\x88\x01\x01\x12\x15\n" +
+	"\x03sku\x18\x05 \x01(\tH\x04R\x03sku\x88\x01\x01\x12\x19\n" +
+	"\x05stock\x18\x06 \x01(\x03H\x05R\x05stock\x88\x01\x01\x12\x1b\n" +
+	"\x06status\x18\a \x01(\tH\x06R\x06status\x88\x01\x01\x12Q\n" +
+	"\x12product_properties\x18\b \x01(\v2\x1d.product.v1.ProductPropertiesH\aR\x11productProperties\x88\x01\x01B\a\n" +
+	"\x05_nameB\x0e\n" +
+	"\f_descriptionB\b\n" +
+	"\x06_priceB\v\n" +
+	"\t_currencyB\x06\n" +
+	"\x04_skuB\b\n" +
+	"\x06_stockB\t\n" +
+	"\a_statusB\x15\n" +
+	"\x13_product_properties\"\xa1\x01\n" +
 	"\x14UpdateProductRequest\x12\x1d\n" +
 	"\n" +
 	"product_id\x18\x01 \x01(\tR\tproductId\x12\x1b\n" +
@@ -1584,6 +1592,7 @@ func file_productmanagement_product_v1_product_proto_init() {
 	if File_productmanagement_product_v1_product_proto != nil {
 		return
 	}
+	file_productmanagement_product_v1_product_proto_msgTypes[15].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

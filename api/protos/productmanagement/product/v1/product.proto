@@ -126,14 +126,14 @@ message ProductProperties{
 }
 
 message UpdateProductInput{
-  string            name               = 1;
-  string            description        = 2;
-  int64             price              = 3;
-  string            currency           = 4;
-  string            sku                = 5;
-  int64             stock              = 6;
-  string            status             = 7;
-  ProductProperties product_properties = 8;
+  optional string            name               = 1;
+  optional string            description        = 2;
+  optional int64             price              = 3;
+  optional string            currency           = 4;
+  optional string            sku                = 5;
+  optional int64             stock              = 6;
+  optional string            status             = 7;
+  optional ProductProperties product_properties = 8;
 }
 
 message UpdateProductRequest{
