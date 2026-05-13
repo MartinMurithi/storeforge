@@ -1,5 +1,5 @@
 
-# StoreForge
+# StoreForge(On-going project)
 
 **StoreForge** is a microservices-based Platform-as-a-Service (PaaS) that enables merchants to launch fully functional e-commerce stores in under **5 minutes**. Built with **Go, gRPC, envoy proxy event-driven architecture, and modular microservices**, it supports trial-first subscriptions, direct merchant payouts, and a plugin-friendly ecosystem for extensibility.
 
